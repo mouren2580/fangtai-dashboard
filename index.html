@@ -495,18 +495,18 @@ reinitOrder();
 
 /* ---------- 已固化数据（由「🔒 固化目标」按钮自动写入，请勿手改） ---------- */
 /*__EMBED_START__*/
-const EMBED_TARGETS = {"month": {"新疆办事处": {"整机": 168300, "爆品": 48600}, "宁夏办事处": {"整机": 111600, "爆品": 35100}, "兰州办事处": {"整机": 83700, "爆品": 23400}, "包头办事处": {"整机": 35100, "爆品": 12600}, "呼和浩特办事处": {"整机": 32400, "爆品": 11700}, "西宁办事处": {"整机": 14400, "爆品": 4500}}, "year": {"新疆办事处": {"整机": 0, "爆品": 0}, "宁夏办事处": {"整机": 0, "爆品": 0}, "兰州办事处": {"整机": 0, "爆品": 0}, "包头办事处": {"整机": 0, "爆品": 0}, "呼和浩特办事处": {"整机": 0, "爆品": 0}, "西宁办事处": {"整机": 0, "爆品": 0}}, "_stamp": "2026-08-07T03:14:03Z"};
+const EMBED_TARGETS = {"month": {"新疆办事处": {"整体": 168300, "爆品": 48600}, "宁夏办事处": {"整体": 111600, "爆品": 35100}, "兰州办事处": {"整体": 83700, "爆品": 23400}, "包头办事处": {"整体": 35100, "爆品": 12600}, "呼和浩特办事处": {"整体": 32400, "爆品": 11700}, "西宁办事处": {"整体": 14400, "爆品": 4500}}, "year": {"新疆办事处": {"整体": 0, "爆品": 0}, "宁夏办事处": {"整体": 0, "爆品": 0}, "兰州办事处": {"整体": 0, "爆品": 0}, "包头办事处": {"整体": 0, "爆品": 0}, "呼和浩特办事处": {"整体": 0, "爆品": 0}, "西宁办事处": {"整体": 0, "爆品": 0}}, "_stamp": "2026-08-07T03:14:03Z"};
 const EMBED_LASTYEAR = {"包头办事处":{"清洗保养":3572,"延保服务":855,"清洁耗材":3580,"止回阀":9460},"呼和浩特办事处":{"清洗保养":6440,"延保服务":389,"清洁耗材":1550,"止回阀":3740},"兰州办事处":{"清洗保养":11413,"延保服务":2061,"清洁耗材":886,"止回阀":26500},"宁夏办事处":{"清洗保养":15243,"延保服务":1886,"清洁耗材":8850,"止回阀":37400},"西宁办事处":{"清洗保养":150,"延保服务":0,"清洁耗材":936,"止回阀":5560},"新疆办事处":{"清洗保养":38500,"延保服务":1374,"清洁耗材":3619,"止回阀":47280},"_stamp":"2026-08-06T12:27:00+08:00"};
 const EMBED_STAMP = "2026-08-07T03:14:03Z";
 /*__EMBED_END__*/
 
 /* ---------- 目标（内嵌固化值 + localStorage + 占位种子） ---------- */
-/* 结构：{ month:{ 办事处:{ 整机:数, 爆品:数(三大爆品整体目标) } }, year:{...}, _stamp:"ISO时间" } */
+/* 结构：{ month:{ 办事处:{ 整体:数, 爆品:数(三大爆品整体目标) } }, year:{...}, _stamp:"ISO时间" } */
 const LS_KEY = 'fangtai_targets_v3';
 function seedTargets(){
   const t={month:{},year:{}};
   for(const o of OFFICE_ORDER){
-    t.month[o]={整机:0,爆品:0}; t.year[o]={整机:0,爆品:0};
+    t.month[o]={整体:0,爆品:0}; t.year[o]={整体:0,爆品:0};
   }
   return t;
 }
@@ -517,10 +517,10 @@ function normTargets(d){
     if(!d[p]||typeof d[p]!=='object') d[p]={};
     for(const o of OFFICE_ORDER){
       const t=d[p][o];
-      if(!t||typeof t!=='object'){ d[p][o]={整机:0,爆品:0}; continue; }
+      if(!t||typeof t!=='object'){ d[p][o]={整体:0,爆品:0}; continue; }
       if(typeof t.爆品==='object'&&t.爆品!==null){ let s=0;for(const it of BREAKOUT)s+=(t.爆品[it]||0); t.爆品=s; }
       if(typeof t.爆品!=='number'||!isFinite(t.爆品)) t.爆品=0;
-      if(typeof t.整机!=='number'||!isFinite(t.整机)) t.整机=0;
+      if(typeof t.整体!=='number'||!isFinite(t.整体)){ const _o=t['整'+'机']; t.整体=(typeof _o==='number'&&isFinite(_o))?_o:0; }
     }
   }
   return d;
@@ -536,7 +536,7 @@ function loadTargets(){
 let TARGETS = loadTargets();
 let period = 'month';
 const perLbl = () => period==='month'?'本月':'本年';
-/* 整机目标标签：月度视图显示为「{月}月目标」（如 8月目标），年度视图显示「年度目标」 */
+/* 整体目标标签：月度视图显示为「{月}月目标」（如 8月目标），年度视图显示「年度目标」 */
 const MONTH_CN = (()=>{const mm=String(DASHBOARD_DATA.meta.月份||'2026-08').split('-');return (+mm[1])+'月';})();
 const wholeTargetLbl = () => period==='month'?`${MONTH_CN}目标`:'年度目标';
 const wholeRateLbl = () => period==='month'?`${MONTH_CN}达成率`:'年度达成率';
@@ -568,7 +568,7 @@ let LASTYEAR = loadLastYear();
 
 /* ---------- 聚合：目标 & 实际 ---------- */
 function rate(act,tgt){return tgt>0?act/tgt:null;}
-function officeTargetWhole(o){return TARGETS[period][o].整机||0;}
+function officeTargetWhole(o){return TARGETS[period][o].整体||0;}
 function officeTargetBreakout(o){return TARGETS[period][o].爆品||0;}  // 三大爆品整体目标（单值）
 function itemActualOffice(it,o){let s=0;for(const n of officeNets(o))s+=(n.品项[it]||0);return s;}
 function fmtDiff(v){ if(v>0) return '+'+fmt(v); if(v<0) return '-'+fmt(-v); return fmt(v); }
@@ -578,7 +578,7 @@ function wholeActual(){return NETS.reduce((s,n)=>s+n.合计,0);}
 function wholeTarget(){return OFFICE_ORDER.reduce((s,o)=>s+officeTargetWhole(o),0);}
 function breakoutActual(){let s=0;for(const o of OFFICE_ORDER)s+=officeBreakoutActual(o);return s;}
 function breakoutTarget(){return OFFICE_ORDER.reduce((s,o)=>s+officeTargetBreakout(o),0);}
-/* 日均：实际/已过天数；完成120%剩余需日均 = (整机目标×120% − 实际) ÷ 剩余天数 */
+/* 日均：实际/已过天数；完成120%剩余需日均 = (整体目标×120% − 实际) ÷ 剩余天数 */
 function dailyActual(o){ return TIME.日>0 ? officeActual(o)/TIME.日 : 0; }
 function dailyNeed120(o){
   const t=officeTargetWhole(o); if(t<=0) return null;
@@ -691,7 +691,7 @@ function renderDrill(){
   let html = `<div class="crumb">${crumb}</div>`;
   // 办事处概览
   html += `<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
-    <div class="kpi"><div class="lbl">实际合计（整机）</div><div class="val">${fmt(a)}</div><div class="sub">${nets.length} 个网点</div></div>
+    <div class="kpi"><div class="lbl">实际合计（整体）</div><div class="val">${fmt(a)}</div><div class="sub">${nets.length} 个网点</div></div>
     <div class="kpi"><div class="lbl">${wholeTargetLbl()}</div><div class="val">${fmt(t)}</div><div class="sub">${t>0?'已设置':'未设置'}</div></div>
     <div class="kpi"><div class="lbl">${wholeRateLbl()}</div><div class="val" style="color:${rateColor(r)}">${r===null?'—':pct(r)}</div><div class="sub">时间进度 ${pct(TIME_PROG)}</div></div>
     <div class="kpi"><div class="lbl">三大爆品达成率</div><div class="val" style="color:${rateColor(rb)}">${rb===null?'—':pct(rb)}</div><div class="sub">实际${fmt(ab)}/目标${fmt(tb)}</div></div>
@@ -842,7 +842,7 @@ function renderTgtTable(){
     const t=TARGETS[period][o];
     const ba=officeBreakoutActual(o);
     h+=`<tr><td class="rowh">${o}</td>`;
-    h+=`<td><input data-o="${o}" data-k="整机" value="${t.整机||0}"></td>`;
+    h+=`<td><input data-o="${o}" data-k="整体" value="${t.整体||0}"></td>`;
     h+=`<td><input data-o="${o}" data-k="爆品" value="${t.爆品||0}"></td>`;
     h+=`<td class="tot">${fmt(ba)}</td></tr>`;
   });
@@ -853,13 +853,13 @@ document.getElementById('setBtn').onclick=openTgt;
 document.getElementById('closeTgtBtn').onclick=closeTgt;
 document.getElementById('mask').onclick=e=>{if(e.target.id==='mask')closeTgt();};
 document.getElementById('fillZeroBtn').onclick=()=>{
-  OFFICE_ORDER.forEach(o=>{TARGETS[period][o].整机=0;TARGETS[period][o].爆品=0;});
+  OFFICE_ORDER.forEach(o=>{TARGETS[period][o].整体=0;TARGETS[period][o].爆品=0;});
   renderTgtTable();
 };
 document.getElementById('fillRunBtn').onclick=()=>{
   // 满月推算：目标 = 实际 ÷ 时间进度
   OFFICE_ORDER.forEach(o=>{
-    TARGETS[period][o].整机 = TIME_PROG>0 ? Math.round(officeActual(o)/TIME_PROG) : 0;
+    TARGETS[period][o].整体 = TIME_PROG>0 ? Math.round(officeActual(o)/TIME_PROG) : 0;
     TARGETS[period][o].爆品 = TIME_PROG>0 ? Math.round(officeBreakoutActual(o)/TIME_PROG) : 0;
   });
   renderTgtTable();
@@ -867,7 +867,7 @@ document.getElementById('fillRunBtn').onclick=()=>{
 document.getElementById('saveTgtBtn').onclick=()=>{
   document.querySelectorAll('#tgtTable input').forEach(i=>{
     const o=i.dataset.o, k=i.dataset.k, v=parseFloat(i.value)||0;
-    if(k==='整机') TARGETS[period][o].整机=v;
+    if(k==='整体') TARGETS[period][o].整体=v;
     else TARGETS[period][o].爆品=v;
   });
   TARGETS._stamp=new Date().toISOString();
@@ -891,7 +891,7 @@ document.getElementById('impFile').onchange=e=>{
       TARGETS=d; TARGETS._stamp=new Date().toISOString();
       localStorage.setItem(LS_KEY,JSON.stringify(TARGETS));
       period='month';syncPeriodUI();renderAll();
-    }else alert('文件格式不正确（需含 month/year → 办事处 → 整机/爆品 结构）');
+    }else alert('文件格式不正确（需含 month/year → 办事处 → 整体/爆品 结构）');
   }catch(err){alert('解析失败：'+err.message);}};
   rd.readAsText(f);
 };
@@ -936,8 +936,8 @@ document.getElementById('freezeDataBtn').onclick=()=>{
 /* ---------- 同步 Excel（重新导入原始数据） ---------- */
 function ensureTargets(){
   for(const o of OFFICE_ORDER){
-    if(!TARGETS.month[o]) TARGETS.month[o]={整机:0,爆品:0};
-    if(!TARGETS.year[o])  TARGETS.year[o]={整机:0,爆品:0};
+    if(!TARGETS.month[o]) TARGETS.month[o]={整体:0,爆品:0};
+    if(!TARGETS.year[o])  TARGETS.year[o]={整体:0,爆品:0};
   }
 }
 
