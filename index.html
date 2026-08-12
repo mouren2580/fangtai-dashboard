@@ -246,15 +246,21 @@
     </div>
   </div>
 
-  <!-- 模块：三大爆品（周度 · 办事处/网点 · 环比） -->
+  <!-- 模块：三大爆品（月度/周度 · 办事处/网点 · 环比） -->
   <div class="panel" id="breakoutMod">
     <div class="sec">
-      <h2>🔥 三大爆品（周度分析）</h2>
-      <div class="desc">三大爆品 = 清洗保养 · 延保服务 · 清洁耗材。按 <b>自然周（周一~周日）</b> 聚合，可与<b>上周环比</b>。可切换 <b>全区 / 办事处 / 服务网点</b> 维度查看。</div>
+      <h2>🔥 三大爆品（月度 / 周度）</h2>
+      <div class="desc">三大爆品 = 清洗保养 · 延保服务 · 清洁耗材。可切换 <b>月度（月累计）</b> 与 <b>周度（自然周·周一~周日）</b> 查看；周度支持<b>上周环比</b>。可再切换 <b>全区 / 办事处 / 服务网点</b> 维度；<b>服务网点</b>维度展示三品明细（非仅合计）。</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 2px">
-        <label style="font-size:13px;color:var(--sub)">统计周：</label>
-        <select id="boWeek" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit"></select>
-        <span id="boWarn" class="pill mute" style="display:none">⚠️ 示例数据</span>
+        <div class="seg" id="boSpan" style="margin:0">
+          <button data-s="month" class="on">月度</button>
+          <button data-s="week">周</button>
+        </div>
+        <span id="boWeekWrap" style="display:none;align-items:center;gap:10px">
+          <label style="font-size:13px;color:var(--sub)">统计周：</label>
+          <select id="boWeek" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit"></select>
+          <span id="boWarn" class="pill mute" style="display:none">⚠️ 示例数据</span>
+        </span>
       </div>
       <div class="seg" id="boDim" style="margin:12px 0 6px">
         <button data-d="all" class="on">全区</button>
@@ -785,6 +791,7 @@ function clearDrill(){
 
 /* ---------- 三大爆品（周度 · 双维度 · 环比） ---------- */
 let boDim='all';
+let boSpan='month';
 function boWeekList(){ return (WEEKLY_DATA&&WEEKLY_DATA.weeks)?WEEKLY_DATA.weeks:[]; }
 function boWeekIndex(key){ return boWeekList().map(w=>w.key).indexOf(key); }
 function boPrevKey(key){ const i=boWeekIndex(key); return i>0?boWeekList()[i-1].key:null; }
@@ -800,7 +807,10 @@ function boWholeForWeek(wk){
   return t;
 }
 function renderBreakoutModule(){
-  const weeks=boWeekList(); if(!weeks.length) return;
+  const weeks=boWeekList(); if(!weeks.length && boSpan==='week') return;
+  document.querySelectorAll('#boSpan button').forEach(b=>b.onclick=()=>{
+    boSpan=b.dataset.s; document.querySelectorAll('#boSpan button').forEach(x=>x.classList.toggle('on',x.dataset.s===boSpan)); syncBoWeekWrap(); renderBreakoutBody();
+  });
   document.querySelectorAll('#boDim button').forEach(b=>b.onclick=()=>{
     boDim=b.dataset.d; document.querySelectorAll('#boDim button').forEach(x=>x.classList.toggle('on',x.dataset.d===boDim)); renderBreakoutBody();
   });
@@ -809,9 +819,12 @@ function renderBreakoutModule(){
     sel.innerHTML=weeks.map((w,i)=>`<option value="${w.key}" ${i===weeks.length-1?'selected':''}>${w.label}（第${i+1}周）</option>`).join('');
     sel.dataset.filled='1'; sel.onchange=renderBreakoutBody;
   }
-  const warn=document.getElementById('boWarn');
-  if(warn) warn.style.display=(WEEKLY_DATA.meta&&WEEKLY_DATA.meta.sample)?'inline-block':'none';
+  syncBoWeekWrap();
   renderBreakoutBody();
+}
+function syncBoWeekWrap(){
+  const ww=document.getElementById('boWeekWrap'); if(ww) ww.style.display=(boSpan==='week')?'inline-flex':'none';
+  const warn=document.getElementById('boWarn'); if(warn) warn.style.display=(boSpan==='week'&&WEEKLY_DATA.meta&&WEEKLY_DATA.meta.sample)?'inline-block':'none';
 }
 function renderExtendWarranty(){
   const D=EXTEND_WARRANTY_DATA; if(!D||!D.techs) return;
@@ -854,9 +867,15 @@ function renderExtendBody(){
 }
 function renderBreakoutBody(){
   const wk=boCurKey(), prevK=boPrevKey(wk); const body=document.getElementById('boBody'); if(!body) return;
-  if(boDim==='all') body.innerHTML=boRenderAll(wk,prevK);
-  else if(boDim==='office') body.innerHTML=boRenderOffice(wk,prevK);
-  else body.innerHTML=boRenderNet(wk,prevK);
+  if(boSpan==='month'){
+    if(boDim==='all') body.innerHTML=boRenderAllMonth();
+    else if(boDim==='office') body.innerHTML=boRenderOfficeMonth();
+    else body.innerHTML=boRenderNetMonth();
+  } else {
+    if(boDim==='all') body.innerHTML=boRenderAll(wk,prevK);
+    else if(boDim==='office') body.innerHTML=boRenderOffice(wk,prevK);
+    else body.innerHTML=boRenderNet(wk,prevK);
+  }
 }
 function boRenderAll(wk,prevK){
   const cur=boWholeForWeek(wk), prev=prevK?boWholeForWeek(prevK):null; const i=boWeekIndex(wk); const wm=WEEKLY_DATA.weeks[i];
@@ -886,10 +905,47 @@ function boRenderNet(wk,prevK){
   if(q) rows=rows.filter(r=>(r.nm||'').indexOf(q)>=0);
   const offs=[...new Set(Object.values(nd).map(d=>d.office))].sort();
   let h=`<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><select id="boNetOff"><option value="">全部办事处</option>${offs.map(o=>`<option value="${o}">${o}</option>`).join('')}</select><input id="boNetQ" placeholder="搜索网点…" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;width:180px"></div>`;
-  h+=`<table><thead><tr><th>服务网点</th><th>办事处</th><th>三品合计</th><th>环比(合计)</th></tr></thead><tbody>`;
-  rows.forEach(r=>{ h+=`<tr><td><b>${r.nm}</b></td><td>${r.d.office}</td><td>${fmt(r.d.total||0)}</td><td>${wowTag(r.d.total||0,r.p?r.p.total:null)}</td></tr>`; });
+  h+=`<table><thead><tr><th>服务网点</th><th>办事处</th>${BREAKOUT.map(it=>`<th>${it}</th>`).join('')}<th>三品合计</th><th>环比(合计)</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ h+=`<tr><td><b>${r.nm}</b></td><td>${r.d.office}</td>`+BREAKOUT.map(it=>`<td>${fmt(r.d[it]||0)}</td>`).join('')+`<td><b>${fmt(r.d.total||0)}</b></td><td>${wowTag(r.d.total||0,r.p?r.p.total:null)}</td></tr>`; });
   h+=`</tbody></table>`;
-  setTimeout(()=>{ const qe=document.getElementById('boNetQ'); if(qe) qe.oninput=renderBreakoutBody; const oe=document.getElementById('boNetOff'); if(oe) oe.onchange=renderBreakoutBody; },0);
+  setTimeout(()=>{ const qe=document.getElementById('boNetQ'); if(qe){ qe.value=q; qe.oninput=renderBreakoutBody; try{ qe.focus(); qe.setSelectionRange(q.length,q.length); }catch(e){} } const oe=document.getElementById('boNetOff'); if(oe){ oe.value=of; oe.onchange=renderBreakoutBody; } },0);
+  return h;
+}
+function boCut(){ return (DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta.统计截止日)||''; }
+function boRenderAllMonth(){
+  const cur={}; BREAKOUT.forEach(it=>cur[it]=itemActual(it)); cur.total=breakoutActual();
+  const cut=boCut();
+  let h=`<div style="font-size:12px;color:var(--sub);margin-bottom:8px">📅 月度累计（截止 ${cut}）· 全区三大爆品明细</div>`;
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">`;
+  BREAKOUT.concat(['total']).forEach(it=>{
+    const c=cur[it], isTot=it==='total', col=isTot?'var(--blue)':'var(--green)';
+    h+=`<div class="card" style="padding:14px"><div style="font-size:13px;color:var(--sub)">${isTot?'三品合计':it}</div><div style="font-size:22px;font-weight:700;margin:4px 0;color:${col}">${fmt(c)}</div><div style="color:var(--sub)">本月累计</div></div>`;
+  });
+  return h+`</div>`;
+}
+function boRenderOfficeMonth(){
+  const rows=OFFICE_ORDER.map(o=>({o, d:{清洗保养:itemActualOffice('清洗保养',o), 延保服务:itemActualOffice('延保服务',o), 清洁耗材:itemActualOffice('清洁耗材',o)}, total:officeBreakoutActual(o)})).sort((x,y)=>y.total-x.total);
+  const cut=boCut();
+  let h=`<div style="font-size:12px;color:var(--sub);margin-bottom:8px">📅 月度累计（截止 ${cut}）· 各办事处三大爆品明细</div>`;
+  h+=`<table><thead><tr><th>办事处</th>${BREAKOUT.map(it=>`<th>${it}</th>`).join('')}<th>三品合计</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ h+=`<tr><td><b>${r.o}</b></td>`+BREAKOUT.map(it=>`<td>${fmt(r.d[it]||0)}</td>`).join('')+`<td><b>${fmt(r.total||0)}</b></td></tr>`; });
+  const tot={}; BREAKOUT.forEach(it=>tot[it]=0); tot.total=0; rows.forEach(r=>{BREAKOUT.forEach(it=>tot[it]+=(r.d[it]||0)); tot.total+=(r.total||0);});
+  h+=`<tr style="font-weight:700;background:var(--card-2)"><td>⭐ 合计</td>`+BREAKOUT.map(it=>`<td>${fmt(tot[it])}</td>`).join('')+`<td>${fmt(tot.total)}</td></tr>`;
+  return h+`</tbody></table>`;
+}
+function boRenderNetMonth(){
+  let rows=NETS.map(n=>({nm:n.名称, office:n.办事处, d:{清洗保养:n.品项['清洗保养']||0, 延保服务:n.品项['延保服务']||0, 清洁耗材:n.品项['清洁耗材']||0}, total:(n.品项['清洗保养']||0)+(n.品项['延保服务']||0)+(n.品项['清洁耗材']||0)})).sort((x,y)=>y.total-x.total);
+  const q=(document.getElementById('boNetQ')||{}).value||''; const of=(document.getElementById('boNetOff')||{}).value||'';
+  if(of) rows=rows.filter(r=>r.office===of);
+  if(q) rows=rows.filter(r=>(r.nm||'').indexOf(q)>=0);
+  const offs=[...new Set(NETS.map(n=>n.办事处))].sort();
+  const cut=boCut();
+  let h=`<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><select id="boNetOff"><option value="">全部办事处</option>${offs.map(o=>`<option value="${o}">${o}</option>`).join('')}</select><input id="boNetQ" placeholder="搜索网点…" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;width:180px"></div>`;
+  h+=`<div style="font-size:12px;color:var(--sub);margin-bottom:8px">📅 月度累计（截止 ${cut}）· 各网点三大爆品明细</div>`;
+  h+=`<table><thead><tr><th>服务网点</th><th>办事处</th>${BREAKOUT.map(it=>`<th>${it}</th>`).join('')}<th>三品合计</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ h+=`<tr><td><b>${r.nm}</b></td><td>${r.office}</td>`+BREAKOUT.map(it=>`<td>${fmt(r.d[it]||0)}</td>`).join('')+`<td><b>${fmt(r.total||0)}</b></td></tr>`; });
+  h+=`</tbody></table>`;
+  setTimeout(()=>{ const qe=document.getElementById('boNetQ'); if(qe){ qe.value=q; qe.oninput=renderBreakoutBody; try{ qe.focus(); qe.setSelectionRange(q.length,q.length); }catch(e){} } const oe=document.getElementById('boNetOff'); if(oe){ oe.value=of; oe.onchange=renderBreakoutBody; } },0);
   return h;
 }
 
