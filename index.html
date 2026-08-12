@@ -934,7 +934,7 @@ function boRenderOfficeMonth(){
   return h+`</tbody></table>`;
 }
 function boRenderNetMonth(){
-  let rows=NETS.map(n=>({nm:n.名称, office:n.办事处, d:{清洗保养:n.品项['清洗保养']||0, 延保服务:n.品项['延保服务']||0, 清洁耗材:n.品项['清洁耗材']||0}, total:(n.品项['清洗保养']||0)+(n.品项['延保服务']||0)+(n.品项['清洁耗材']||0)})).sort((x,y)=>y.total-x.total);
+  let rows=NETS.map(n=>({nm:(n['服务网点名称']||n['名称']||n.网点||''), office:n.办事处, d:{清洗保养:n.品项['清洗保养']||0, 延保服务:n.品项['延保服务']||0, 清洁耗材:n.品项['清洁耗材']||0}, total:(n.品项['清洗保养']||0)+(n.品项['延保服务']||0)+(n.品项['清洁耗材']||0)})).sort((x,y)=>y.total-x.total);
   const q=(document.getElementById('boNetQ')||{}).value||''; const of=(document.getElementById('boNetOff')||{}).value||'';
   if(of) rows=rows.filter(r=>r.office===of);
   if(q) rows=rows.filter(r=>(r.nm||'').indexOf(q)>=0);
