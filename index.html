@@ -918,8 +918,8 @@ document.getElementById('freezeBtn').onclick=()=>{
 };
 /* ---------- 固化数据：把当前实际数据（同步后的最新）写死进新 HTML，用于重新部署 ---------- */
 document.getElementById('freezeDataBtn').onclick=()=>{
-  const stamp=new Date().toISOString();
-  DASHBOARD_DATA.meta._stamp=stamp;
+  // 固化数据只是把当前实际数据写死进新文件，本身不产生「新数据」，不刷新「数据更新时间」（避免休息日/重复导出被误标为已更新）
+  const stamp=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta._stamp)||new Date().toISOString();
   try{ localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp})); }catch(e){}
   const re=/const DASHBOARD_DATA = [^\n]*\n/;
   const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
@@ -1063,13 +1063,19 @@ document.getElementById('syncFile').onchange=e=>{
   const rd=new FileReader();
   rd.onload=ev=>{
     try{
+      const oldTotal=DASHBOARD_DATA.网点.reduce((s,x)=>s+x.合计,0);
       const wb=XLSX.read(ev.target.result,{type:'array'});
       const res=rebuildFromWorkbook(wb);
       if(res){
         clearDrill(); selectedBreakout=null; document.getElementById('breakoutDetail').innerHTML='';
         syncPeriodUI(); renderAll();
-        try{ DASHBOARD_DATA.meta._stamp=new Date().toISOString(); localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp:DASHBOARD_DATA.meta._stamp})); }catch(e){}
-        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n统计截止日已自动设为 ${isoDate(y)}（前一天）· 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}\n（目标保持不变，可点「🕒 时间设置」手动调整）`);
+        // 仅当导入的数据「确实不同」（合计金额变化）才刷新「数据更新时间」；
+        // 休息日重导同一份文件 → 数据未变 → 保留原更新时间，避免被误标为「今天已更新」
+        const changed = Math.round(res.total) !== Math.round(oldTotal);
+        if(changed){
+          try{ DASHBOARD_DATA.meta._stamp=new Date().toISOString(); localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp:DASHBOARD_DATA.meta._stamp})); }catch(e){}
+        }
+        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n统计截止日已自动设为 ${isoDate(y)}（前一天）· 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}`+(changed?'':'\n（数据未变化，「数据更新时间」保持不变）')+`\n（目标保持不变，可点「🕒 时间设置」手动调整）`);
       }
     }catch(err){ alert('Excel 解析失败：'+err.message); }
     e.target.value='';
@@ -1231,7 +1237,14 @@ function renderAll(){
   const bn=document.getElementById('banner');
   if(bn) bn.style.display = wholeTarget()>0 ? 'none' : 'flex';   // 目标已设置则自动收起提示
   const ds=document.getElementById('dataStampBadge');
-  if(ds){ const s=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta._stamp)||''; ds.textContent = s?('数据更新于 '+new Date(s).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})):''; ds.style.display=s?'inline-block':'none'; }
+  if(ds){
+    const s=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta._stamp)||'';
+    const cut=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta.统计截止日)||'';
+    let txt='';
+    if(s){ const d=new Date(s); const p=n=>String(n).padStart(2,'0'); txt='数据更新于 '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+    if(cut){ txt += (txt?' · ':'')+'数据覆盖至 '+cut; }
+    ds.textContent=txt; ds.style.display=txt?'inline-block':'none';
+  }
 }
 document.getElementById('footNote').innerHTML =
   `数据来源：${DASHBOARD_DATA.meta.大区}《${DASHBOARD_DATA.meta.月份} 西北服务产品》（含工单消耗、网点买断）。品项=销售分类（共 ${ITEMS.length} 项），其中 🔥 为三大爆品。`+
