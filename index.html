@@ -890,12 +890,13 @@ function boRenderAll(wk,prevK){
 }
 function boRenderOffice(wk,prevK){
   const od=WEEKLY_DATA.office[wk]||{}, op=prevK?WEEKLY_DATA.office[prevK]:null;
-  const rows=Object.keys(od).map(o=>({o,d:od[o],p:op?op[o]:null})).sort((x,y)=>y.d.total-x.d.total);
+  const EXCL=new Set(['西北大区部','—']);  // 非真实办事处：西北大区部=区域合计，—=未归属
+  const rows=Object.keys(od).filter(o=>!EXCL.has(o)).map(o=>({o,d:od[o],p:op?op[o]:null})).sort((x,y)=>y.d.total-x.d.total);
   let h=`<table><thead><tr><th>办事处</th>${BREAKOUT.map(it=>`<th>${it}</th>`).join('')}<th>三品合计</th><th>环比(合计)</th></tr></thead><tbody>`;
   rows.forEach(r=>{ h+=`<tr><td><b>${r.o}</b></td>`+BREAKOUT.map(it=>`<td>${fmt(r.d[it]||0)}</td>`).join('')+`<td><b>${fmt(r.d.total||0)}</b></td><td>${wowTag(r.d.total||0,r.p?r.p.total:null)}</td></tr>`; });
-  const tot={}; BREAKOUT.forEach(it=>tot[it]=0); tot.total=0; rows.forEach(r=>{BREAKOUT.forEach(it=>tot[it]+=(r.d[it]||0)); tot.total+=(r.d.total||0);});
+  const tot={}; BREAKOUT.forEach(it=>tot[it]=0); tot.total=0; Object.keys(od).forEach(o=>{const d=od[o];BREAKOUT.forEach(it=>tot[it]+=(d[it]||0)); tot.total+=(d.total||0);});
   const totP=op?Object.keys(op).reduce((s,o)=>s+(op[o].total||0),0):null;
-  h+=`<tr style="font-weight:700;background:var(--card-2)"><td>⭐ 合计</td>`+BREAKOUT.map(it=>`<td>${fmt(tot[it])}</td>`).join('')+`<td>${fmt(tot.total)}</td><td>${wowTag(tot.total,totP)}</td></tr>`;
+  h+=`<tr style="font-weight:700;background:var(--card-2)"><td>⭐ 西北大区部（合计）</td>`+BREAKOUT.map(it=>`<td>${fmt(tot[it])}</td>`).join('')+`<td>${fmt(tot.total)}</td><td>${wowTag(tot.total,totP)}</td></tr>`;
   return h+`</tbody></table>`;
 }
 function boRenderNet(wk,prevK){
@@ -904,7 +905,7 @@ function boRenderNet(wk,prevK){
   const q=(document.getElementById('boNetQ')||{}).value||''; const of=(document.getElementById('boNetOff')||{}).value||'';
   if(of) rows=rows.filter(r=>r.d.office===of);
   if(q) rows=rows.filter(r=>(r.nm||'').indexOf(q)>=0);
-  const offs=[...new Set(Object.values(nd).map(d=>d.office))].sort();
+  const offs=[...new Set(Object.values(nd).map(d=>d.office))].filter(o=>o!=='西北大区部'&&o!=='—').sort();
   let h=`<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><select id="boNetOff"><option value="">全部办事处</option>${offs.map(o=>`<option value="${o}">${o}</option>`).join('')}</select><input id="boNetQ" placeholder="搜索网点…" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;width:180px"></div>`;
   h+=`<table><thead><tr><th>服务网点</th><th>办事处</th>${BREAKOUT.map(it=>`<th>${it}</th>`).join('')}<th>三品合计</th><th>环比(合计)</th></tr></thead><tbody>`;
   rows.forEach(r=>{ h+=`<tr><td><b>${r.nm}</b></td><td>${r.d.office}</td>`+BREAKOUT.map(it=>`<td>${fmt(r.d[it]||0)}</td>`).join('')+`<td><b>${fmt(r.d.total||0)}</b></td><td>${wowTag(r.d.total||0,r.p?r.p.total:null)}</td></tr>`; });
