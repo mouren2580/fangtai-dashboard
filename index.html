@@ -216,12 +216,6 @@
 
   <!-- 模块2：各产品线分析 -->
   <div class="panel" id="mod2">
-    <div class="sec">
-      <h2>🔥 三大爆品达成情况（全区）</h2>
-      <div class="desc">三大爆品 = 清洗保养 · 延保服务 · 清洁耗材，三者<b>合并为一个整体目标</b>。上方为全区整体达成率（Σ三品实际 ÷ Σ三品目标），下方为三品实际构成（按绝对金额展示，无单品目标）。点击任一爆品可在下方查看各办事处分布。</div>
-      <div id="breakoutBars"></div>
-      <div id="breakoutDetail" style="margin-top:16px"></div>
-    </div>
     <!-- 大保养占比分析 -->
     <div class="sec">
       <h2>🛠 大保养占比分析 <span class="pill mute">CSM服务项目</span></h2>
@@ -766,47 +760,6 @@ function clearDrill(){
   document.getElementById('drillSec').style.display='none';
 }
 
-/* ---------- 三大爆品维度（整体目标） ---------- */
-let selectedBreakout=null;
-function renderBreakoutBars(){
-  const aB=breakoutActual(), tB=breakoutTarget(), rB=rate(aB,tB);
-  const col=rateColor(rB);
-  const maxv=Math.max(aB,tB,1);
-  const w=aB/maxv*100, tline=tB>0?tB/maxv*100:null;
-  let h=`<div class="obar" style="cursor:default">
-    <div class="name" style="width:150px">🔥 三大爆品<br><span style="font-weight:400;font-size:11px;color:var(--sub)">整体达成</span></div>
-    <div class="track"><div class="fill" style="width:${w}%;background:${col}"></div>${tline!==null?`<div class="tline" style="left:${tline}%"></div>`:''}</div>
-    <div class="nums"><div class="r" style="color:${col}">${rB===null?'—':pct(rB)}</div><div style="color:var(--sub)">实际 ${fmt(aB)} / 目标 ${fmt(tB)}</div></div>
-  </div>`;
-  // 三品实际构成（按金额，无单品目标）
-  const itemRows=BREAKOUT.map(it=>({it,a:itemActual(it)})).sort((x,y)=>y.a-x.a);
-  const maxi=Math.max(...itemRows.map(x=>x.a),1);
-  h+=`<div style="margin-top:14px;margin-bottom:6px;font-size:12px;color:var(--sub)">三大爆品实际构成（点击查看各办事处分布）</div>`;
-  h+=itemRows.map(x=>`<div class="obar" onclick="selectBreakout('${x.it}')">
-    <div class="name" style="width:150px;font-weight:600">${x.it}</div>
-    <div class="track"><div class="fill" style="width:${x.a/maxi*100}%;background:var(--blue)"></div></div>
-    <div class="nums"><div class="r" style="color:var(--blue)">${fmt(x.a)}</div><div class="r2">占三品 ${aB>0?pct(x.a/aB):'—'}</div></div>
-  </div>`).join('');
-  document.getElementById('breakoutBars').innerHTML=h;
-}
-function selectBreakout(it){
-  selectedBreakout=it;
-  if(!it){ document.getElementById('breakoutDetail').innerHTML=''; return; }
-  const total=itemActual(it);
-  const rows=OFFICE_ORDER.map(o=>({o,a:officeNets(o).reduce((s,n)=>s+(n.品项[it]||0),0)}))
-                        .sort((x,y)=>y.a-x.a);
-  let html=`<h3 style="font-size:15px;margin:0 0 10px">🔥「${it}」各办事处分布（实际收入）</h3>`;
-  html+=`<table><thead><tr><th>办事处</th><th>实际</th><th>占该品</th><th style="width:200px">分布</th></tr></thead><tbody>`;
-  const maxv=Math.max(...rows.map(x=>x.a),1);
-  rows.forEach(x=>{
-    const w=x.a/maxv*100;
-    html+=`<tr><td><b>${x.o}</b></td><td>${fmt(x.a)}</td><td>${total>0?pct(x.a/total):'—'}</td>
-      <td><span class="mini"><i style="width:${w}%;background:var(--blue)"></i></span></td></tr>`;
-  });
-  html+=`</tbody></table>`;
-  document.getElementById('breakoutDetail').innerHTML=html;
-}
-
 /* ---------- 目标弹窗 ---------- */
 /* ---------- 管理锁：仅本人（输入密码）可设置目标/去年/固化/导入导出 ---------- */
 const ADMIN_PWD = 'fangtai2026';
@@ -1062,7 +1015,7 @@ document.getElementById('syncFile').onchange=e=>{
       const wb=XLSX.read(ev.target.result,{type:'array'});
       const res=rebuildFromWorkbook(wb);
       if(res){
-        clearDrill(); selectedBreakout=null; document.getElementById('breakoutDetail').innerHTML='';
+        clearDrill();
         syncPeriodUI(); renderAll();
         // 仅当导入的数据「确实不同」（合计金额变化）才刷新「数据更新时间」；
         // 休息日重导同一份文件 → 数据未变 → 保留原更新时间，避免被误标为「今天已更新」
@@ -1220,12 +1173,10 @@ document.querySelectorAll('#tgtSeg button').forEach(b=>b.onclick=()=>{period=b.d
 function renderAll(){
   renderKPI();
   renderOfficeBars();
-  renderBreakoutBars();
   renderItemAnalysis();
   renderBigCare();
   updateColSummaries();
   if(selectedOffice) renderDrill();
-  if(selectedBreakout) selectBreakout(selectedBreakout);
   renderLastYear();
   if(lySelected) lySelect(lySelected);
   const bn=document.getElementById('banner');
