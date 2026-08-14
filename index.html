@@ -482,7 +482,7 @@ function saveAsOf(d){
 function updateAsOfBadge(){
   const b=document.getElementById('asOfBadge'); if(!b) return;
   // 默认（未手动设置时）按「前一天」= 最近一个完整数据日 口径显示
-  const eff = AS_OF_DATE || DEFAULT_ASOF;
+  const eff = DEFAULT_ASOF;
   b.textContent='截止 '+isoDate(eff);
   b.style.display='inline-block';
 }
@@ -500,7 +500,8 @@ function computeTime(asOf){
   updateAsOfBadge();
 }
 function reinitOrder(){ OFFICE_ORDER=[...new Set(NETS.map(n=>n.办事处))]; OFFICE_ORDER.sort((a,b)=>officeActual(b)-officeActual(a)); }
-AS_OF_DATE = loadAsOf();
+// 截止日固定读数据自带「统计截止日」(DEFAULT_ASOF)，不依赖本地存储/手动设置，避免自行漂移
+AS_OF_DATE = null;
 /* 默认数据截止日：优先读 DASHBOARD_DATA.meta.统计截止日（由 build 脚本 --date 写入），缺失时退回今天。
    口径：已完成天数 = 截止日 − 周期开始(上月28日) + 1，如 8.8 → 12 天、剩余 19 天。
    用户同步Excel或点「🕒时间设置」可再调整。 */
@@ -509,7 +510,7 @@ const DEFAULT_ASOF = (function(){
   const d=s?new Date(s+'T00:00:00'):null;
   return (d&&!isNaN(d.getTime()))?d:new Date();
 })();
-computeTime(AS_OF_DATE || DEFAULT_ASOF);
+computeTime(DEFAULT_ASOF);
 reinitOrder();
 
 /* ---------- 已固化数据（由「🔒 固化目标」按钮自动写入，请勿手改） ---------- */
@@ -1185,10 +1186,8 @@ function rebuildFromWorkbook(wb){
   const NETS_NEW=Object.keys(map).map(k=>({办事处:map[k].办事处,服务中心:map[k].服务中心,服务网点:map[k].服务网点,
     合计:Math.round(map[k].合计*100)/100,品项:map[k].品项,来源:Object.keys(map[k].来源)}));
   if(!NETS_NEW.length){ alert('未解析到任何网点数据'); return null; }
-  /* 重新计算服务月周期；同步后默认把统计截止日设为「前一天」（Excel 数据通常截止到昨天） */
-  const y=new Date(); y.setDate(y.getDate()-1);
-  AS_OF_DATE=y; saveAsOf(y);
-  computeTime(y);
+  /* 同步后截止日保持数据自带「统计截止日」不变（不自动滚动到前一天），符合"固定截止日"铁律 */
+  computeTime(DEFAULT_ASOF);
   /* 写回全局 */
   DASHBOARD_DATA.网点=NETS_NEW;
   DASHBOARD_DATA.meta.品项=ITEMS_NEW;
@@ -1214,7 +1213,7 @@ document.getElementById('syncFile').onchange=e=>{
         if(changed){
           try{ DASHBOARD_DATA.meta._stamp=new Date().toISOString(); localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp:DASHBOARD_DATA.meta._stamp})); }catch(e){}
         }
-        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n统计截止日已自动设为 ${isoDate(y)}（前一天）· 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}`+(changed?'':'\n（数据未变化，「数据更新时间」保持不变）')+`\n（目标保持不变，可点「🕒 时间设置」手动调整）`);
+        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n截止日保持「${isoDate(DEFAULT_ASOF)}」(数据自带，不自动滚动) · 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}`+(changed?'':'\n（数据未变化，「数据更新时间」保持不变）'));
       }
     }catch(err){ alert('Excel 解析失败：'+err.message); }
     e.target.value='';
@@ -1229,19 +1228,15 @@ function openAsOf(){
   i.value = isoDate(AS_OF_DATE || prevDay());
 }
 function closeAsOf(){ document.getElementById('asOfMask').classList.remove('show'); }
-document.getElementById('asOfBtn').onclick=openAsOf;
+// 截止日已改为「固定读数据自带统计截止日」，不再支持手动调整（避免自行漂移）。
+// 用户通知更新时由数据重建写入新截止日（通知日−1）。
+document.getElementById('asOfBtn').onclick=()=>alert('截止日期已固定为数据自带「统计截止日」，不随打开时间自动变化。\n如需更新，请通知我重新导入数据（截止日=通知更新日−1），不要在此手动调整。');
 document.getElementById('asOfCloseBtn').onclick=closeAsOf;
 document.getElementById('asOfMask').onclick=e=>{if(e.target.id==='asOfMask')closeAsOf();};
 document.getElementById('asOfTodayBtn').onclick=()=>{document.getElementById('asOfInput').value=isoDate(new Date());};
 document.getElementById('asOfYestBtn').onclick=()=>{const y=new Date();y.setDate(y.getDate()-1);document.getElementById('asOfInput').value=isoDate(y);};
-document.getElementById('asOfClearBtn').onclick=()=>{AS_OF_DATE=prevDay();saveAsOf(AS_OF_DATE);computeTime(AS_OF_DATE);closeAsOf();renderAll();};
-document.getElementById('asOfSaveBtn').onclick=()=>{
-  const v=document.getElementById('asOfInput').value;
-  if(!v){ alert('请选择日期'); return; }
-  const d=new Date(v+'T00:00:00');
-  if(isNaN(d.getTime())){ alert('日期无效，请重新选择'); return; }
-  AS_OF_DATE=d; saveAsOf(d); computeTime(d); closeAsOf(); renderAll();
-};
+document.getElementById('asOfClearBtn').onclick=()=>{alert('截止日期已固定，不可手动调整。');};
+document.getElementById('asOfSaveBtn').onclick=()=>{ alert('截止日期已固定，不可手动调整。'); };
 
 /* ---------- 六列导航 / 模块切换（互斥，一次展开一个） ---------- */
 function toggleModule(id){
