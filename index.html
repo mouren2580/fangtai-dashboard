@@ -203,8 +203,8 @@
       <div id="officeBars"></div>
       <div class="legend">
         <span><i style="background:var(--green)"></i>8月达成率 ≥ 时间进度（领先）</span>
-        <span><i style="background:var(--orange)"></i>8月达成率 70%~100% 时间进度（预警）</span>
-        <span><i style="background:var(--red)"></i>8月达成率 &lt; 70% 时间进度（落后）</span>
+        <span><i style="background:var(--orange)"></i>8月达成率 80%~100% 时间进度（预警）</span>
+        <span><i style="background:var(--red)"></i>8月达成率 &lt; 80% 时间进度（落后）</span>
         <span><i style="background:#1f2733"></i>时间进度线</span>
       </div>
     </div>
@@ -611,13 +611,13 @@ function dailyNeed120(o){
 function rateClass(r){
   if(r===null) return 'mute';
   if(r>=TIME_PROG) return 'good';
-  if(r>=TIME_PROG*0.7) return 'warn';
+  if(r>=TIME_PROG*0.8) return 'warn';
   return 'bad';
 }
 function rateColor(r){
   if(r===null) return '#b9c1cc';
   if(r>=TIME_PROG) return 'var(--green)';
-  if(r>=TIME_PROG*0.7) return 'var(--orange)';
+  if(r>=TIME_PROG*0.8) return 'var(--orange)';
   return 'var(--red)';
 }
 function devPill(r){
@@ -640,7 +640,7 @@ function renderKPI(){
   // 环形：8月达成率
   const rr = rW===null?0:Math.min(rW,1);
   const C=2*Math.PI*24, off=C*(1-rr);
-  const ringColor = rW===null?'#b9c1cc':(rW>=TIME_PROG?'var(--green)':(rW>=TIME_PROG*0.7?'var(--orange)':'var(--red)'));
+  const ringColor = rW===null?'#b9c1cc':(rW>=TIME_PROG?'var(--green)':(rW>=TIME_PROG*0.8?'var(--orange)':'var(--red)'));
   const ring = `<svg class="ring" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" fill="none" stroke="#eef1f6" stroke-width="6"/><circle cx="28" cy="28" r="24" fill="none" stroke="${ringColor}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 28 28)"/><text x="28" y="32" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2733">${rW===null?'—':pct(rW)}</text></svg>`;
   const cards=[
     {lbl:`实际总收入（${perLbl()}）`,val:fmt(aW),sub:`覆盖 ${NETS.length} 个网点 · ${OFFICE_ORDER.length} 个办事处`},
