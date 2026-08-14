@@ -482,7 +482,7 @@ function saveAsOf(d){
 function updateAsOfBadge(){
   const b=document.getElementById('asOfBadge'); if(!b) return;
   // 默认（未手动设置时）按「前一天」= 最近一个完整数据日 口径显示
-  const eff = AS_OF_DATE || prevDay();
+  const eff = AS_OF_DATE || DEFAULT_ASOF;
   b.textContent='截止 '+isoDate(eff);
   b.style.display='inline-block';
 }
