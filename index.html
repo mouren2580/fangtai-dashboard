@@ -781,7 +781,8 @@ function renderOfficeBars(){
     const a=officeActual(o), t=officeTargetWhole(o), r=rate(a,t);
     const ab=officeBreakoutActual(o), tb=officeTargetBreakout(o), rb=rate(ab,tb);
     const da=dailyActual(o), dn=dailyNeed120(o);
-    return {o,a,t,r,ab,tb,rb,da,dn,tSet:t>0};
+    const dailyHtml = t>0 ? (dn===0 ? `<div class="r2" style="color:var(--green)">日均 ${fmt(da)} · 已超额(120%)</div>` : `<div class="r2" style="color:${da>=dn?'var(--green)':'var(--red)'}">日均 ${fmt(da)} · 需 ${fmt(dn)}/天(剩余)</div>`) : '';
+    return {o,a,t,r,ab,tb,rb,da,dn,tSet:t>0, dailyHtml};
   }).sort((x,y)=> (y.r??-1)-(x.r??-1) || (y.a-x.a));
   const maxv = Math.max(...rows.map(x=>Math.max(x.a,x.t)),1);
   document.getElementById('officeBars').innerHTML = rows.map(x=>{
@@ -797,7 +798,7 @@ function renderOfficeBars(){
         <div class="r" style="color:${col}">${x.r===null?'—':pct(x.r)}</div>
         <div style="color:var(--sub)">实际 ${fmt(x.a)} / 目标 ${fmt(x.t)}</div>
         <div class="r2">三大爆品 ${rbs}</div>
-        <div class="r2" style="color:${!x.tSet?'var(--sub)':(x.dn===0?'var(--green)':(x.da>=x.dn?'var(--green)':'var(--red)'))}">日均 ${fmt(x.da)}${!x.tSet?'':(x.dn===0?' · 已超额(120%)':` · 需 ${fmt(x.dn)}/天(剩余)`)}</div>
+        ${isYearView?'':x.dailyHtml}
       </div>
     </div>`;
   }).join('');
@@ -1612,9 +1613,11 @@ function renderAll(){
   if(techPanel) techPanel.style.display=yv?'none':'';
   const weekB=document.getElementById('weekBadge'); if(weekB) weekB.style.display=yv?'none':'';
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
-  /* 把 mod1 说明/图例里的「8月」字眼在年度视图下替换为「年度」，避免误导 */
+  /* 年度累计视图：mod1 说明/图例改为年度口径，去掉「日均/120%剩余」等单月措辞，避免误导 */
   const mod1desc=document.querySelector('#mod1 .desc'), mod1leg=document.querySelector('#mod1 .legend');
-  if(mod1desc) mod1desc.innerHTML = yv ? mod1desc.innerHTML.replace(/8月/g,'年度') : mod1desc.innerHTML.replace(/年度/g,'8月');
+  const RANK_DESC_MONTH='按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序，虚线为「时间进度」参考线。每行小字：该办事处<b>三大爆品达成率</b>，以及<b>日均完成金额</b>与<b>完成120%剩余每天需完成金额</b>（绿=按当前节奏可冲到120%，红=需提速）。点击任意办事处查看其下网点与品项明细。';
+  const RANK_DESC_YEAR='按<b>年度累计达成率</b>（1–8月实际合计 ÷ 全年目标）排序，虚线为各办事处<b>年度目标</b>参考线。每行小字：该办事处<b>三大爆品年度达成率</b>。点击任意办事处查看其下网点与品项明细。';
+  if(mod1desc) mod1desc.innerHTML = yv ? RANK_DESC_YEAR : RANK_DESC_MONTH;
   if(mod1leg) mod1leg.innerHTML = yv ? mod1leg.innerHTML.replace(/8月/g,'年度') : mod1leg.innerHTML.replace(/年度/g,'8月');
   if(yv && ds){ ds.textContent='年度累计（1–8月汇总）· 数据覆盖至 '+(DASHBOARD_DATA.meta.统计截止日||''); ds.style.display='inline-block'; }
 }
