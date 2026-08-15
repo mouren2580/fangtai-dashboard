@@ -138,7 +138,8 @@
     <select id="monthSel" title="切换查询月份（数据已按月隔离）" style="margin-left:10px;padding:7px 12px;border-radius:9px;border:1px solid #d6deea;background:#fff;font-size:13px;font-weight:700;color:#1f2733;cursor:pointer"></select>
     <div class="spacer"></div>
     <div class="seg" id="periodSeg">
-      <button data-p="month" class="on">月度</button>
+      <button data-p="month" class="on">单月</button>
+      <button data-p="year">年度累计</button>
     </div>
     <button class="btn" id="syncBtn" title="重新导入更新后的 Excel，自动同步网点×品项实际数据">🔄 同步Excel</button>
     <button class="btn" id="asOfBtn" title="设置统计截止日（默认同步Excel后自动取前一天）">🕒 时间设置</button>
@@ -327,6 +328,7 @@
       <h3>设置目标</h3>
       <div class="seg" id="tgtSeg">
         <button data-p="month" class="on">月度目标</button>
+        <button data-p="year">年度累计目标</button>
       </div>
       <div class="spacer" style="flex:1"></div>
       <button class="btn" id="fillRunBtn">按满月推算填充</button>
@@ -448,6 +450,7 @@ let CURRENT_MONTH = "2026-08";
 const BASE_MONTH = "2026-08";   // 基准月：数据存于顶层 const DASHBOARD_DATA；其它月存于 MDATA_<Y>_<M>_D
 function applyMonth(m){
   if(!MONTH_DATA[m]) return;
+  isYearView=false; period='month';   // 切到具体月份即退出年度累计视图
   CURRENT_MONTH = m;
   const M = MONTH_DATA[m];
   DASHBOARD_DATA = M.D; WEEKLY_DATA = M.W; BIG_CARE_DATA = M.B; EXTEND_WARRANTY_DATA = M.E; TECH_DATA = M.T;
@@ -459,7 +462,46 @@ function applyMonth(m){
   computeTime(isNaN(d.getTime())?new Date():d);
   recomputeTime(); reinitOrder(); ensureTargets();
   const sel=document.getElementById('monthSel'); if(sel) sel.value=m;
+  syncPeriodUI();
   renderAll();
+}
+/* 年度累计视图：合成跨所有已加载月份的汇总数据（实际=各月相加，缺失月份按0；目标=12个月目标之和） */
+function buildYearView(){
+  const officeMap={}; let latestCut='', latestStamp='';
+  for(const mk of Object.keys(MONTH_DATA)){
+    const D=MONTH_DATA[mk].D; if(!D||!D.网点) continue;
+    const cut=(D.meta&&D.meta.统计截止日)||''; if(cut>latestCut) latestCut=cut;
+    const st=(D.meta&&D.meta._stamp)||''; if(st>latestStamp) latestStamp=st;
+    for(const n of D.网点){
+      const o=n['办事处'];
+      if(!officeMap[o]) officeMap[o]={办事处:o, 合计:0, 品项:{}};
+      officeMap[o].合计 += (n.合计||0);
+      for(const k in (n.品项||{})) officeMap[o].品项[k]=(officeMap[o].品项[k]||0)+(n.品项[k]||0);
+    }
+  }
+  const nets=Object.values(officeMap);
+  const baseMeta=(MONTH_DATA[CURRENT_MONTH]&&MONTH_DATA[CURRENT_MONTH].D.meta)||DASHBOARD_DATA.meta;
+  DASHBOARD_DATA={ meta:{ 月份:'年度累计', 大区:baseMeta.大区, 统计截止日:latestCut||baseMeta.统计截止日, _stamp:latestStamp||baseMeta._stamp }, 网点:nets };
+  NETS=nets;
+  const yt={}; for(const o of OFFICE_ORDER) yt[o]={整体:0,爆品:0};
+  for(const mk of Object.keys(TARGETS_BY_MONTH)){
+    const t=TARGETS_BY_MONTH[mk]; if(!t||!t.month) continue;
+    for(const o of OFFICE_ORDER){ if(t.month[o]){ yt[o].整体+=(t.month[o].整体||0); yt[o].爆品+=(t.month[o].爆品||0); } }
+  }
+  TARGETS={ month:yt, year:yt, _stamp:(latestStamp||'') };
+  const cut=DASHBOARD_DATA.meta.统计截止日;
+  const cd=cut?new Date(cut+'T00:00:00'):new Date();
+  const jan1=new Date(cd.getFullYear(),0,1);
+  const elapsed=Math.max(1,Math.round((cd-jan1)/86400000)+1);
+  TIME={ 日:Math.min(365,elapsed), 月度天数:365, 周期标签:`${cd.getFullYear()} 年度累计（截至 ${cut||'今天'}）`, time:DASHBOARD_DATA.time };
+  DASHBOARD_DATA.time=TIME;
+  recomputeTime(); reinitOrder();
+  renderAll();
+}
+function setView(p){
+  period=p;
+  if(p==='year'){ isYearView=true; buildYearView(); } else { isYearView=false; applyMonth(CURRENT_MONTH); }
+  syncPeriodUI();
 }
 /*__MONTHS_END__*/
 let TIME = DASHBOARD_DATA.time;
@@ -596,11 +638,12 @@ function loadAllTargets(){
 let TARGETS_BY_MONTH = loadAllTargets();
 let TARGETS = null;
 let period = 'month';
-const perLbl = () => period==='month'?'本月':'本年';
-/* 整体目标标签：月度视图显示为「{月}月目标」（如 8月目标），年度视图显示「年度目标」；随当前月份动态变化 */
-const monthCN = () => { const mm=String((DASHBOARD_DATA&&DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta.月份)||'2026-08').split('-'); return (+mm[1])+'月'; };
-const wholeTargetLbl = () => period==='month'?`${monthCN()}目标`:'年度目标';
-const wholeRateLbl = () => period==='month'?`${monthCN()}达成率`:'年度达成率';
+let isYearView = false;   // 年度累计视图开关（合成跨月汇总数据）
+const perLbl = () => period==='month'?'单月':'年度累计';
+/* 整体目标标签：月度视图显示为「{月}月目标」，年度累计视图显示「年度累计目标」 */
+const monthCN = () => { const mm=String((DASHBOARD_DATA&&DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta.月份)||'2026-08'); if(mm==='年度累计') return '年度累计'; const p=mm.split('-'); return (+p[1])+'月'; };
+const wholeTargetLbl = () => period==='month'?`${monthCN()}目标`:'年度累计目标';
+const wholeRateLbl = () => period==='month'?`${monthCN()}达成率`:'年度累计达成率';
 
 /* ---------- 同比去年（3+1 产品） ---------- */
 const SELECT_3P1 = ["清洗保养","延保服务","清洁耗材","止回阀"];  // 3+1 产品
@@ -1424,8 +1467,8 @@ function syncPeriodUI(){
   document.querySelectorAll('#periodSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
   document.querySelectorAll('#tgtSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
 }
-document.querySelectorAll('#periodSeg button').forEach(b=>b.onclick=()=>{period=b.dataset.p;syncPeriodUI();renderAll();});
-document.querySelectorAll('#tgtSeg button').forEach(b=>b.onclick=()=>{period=b.dataset.p;syncPeriodUI();renderTgtTable();});
+document.querySelectorAll('#periodSeg button').forEach(b=>b.onclick=()=>{setView(b.dataset.p);});
+document.querySelectorAll('#tgtSeg button').forEach(b=>b.onclick=()=>{setView(b.dataset.p);renderTgtTable();});
 
 /* ---------- 渲染 ---------- */
 function renderAll(){
@@ -1452,6 +1495,13 @@ function renderAll(){
     ds.textContent=txt; ds.style.display=txt?'inline-block':'none';
   }
   renderFootNote();
+  // 年度累计视图：隐藏仅按月有意义的明细板块（大保养占比 / 延保年限×工程师），避免与累计口径混淆
+  const yv=isYearView;
+  const bigBox=document.getElementById('bigCareBox'), bigSeg=document.getElementById('bigCareSeg');
+  if(bigBox) bigBox.style.display=yv?'none':'';
+  if(bigSeg) bigSeg.style.display=yv?'none':'';
+  const extBox=document.getElementById('extendBox');
+  if(extBox) extBox.style.display=yv?'none':'';
 }
 function renderFootNote(){
   document.getElementById('footNote').innerHTML =
