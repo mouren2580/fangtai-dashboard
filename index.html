@@ -820,6 +820,10 @@ function renderDrill(){
   const a=officeActual(o), t=officeTargetWhole(o), r=rate(a,t);
   const ab=officeBreakoutActual(o), tb=officeTargetBreakout(o), rb=rate(ab,tb);
   const da=dailyActual(o), dn=dailyNeed120(o); const remainDays=Math.max(0,TIME.月度天数-TIME.日);
+  /* 日均/120%剩余日均 仅单月视图有意义（年度累计是跨月汇总，无"剩余天数"概念），年度视图下隐藏 */
+  const dailyKpi = isYearView ? '' : `
+    <div class="kpi"><div class="lbl">日均完成金额</div><div class="val" style="color:${t<=0?'var(--ink)':(dn===0?'var(--green)':(da>=dn?'var(--green)':'var(--red)'))}">${fmt(da)}</div><div class="sub">已过 ${TIME.日} 天平均</div></div>
+    <div class="kpi"><div class="lbl">完成120%剩余日均</div><div class="val">${t>0?(dn===0?'已超额':fmt(dn)):'—'}</div><div class="sub">${t>0?(wholeTargetLbl()+'×120% − 实际 ÷ 剩余'+remainDays+'天'):'设目标后显示'}</div></div>`;
   const nets = officeNets(o).slice().sort((x,y)=>y.合计-x.合计);
   const maxv = Math.max(...nets.map(n=>n.合计),1);
   let crumb = `<a onclick="clearDrill()">各办事处</a> <span>›</span> <b>${o}</b>`;
@@ -831,8 +835,7 @@ function renderDrill(){
     <div class="kpi"><div class="lbl">${wholeTargetLbl()}</div><div class="val">${fmt(t)}</div><div class="sub">${t>0?'已设置':'未设置'}</div></div>
     <div class="kpi"><div class="lbl">${wholeRateLbl()}</div><div class="val" style="color:${rateColor(r)}">${r===null?'—':pct(r)}</div><div class="sub">时间进度 ${pct(TIME_PROG)}</div></div>
     <div class="kpi"><div class="lbl">三大爆品达成率</div><div class="val" style="color:${rateColor(rb)}">${rb===null?'—':pct(rb)}</div><div class="sub">实际${fmt(ab)}/目标${fmt(tb)}</div></div>
-    <div class="kpi"><div class="lbl">日均完成金额</div><div class="val" style="color:${t<=0?'var(--ink)':(dn===0?'var(--green)':(da>=dn?'var(--green)':'var(--red)'))}">${fmt(da)}</div><div class="sub">已过 ${TIME.日} 天平均</div></div>
-    <div class="kpi"><div class="lbl">完成120%剩余日均</div><div class="val">${t>0?(dn===0?'已超额':fmt(dn)):'—'}</div><div class="sub">${t>0?(wholeTargetLbl()+'×120% − 实际 ÷ 剩余'+remainDays+'天'):'设目标后显示'}</div></div>
+    ${dailyKpi}
   </div>`;
   // 网点列表
   html += `<h3 style="font-size:15px;margin:0 0 10px">网点完成情况（按实际收入排序）</h3>`;
