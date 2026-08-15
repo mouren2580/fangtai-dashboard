@@ -239,8 +239,8 @@
   <!-- 模块4：服务产品 3+1 同比 -->
   <div class="panel" id="mod4">
     <div class="sec">
-      <h2>📈 同比去年8月 · 3+1 产品差值</h2>
-      <div class="desc">3+1 产品 = 清洗保养 · 延保服务 · 清洁耗材 · 止回阀。「今年」取当前表格实际（按网点×品项汇总）；「去年」请在右上角「📅 设置去年」中填写。单元格显示 <b>差值 = 今年 − 去年</b> 与 <b>同比%</b>，<span style="color:var(--green)">绿色=正增长</span> / <span style="color:var(--red)">红色=负增长</span>。点击任一品项表头，可在下方查看各办事处分布。</div>
+      <h2 id="lyTitle">📈 同比去年8月 · 3+1 产品差值</h2>
+      <div class="desc">3+1 产品 = 清洗保养 · 延保服务 · 清洁耗材 · 止回阀。8 月基准口径下，「今年」取当前表格实际（按网点×品项汇总），「去年」为手动填写的去年8月（右上角「📅 设置去年」），单元格显示 <b>差值 = 今年 − 去年</b> 与 <b>同比%</b>；<b>其它月份不对比去年，仅展示 3+1 今年实际</b>。点击品项表头可在下方查看各办事处分布。</div>
       <div class="banner" id="lyBanner" style="display:none;margin-bottom:12px"><span>⚠ 去年8月数据尚未填写，当前差值 = 今年全额、同比暂无法计算。点右上角「📅 设置去年」填写。</span></div>
       <div id="lyBars"></div>
       <div id="lyDetail" style="margin-top:16px"></div>
@@ -1219,8 +1219,32 @@ function ensureTargets(){
 /* ---------- 同比去年8月 · 3+1 产品 ---------- */
 let lySelected=null;
 function renderLastYear(){
+  const lb=document.getElementById('lyBanner'); if(lb) lb.style.display='none';
+  const tEl=document.getElementById('lyTitle');
+  /* 非基准月（8月）：忽略去年，仅按 8 月同口径展示本月 3+1 今年实际 */
+  if(CURRENT_MONTH !== BASE_MONTH){
+    if(tEl) tEl.textContent = `📈 ${CURRENT_MONTH.slice(5)}月 · 3+1 产品今年实际`;
+    let html=`<div class="lymat"><div style="margin-bottom:10px;color:#7a869a;font-size:13px">非 8 月口径：不对比去年，仅按 8 月同口径展示本月 3+1 今年实际（清洗保养·延保服务·清洁耗材·止回阀）。</div>`;
+    html+=`<table class="tedit"><thead><tr><th class="rowh">办事处 ＼ 3+1产品</th>`;
+    SELECT_3P1.forEach(it=>html+=`<th>${it}</th>`);
+    html+=`<th>3+1合计</th></tr></thead><tbody>`;
+    const rowsData = OFFICE_ORDER.map(o=>({o}));
+    rowsData.push({o:'全区合计',all:true});
+    rowsData.forEach(r=>{
+      html+=`<tr><td class="rowh"><b>${r.o}</b></td>`;
+      let s=0;
+      SELECT_3P1.forEach(it=>{ const cur = r.all? itemActual(it) : itemActualOffice(it,r.o); s+=cur; html+=`<td>${fmt(cur)}</td>`; });
+      html+=`<td><b>${fmt(s)}</b></td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    document.getElementById('lyBars').innerHTML=html;
+    const det=document.getElementById('lyDetail'); if(det) det.innerHTML='';
+    return;
+  }
+  /* 基准月（8月）：今年 vs 去年8月 差值 + 同比 */
+  if(tEl) tEl.textContent = `📈 同比去年8月 · 3+1 产品差值`;
   const allZero = OFFICE_ORDER.every(o=>SELECT_3P1.every(it=>((LASTYEAR[o]&&LASTYEAR[o][it])||0)===0));
-  const lb=document.getElementById('lyBanner'); if(lb) lb.style.display=allZero?'block':'none';
+  if(lb) lb.style.display=allZero?'block':'none';
   let html=`<div class="lymat"><table class="tedit"><thead><tr><th class="rowh">办事处 ＼ 3+1产品</th>`;
   SELECT_3P1.forEach(it=>html+=`<th style="cursor:pointer" onclick="lySelect('${it}')">${it}<br><span class="sub">今年 ${fmt(itemActual(it))}</span></th>`);
   html+=`<th>3+1合计</th></tr></thead><tbody>`;
@@ -1278,7 +1302,7 @@ function renderLyTable(){
   h+=`</tbody>`;
   document.getElementById('lyTable').innerHTML=h;
 }
-document.getElementById('lyBtn').onclick=()=>{ if(!adminUnlocked){ alert('请先点击右上角「🔒 锁定」按钮解锁后再设置去年数据。'); return; } document.getElementById('lyMask').classList.add('show');renderLyTable();};
+document.getElementById('lyBtn').onclick=()=>{ if(CURRENT_MONTH!==BASE_MONTH){ alert('「设置去年」仅 8 月基准口径可用；其它月份不对比去年，仅展示今年实际。'); return; } if(!adminUnlocked){ alert('请先点击右上角「🔒 锁定」按钮解锁后再设置去年数据。'); return; } document.getElementById('lyMask').classList.add('show');renderLyTable();};
 document.getElementById('lyCloseBtn').onclick=()=>document.getElementById('lyMask').classList.remove('show');
 document.getElementById('lyMask').onclick=e=>{if(e.target.id==='lyMask')document.getElementById('lyMask').classList.remove('show');};
 document.getElementById('lyZeroBtn').onclick=()=>{OFFICE_ORDER.forEach(o=>SELECT_3P1.forEach(it=>{if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=0;}));LASTYEAR_BY_MONTH[CURRENT_MONTH]=LASTYEAR;try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}renderLyTable();};
