@@ -509,6 +509,7 @@ function applyMonth(m){
 /*__MONTHS_END__*/
 let TIME = DASHBOARD_DATA.time;
 let NETS = DASHBOARD_DATA.网点;
+let SAVED_MONTH = '2026-08';   // 年度累计视图退出后，回退到的上一个真实月份
 const fmt = n => '¥' + (Math.round(n*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct = x => (x*100).toFixed(1) + '%';
 /* 全局金额格式化（原仅定义在第二个 <script> 的 IIFE 内，script1 的 updateColSummaries 无法访问，提升为全局以便复用） */
@@ -1158,6 +1159,7 @@ document.getElementById('impFile').onchange=e=>{
 };
 /* ---------- 固化：把当前目标 + 去年数据写死进一个新的 HTML ---------- */
 document.getElementById('freezeBtn').onclick=()=>{
+  if(isYearView){ alert('年度累计视图下不可固化目标，请先切回「单月」再操作。'); return; }
   const stamp=new Date().toISOString();
   TARGETS._stamp=stamp; LASTYEAR._stamp=stamp;
   TARGETS_BY_MONTH[CURRENT_MONTH]=TARGETS;
@@ -1184,6 +1186,7 @@ document.getElementById('freezeBtn').onclick=()=>{
 };
 /* ---------- 固化数据：把当前实际数据（同步后的最新）写死进新 HTML，用于重新部署 ---------- */
 document.getElementById('freezeDataBtn').onclick=()=>{
+  if(isYearView){ alert('年度累计视图下不可固化数据，请先切回「单月」再操作。'); return; }
   // 固化数据只是把当前实际数据写死进新文件，本身不产生「新数据」，不刷新「数据更新时间」（避免休息日/重复导出被误标为已更新）
   const stamp=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta._stamp)||new Date().toISOString();
   try{ localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp})); }catch(e){}
@@ -1508,6 +1511,59 @@ function renderDataTable(){
 document.getElementById('dtOffice').onchange=renderDataTable;
 document.getElementById('dtSearch').oninput=renderDataTable;
 
+/* ---------- 年度累计视图（1–8月汇总，合成跨月数据） ---------- */
+/* 注意：此逻辑必须放在 MONTHS_START / MONTHS_END 锚点【之外】，
+   因为 applyMonth 在锚点内，重注入 _inject_month.py 会整体覆盖锚点块，改写即丢失。 */
+function buildYearData(){
+  /* 1. 汇总所有月份的品项目录（并集），保证跨月品项一致 */
+  const allItems=[];
+  for(const mk in MONTH_DATA){ const its=(MONTH_DATA[mk].D.meta&&MONTH_DATA[mk].D.meta.品项)||[]; for(const it of its) if(allItems.indexOf(it)<0) allItems.push(it); }
+  /* 2. 按 (办事处||服务网点) 跨月累加 合计 + 各品项（虚拟网点/技师原样保留，与主表口径一致） */
+  const yNets={};
+  for(const mk in MONTH_DATA){
+    const nets=MONTH_DATA[mk].D.网点||[];
+    for(const n of nets){
+      const key=n.办事处+'||'+n.服务网点;
+      if(!yNets[key]){
+        const itm={}; for(const it of allItems) itm[it]=0;
+        yNets[key]={办事处:n.办事处, 服务中心:n.服务中心, 服务网点:n.服务网点, 合计:0, 品项:itm, 来源:'年度累计(1-8月)'};
+      }
+      yNets[key].合计 += (n.合计||0);
+      for(const it of allItems) yNets[key].品项[it] += ((n.品项&&n.品项[it])||0);
+    }
+  }
+  const netsArr=Object.keys(yNets).map(k=>yNets[k]);
+  const yMeta={大区:'西北大区部', 月份:'年度累计', 品项:allItems, 来源表:'服务产品收入统计（1–8月汇总）', 统计截止日:'2026-08-14', _stamp:new Date().toISOString()};
+  /* 3. 时间进度：服务年 2025.12.28–2026.12.27（365天），已过天数按今天算 */
+  const start=new Date(2025,11,28), end=new Date(2026,11,27); const days=365;
+  const now=new Date(); let passed=Math.round((now-start)/86400000)+1; passed=Math.max(1,Math.min(days,passed));
+  TIME={日:passed, 月度天数:days, 周期标签:'2025.12.28–2026.12.27（'+days+'天）', 进度:passed/days};
+  DASHBOARD_DATA={meta:yMeta, 网点:netsArr, time:TIME};
+  NETS=netsArr; ITEMS=allItems; CURRENT_MONTH='年度累计';
+  /* 4. 目标：取各月内置的「year」年度目标（各月一致，取第一个非零者） */
+  let yrT=null;
+  for(const mk in TARGETS_BY_MONTH){ const t=TARGETS_BY_MONTH[mk]; if(t&&t.year){ const any=Object.values(t.year).some(v=>v&&v.整体>0); if(any){yrT=t.year;break;} } }
+  if(!yrT && typeof EMBED_TARGETS!=='undefined' && EMBED_TARGETS.year) yrT=EMBED_TARGETS.year;
+  TARGETS={month:seedTargets().month, year: yrT||seedTargets().year, _stamp:''};
+  boSpan='month';   // 年度视图强制月度口径，避免周度读取单月 WEEKLY_DATA 出错
+}
+function setView(p){
+  if(p==='year'){
+    period='year'; isYearView=true;
+    buildYearData();
+    syncPeriodUI();
+    renderAll();
+    const sel=document.getElementById('monthSel'); if(sel){ sel.disabled=true; sel.value=SAVED_MONTH; }
+    return;
+  }
+  /* 单月：回到上一个真实月份，并重置年度视图状态 */
+  period='month'; isYearView=false;
+  const m = MONTH_DATA[SAVED_MONTH] ? SAVED_MONTH : '2026-08';
+  const sel=document.getElementById('monthSel'); if(sel) sel.disabled=false;
+  applyMonth(m);
+  syncPeriodUI();
+}
+
 /* 周期切换 */
 function syncPeriodUI(){
   document.querySelectorAll('#periodSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
@@ -1541,13 +1597,23 @@ function renderAll(){
     ds.textContent=txt; ds.style.display=txt?'inline-block':'none';
   }
   renderFootNote();
-  // 年度累计视图：隐藏仅按月有意义的明细板块（大保养占比 / 延保年限×工程师），避免与累计口径混淆
+  // 年度累计视图：隐藏仅按月有意义的明细板块（大保养占比 / 延保年限×工程师 / 同比去年 / 服务工程师 / 周徽标），避免与累计口径混淆
   const yv=isYearView;
   const bigBox=document.getElementById('bigCareBox'), bigSeg=document.getElementById('bigCareSeg');
   if(bigBox) bigBox.style.display=yv?'none':'';
   if(bigSeg) bigSeg.style.display=yv?'none':'';
   const extBox=document.getElementById('extendBox');
   if(extBox) extBox.style.display=yv?'none':'';
+  const lyPanel=document.getElementById('mod4'), techPanel=document.getElementById('techSec');
+  if(lyPanel) lyPanel.style.display=yv?'none':'';
+  if(techPanel) techPanel.style.display=yv?'none':'';
+  const weekB=document.getElementById('weekBadge'); if(weekB) weekB.style.display=yv?'none':'';
+  const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
+  /* 把 mod1 说明/图例里的「8月」字眼在年度视图下替换为「年度」，避免误导 */
+  const mod1desc=document.querySelector('#mod1 .desc'), mod1leg=document.querySelector('#mod1 .legend');
+  if(mod1desc) mod1desc.innerHTML = yv ? mod1desc.innerHTML.replace(/8月/g,'年度') : mod1desc.innerHTML.replace(/年度/g,'8月');
+  if(mod1leg) mod1leg.innerHTML = yv ? mod1leg.innerHTML.replace(/8月/g,'年度') : mod1leg.innerHTML.replace(/年度/g,'8月');
+  if(yv && ds){ ds.textContent='年度累计（1–8月汇总）· 数据覆盖至 '+(DASHBOARD_DATA.meta.统计截止日||''); ds.style.display='inline-block'; }
 }
 function renderFootNote(){
   document.getElementById('footNote').innerHTML =
@@ -1566,7 +1632,7 @@ syncPeriodUI();
   if(sel){
     Object.keys(MONTH_DATA).sort().forEach(m=>{ const op=document.createElement('option'); op.value=m; op.textContent=m; sel.appendChild(op); });
     sel.value=CURRENT_MONTH;
-    sel.onchange=()=>applyMonth(sel.value);
+    sel.onchange=()=>{ SAVED_MONTH=sel.value; applyMonth(sel.value); };
   }
 }
 renderAll();
