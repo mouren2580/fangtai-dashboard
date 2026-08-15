@@ -447,6 +447,7 @@ const MONTH_DATA = {
   "2026-07": {D:MDATA_2026_07_D, T:MDATA_2026_07_T, B:MDATA_2026_07_B, W:MDATA_2026_07_W, E:MDATA_2026_07_E}
 };
 let CURRENT_MONTH = "2026-08";
+const BASE_MONTH = "2026-08"; // 基准月：去年对比 / 数据固化锚点（仅此月走同比口径）
 function applyMonth(m){
   if(!MONTH_DATA[m]) return;
   CURRENT_MONTH = m;
