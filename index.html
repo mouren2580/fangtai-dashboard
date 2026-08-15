@@ -10,6 +10,7 @@
     --blue:#2b6cb0; --blue-soft:#eaf2fb;
     --green:#2f9e44; --green-soft:#e7f6ec;
     --orange:#f08c00; --orange-soft:#fff4e0;
+    --bo:#e8590c; --bo-soft:#fff0e6;
     --red:#e03131; --red-soft:#fdeaea;
     --shadow:0 1px 3px rgba(20,40,80,.08),0 6px 18px rgba(20,40,80,.06);
   }
@@ -54,12 +55,17 @@
   .obar{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;transition:.15s;border:1px solid transparent}
   .obar:hover{background:var(--blue-soft);border-color:#cfe0f5}
   .obar .name{width:118px;font-weight:700;flex-shrink:0}
-  .obar .track{flex:1;height:26px;background:#eef1f6;border-radius:7px;position:relative;overflow:hidden}
+  .obar .tracks{flex:1;display:flex;flex-direction:column;gap:5px;justify-content:center}
+  .obar .track{height:18px;background:#eef1f6;border-radius:7px;position:relative;overflow:hidden}
+  .obar .track.bo{height:11px;background:var(--bo-soft);border-radius:6px}
   .obar .fill{height:100%;border-radius:7px;transition:width .5s}
+  .obar .fill.bo{background:var(--bo)}
   .obar .tline{position:absolute;top:-3px;bottom:-3px;width:2px;background:#1f2733;opacity:.55}
+  .obar .tline.bo{top:0;bottom:0;width:2px;background:var(--bo);opacity:.5}
   .obar .nums{width:250px;text-align:right;flex-shrink:0;font-size:13px}
   .obar .nums .r{font-weight:700;font-size:15px}
   .obar .nums .r2{font-size:12px;color:var(--sub)}
+  .obar .nums .bo-r2{font-size:12px;color:var(--bo);font-weight:700}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}
@@ -200,12 +206,13 @@
   <div class="panel open" id="mod1">
     <div class="sec">
       <h2>📊 各办事处达成情况 <span class="pill mute" id="rankPeriodLbl">月度</span></h2>
-      <div class="desc">按<b>8月达成率</b>（实际合计 ÷ 8月目标）排序，虚线为「时间进度」参考线。每行小字：该办事处<b>三大爆品达成率</b>，以及<b>日均完成金额</b>与<b>完成120%剩余每天需完成金额</b>（绿=按当前节奏可冲到120%，红=需提速）。点击任意办事处查看其下网点与品项明细。</div>
+      <div class="desc">按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。</div>
       <div id="officeBars"></div>
       <div class="legend">
         <span><i style="background:var(--green)"></i>8月达成率 ≥ 时间进度（领先）</span>
         <span><i style="background:var(--orange)"></i>8月达成率 80%~100% 时间进度（预警）</span>
         <span><i style="background:var(--red)"></i>8月达成率 &lt; 80% 时间进度（落后）</span>
+        <span><i style="background:var(--bo)"></i>8月三大爆品进度（橙色条）</span>
         <span><i style="background:#1f2733"></i>时间进度线</span>
       </div>
     </div>
@@ -787,17 +794,24 @@ function renderOfficeBars(){
   const maxv = Math.max(...rows.map(x=>Math.max(x.a,x.t)),1);
   document.getElementById('officeBars').innerHTML = rows.map(x=>{
     const w=(x.a/maxv*100), tline=(x.t>0)?(x.t/maxv*100):null, col=rateColor(x.r);
+    const bw=(x.ab/maxv*100), btline=(x.tb>0)?(x.tb/maxv*100):null;
     const rbs = x.rb===null?'未设爆品目标':pct(x.rb);
     return `<div class="obar" onclick="selectOffice('${x.o}')">
       <div class="name">${x.o.replace('办事处','')}</div>
-      <div class="track">
-        <div class="fill" style="width:${w}%;background:${col}"></div>
-        ${tline!==null?`<div class="tline" style="left:${tline}%"></div>`:''}
+      <div class="tracks">
+        <div class="track">
+          <div class="fill" style="width:${w}%;background:${col}"></div>
+          ${tline!==null?`<div class="tline" style="left:${tline}%"></div>`:''}
+        </div>
+        <div class="track bo" title="三大爆品达成率 ${rbs}">
+          <div class="fill bo" style="width:${bw}%"></div>
+          ${btline!==null?`<div class="tline bo" style="left:${btline}%"></div>`:''}
+        </div>
       </div>
       <div class="nums">
         <div class="r" style="color:${col}">${x.r===null?'—':pct(x.r)}</div>
         <div style="color:var(--sub)">实际 ${fmt(x.a)} / 目标 ${fmt(x.t)}</div>
-        <div class="r2">三大爆品 ${rbs}</div>
+        <div class="r2 bo-r2">三大爆品 ${rbs}</div>
         ${isYearView?'':x.dailyHtml}
       </div>
     </div>`;
@@ -1615,8 +1629,8 @@ function renderAll(){
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
   /* 年度累计视图：mod1 说明/图例改为年度口径，去掉「日均/120%剩余」等单月措辞，避免误导 */
   const mod1desc=document.querySelector('#mod1 .desc'), mod1leg=document.querySelector('#mod1 .legend');
-  const RANK_DESC_MONTH='按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序，虚线为「时间进度」参考线。每行小字：该办事处<b>三大爆品达成率</b>，以及<b>日均完成金额</b>与<b>完成120%剩余每天需完成金额</b>（绿=按当前节奏可冲到120%，红=需提速）。点击任意办事处查看其下网点与品项明细。';
-  const RANK_DESC_YEAR='按<b>年度累计达成率</b>（1–8月实际合计 ÷ 全年目标）排序，虚线为各办事处<b>年度目标</b>参考线。每行小字：该办事处<b>三大爆品年度达成率</b>。点击任意办事处查看其下网点与品项明细。';
+  const RANK_DESC_MONTH='按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。';
+  const RANK_DESC_YEAR='按<b>年度累计达成率</b>（1–8月实际合计 ÷ 全年目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝各办事处年度目标参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。';
   if(mod1desc) mod1desc.innerHTML = yv ? RANK_DESC_YEAR : RANK_DESC_MONTH;
   if(mod1leg) mod1leg.innerHTML = yv ? mod1leg.innerHTML.replace(/8月/g,'年度') : mod1leg.innerHTML.replace(/年度/g,'8月');
   if(yv && ds){ ds.textContent='年度累计（1–8月汇总）· 数据覆盖至 '+(DASHBOARD_DATA.meta.统计截止日||''); ds.style.display='inline-block'; }
