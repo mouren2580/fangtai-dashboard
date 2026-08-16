@@ -982,23 +982,31 @@ function renderExtendBody(){
   const inp=document.getElementById('extSearch'); const kw=(inp?inp.value:'').trim();
   const rows=D.techs.filter(t=>(!off||t.office===off)&&(!kw||t.name.indexOf(kw)>=0));
   const t=D.total; const fmtA=v=>v.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const scopeLbl = isYearView ? '📅 年度累计（1–8月）' : '月度合计';
+  const ysum=(cls,label,o)=>`<span style="display:inline-flex;flex-direction:column;padding:6px 14px;border-radius:10px;background:${cls.bg};color:${cls.fg};min-width:118px"><span style="font-size:11px;opacity:.85">${label}</span><span style="font-size:15px;font-weight:700">¥${fmtA(o.amt)}</span><span style="font-size:11px;opacity:.8">${o.qty} 单</span></span>`;
+  const cs1={bg:'#e8f0fe',fg:'#1a56c4'}, cs2={bg:'#e6f6ec',fg:'#1a7a3c'}, cs3={bg:'#f3eafe',fg:'#7a3ac4'};
+  let sum=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 12px">`
+        +`<span style="font-size:13px;color:var(--sub);font-weight:600">${scopeLbl} · 延保上缴按年限拆分：</span>`
+        +ysum(cs1,'① 一年',t.y1)+ysum(cs2,'② 二年',t.y2)+ysum(cs3,'③ 三年',t.y3)
+        +`<span style="display:inline-flex;flex-direction:column;padding:6px 14px;border-radius:10px;background:#0f2a4a;color:#fff;min-width:128px"><span style="font-size:11px;opacity:.85">全年合计</span><span style="font-size:15px;font-weight:700">¥${fmtA(t.y1.amt+t.y2.amt+t.y3.amt)}</span><span style="font-size:11px;opacity:.8">${t.y1.qty+t.y2.qty+t.y3.qty} 单</span></span>`
+        +`</div>`;
   let h='<table class="dt"><thead><tr><th>服务工程师</th><th>办事处</th>'
        +'<th>一年·数量</th><th>一年·上缴</th><th>二年·数量</th><th>二年·上缴</th>'
-       +'<th>三年·数量</th><th>三年·上缴</th><th>合计·数量</th><th>合计·上缴</th></tr></thead><tbody>';
+       +'<th>三年·数量</th><th>三年·上缴</th><th>全年合计·数量</th><th>全年合计·上缴</th></tr></thead><tbody>';
   rows.forEach(t0=>{
     h+=`<tr><td class="name">${t0.name}</td><td>${t0.office||''}</td>`
-      +`<td>${t0.y1.qty}</td><td>${fmtA(t0.y1.amt)}</td>`
-      +`<td>${t0.y2.qty}</td><td>${fmtA(t0.y2.amt)}</td>`
-      +`<td>${t0.y3.qty}</td><td>${fmtA(t0.y3.amt)}</td>`
+      +`<td style="background:#fafcff">${t0.y1.qty}</td><td style="background:#fafcff;font-weight:600;color:#1a56c4">${fmtA(t0.y1.amt)}</td>`
+      +`<td style="background:#f6fbf8">${t0.y2.qty}</td><td style="background:#f6fbf8;font-weight:600;color:#1a7a3c">${fmtA(t0.y2.amt)}</td>`
+      +`<td style="background:#fbf7fe">${t0.y3.qty}</td><td style="background:#fbf7fe;font-weight:600;color:#7a3ac4">${fmtA(t0.y3.amt)}</td>`
       +`<td><b>${t0.tqty}</b></td><td><b>${fmtA(t0.tamt)}</b></td></tr>`;
   });
   h+=`<tr style="font-weight:700;background:var(--card-2)"><td class="name">⭐ 全区合计</td><td>—</td>`
-    +`<td>${t.y1.qty}</td><td>${fmtA(t.y1.amt)}</td>`
-    +`<td>${t.y2.qty}</td><td>${fmtA(t.y2.amt)}</td>`
-    +`<td>${t.y3.qty}</td><td>${fmtA(t.y3.amt)}</td>`
+    +`<td>${t.y1.qty}</td><td style="color:#1a56c4">${fmtA(t.y1.amt)}</td>`
+    +`<td>${t.y2.qty}</td><td style="color:#1a7a3c">${fmtA(t.y2.amt)}</td>`
+    +`<td>${t.y3.qty}</td><td style="color:#7a3ac4">${fmtA(t.y3.amt)}</td>`
     +`<td>${t.y1.qty+t.y2.qty+t.y3.qty}</td><td>${fmtA(t.y1.amt+t.y2.amt+t.y3.amt)}</td></tr>`;
   h+='</tbody></table>';
-  box.innerHTML=h;
+  box.innerHTML=sum+h;
   const c=document.getElementById('extCount'); if(c) c.textContent='共 '+rows.length+' 位工程师';
 }
 function renderBreakoutBody(){
@@ -1772,7 +1780,8 @@ setAdminMode(false); // 默认锁定：隐藏 设置目标/固化/导出/导入/
       T = TECH_DATA;
       $('techTotal').textContent = money(T.total);
       $('techCount').textContent = T.count;
-      $('techBadge').textContent = '合计 ' + money(T.total);
+      $('techScope').textContent = isYearView ? '服务产品收入统计 · 年度累计（1–8月）' : '服务产品收入统计';
+      $('techBadge').textContent = isYearView ? '📅 年度累计 · 合计 ' + money(T.total) : '合计 ' + money(T.total);
       if (T.meta && T.meta.报表总合计) {
         var parts = [
           ['工程师工单消耗', T.meta.工程师工单消耗, T.count + ' 名工程师'],
