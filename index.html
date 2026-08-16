@@ -1590,11 +1590,13 @@ function buildYearData(){
   EXTEND_WARRANTY_DATA={meta:yE_meta||{来源:'CSM服务项目(1–8月汇总)'}, offices:yE_offices, techs:yETechs, total:yE_total};
   /* 6. 服务工程师跨月累计：按技师工号归并，累加金额/单数/各品项（含无工号特殊项，虚拟技师原样保留） */
   let yT_offices=[], yT_items=[], yT_meta=null, yT_total=0; const yTT={};
+  /* 聚合 meta 拆分字段：工程师工单消耗 + 网点买断 = 报表总合计，跨月累加 */
+  let _yT_eng=0, _yT_buy=0;
   for(const mk in MONTH_DATA){
     const T=MONTH_DATA[mk].T; if(!T||!T.techs) continue;
     if(T.offices&&T.offices.length&&!yT_offices.length) yT_offices=T.offices;
     if(T.items&&T.items.length&&!yT_items.length) yT_items=T.items;
-    if(T.meta) yT_meta=T.meta;
+    if(T.meta){ yT_meta=T.meta; _yT_eng+=(T.meta.工程师工单消耗||0); _yT_buy+=(T.meta.网点买断||0); }
     yT_total+=(T.total||0);
     T.techs.forEach(t=>{
       const k=t.id||('__'+t.name); if(!yTT[k]) yTT[k]={id:t.id,name:t.name,office:t.office,center:t.center,net:t.net,cnt:0,amount:0,items:{}};
@@ -1604,7 +1606,7 @@ function buildYearData(){
     });
   }
   const yTTechs=Object.keys(yTT).map(k=>yTT[k]).sort((a,b)=>(b.amount||0)-(a.amount||0));
-  TECH_DATA={meta:yT_meta||{口径:'服务产品收入统计(1–8月汇总)'}, offices:yT_offices, items:yT_items, techs:yTTechs, total:yT_total, count:yTTechs.length};
+  TECH_DATA={meta:{...(yT_meta||{口径:'服务产品收入统计(1–8月汇总)'}), 工程师工单消耗:_yT_eng, 网点买断:_yT_buy, 报表总合计:_yT_eng+_yT_buy}, offices:yT_offices, items:yT_items, techs:yTTechs, total:yT_total, count:yTTechs.length};
 }
 function setView(p){
   if(p==='year'){
@@ -1666,7 +1668,7 @@ function renderAll(){
   const extBox=document.getElementById('extendBox'); if(extBox) extBox.style.display=''; // 延保明细年度/单月均显示
   const lyPanel=document.getElementById('mod4'), techPanel=document.getElementById('techSec');
   if(lyPanel) lyPanel.style.display=yv?'none':'';
-  if(techPanel){ techPanel.style.display=yv?'':'none'; techPanel.classList.toggle('open', yv); } // 年度显示并展开服务工程师明细
+  if(techPanel) techPanel.classList.add('open'); // 技师明细月度/年度均展开显示（.panel默认display:none，需.open才可见）
   const weekB=document.getElementById('weekBadge'); if(weekB) weekB.style.display=yv?'none':'';
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
   /* 年度累计视图：mod1 说明/图例改为年度口径，去掉「日均/120%剩余」等单月措辞，避免误导 */
