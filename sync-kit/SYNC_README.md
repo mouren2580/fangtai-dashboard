@@ -3,24 +3,33 @@
 本说明教你如何在**家里（或任何一台新）电脑**上，用最新月报 Excel 自己刷新看板并发布上线。
 
 > 看板在线地址不变：`https://mouren2580.github.io/fangtai-dashboard/`
-> 同步脚本 `sync.py` 已做成**自包含**：不依赖办公室的盘符路径、也不依赖 WorkBuddy 技能，复制整个文件夹即可用。
+> 同步脚本 `sync.py` 已做成**自包含**：不依赖办公室的盘符路径、也不依赖 WorkBuddy 技能。
 
 ---
 
-## 一、把项目文件夹整体拷到家里电脑
+## 一、获取同步包（两种方式任选）
 
-从办公室电脑（或让同事/网盘）拿到这个文件夹，**原样整体复制**到家里电脑任意位置（如 `D:\fangtai-dashboard\`）。文件夹里至少要包含：
-
+### 方式 A：git clone（推荐，家里电脑有网络时）
+```bat
+git clone https://github.com/mouren2580/fangtai-dashboard.git
 ```
-dashboard.html          ← 看板本体（sync.py 只刷新里面的数据）
-sync.py                 ← 一键同步脚本（自包含）
-build_dashboard.py      ← 核心聚合逻辑（已随包提供，无需装技能）
-requirements.txt        ← Python 依赖清单
-sync.bat               ← Windows 一键脚本
-.gh_token              ← 你自己建的令牌文件（见第三步，勿从办公室复制我的）
+clone 下来后目录结构如下（仓库根还有 `index.html` 是线上看板本体）：
 ```
+fangtai-dashboard\          ← 仓库根
+  index.html                ← 线上看板（可直接双击打开看，无需网络）
+  sync-kit\                 ← 同步工具包（你要用的）
+    sync.py
+    build_dashboard.py
+    requirements.txt
+    sync.bat
+    SYNC_README.md
+```
+**同步时在 `sync-kit\` 目录里运行**，`sync.py` 会自动向上找到仓库根的 `dashboard.html`（index.html 和 dashboard.html 同源，刷新后两者一致）。
 
-> ⚠️ `.gh_token` **不要**从办公室电脑直接复制过来——那是办公室的密钥。家里电脑要**自己新建**一个（第三步）。
+### 方式 B：网盘 / U 盘整体拷贝
+从同事或网盘拿到 `fangtai-dashboard` 文件夹，**原样复制**到家里电脑任意位置。只要 `sync-kit\` 与 `dashboard.html`/`index.html` 保持「sync-kit 在上级目录」的相对关系即可（`sync.py` 会自动定位）。
+
+> ⚠️ `.gh_token` **不要**从办公室电脑直接复制过来——那是办公室的密钥。家里电脑要**自己新建**一个（第三步）。clone 下来的仓库里**不含** `.gh_token`。
 
 ---
 
@@ -28,7 +37,7 @@ sync.bat               ← Windows 一键脚本
 
 1. 到 https://www.python.org/downloads/ 下载安装 **Python 3.11 或更新版本**。
    - **关键**：安装时务必勾选 **`Add python.exe to PATH`**（添加到环境变量）。
-2. 安装完成后，打开命令行（Win+R → 输入 `cmd` → 回车），在**项目文件夹内**执行：
+2. 安装完成后，打开命令行（Win+R → 输入 `cmd` → 回车），在 **`sync-kit` 文件夹内**执行：
    ```bat
    pip install -r requirements.txt
    ```
@@ -63,7 +72,7 @@ Excel 里必须包含这四个表（和办公室版一致）：
 
 **最简单**：双击 `sync.bat`，按提示输入 Excel 文件名和截止日即可。
 
-**或命令行**（在项目文件夹内）：
+**或命令行**（在 `sync-kit` 文件夹内）：
 ```bat
 python sync.py --excel "2026年8月西北服务产品.xlsx" --date 2026-08-16
 ```
