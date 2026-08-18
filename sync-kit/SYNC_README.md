@@ -94,7 +94,7 @@ python sync.py --excel "2026年8月西北服务产品.xlsx" --date 2026-08-16
 
 ## 六、查看
 
-浏览器打开 `https6://mouren2580.github.io/fangtai-dashboard/`，按 **Ctrl+Shift+R** 硬刷新即可看到新数据。
+浏览器打开 `https://mouren2580.github.io/fangtai-dashboard/`，按 **Ctrl+Shift+R** 硬刷新即可看到新数据。
 
 ---
 
