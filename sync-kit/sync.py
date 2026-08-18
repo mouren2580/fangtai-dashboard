@@ -418,6 +418,17 @@ def main():
 
     if not os.path.exists(a.excel):
         raise SystemExit("找不到 Excel：%s" % a.excel)
+
+    # 自动定位 dashboard.html：同目录 → 上级目录（适配 sync-kit 子目录场景）
+    if not os.path.exists(a.html):
+        for cand in [os.path.join(HERE, "dashboard.html"),
+                     os.path.join(HERE, "..", "dashboard.html"),
+                     os.path.join(HERE, "..", "..", "dashboard.html")]:
+            if os.path.exists(cand):
+                a.html = cand
+                break
+    if not os.path.exists(a.html):
+        raise SystemExit("找不到 dashboard.html：默认在同目录或上级目录（sync-kit 场景），可用 --html 指定")
     html = open(a.html, encoding="utf-8").read()
 
     # 1) 主数据 + 服务工程师
