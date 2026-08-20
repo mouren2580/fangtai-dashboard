@@ -1367,10 +1367,9 @@ function deriveCutoffFromWorkbook(wb){
         const r=rows[i]; if(!r) continue;
         for(const j of dc){
           const v=r[j]; if(v==null||v==='') continue;
-          let d=null;
-          if(v instanceof Date) d=v;
-          else { const t=String(v).trim(); if(t){ const dt=new Date(t.replace(' ','T')); if(!isNaN(dt.getTime())) d=dt; } }
-          if(d){ d.setHours(0,0,0,0); if(!maxDate||d>maxDate) maxDate=d; }
+          // 只认 SheetJS 已解析为 Date 对象的单元格；单号/编号等字符串含 20260820 会被误解析，故排除
+          if(!(v instanceof Date)) continue;
+          const d=v; d.setHours(0,0,0,0); if(!maxDate||d>maxDate) maxDate=d;
         }
       }
     }
