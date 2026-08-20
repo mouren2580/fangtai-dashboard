@@ -1346,6 +1346,38 @@ document.getElementById('lySaveBtn').onclick=()=>{
   renderLastYear();
   document.getElementById('lyBanner').style.display='none';
 };
+/* 从整个工作簿所有「日期/时间」类列取最大日期，作为统计截止日（封顶今天，避免未来日期） */
+function deriveCutoffFromWorkbook(wb){
+  let maxDate=null;
+  try{
+    const today=new Date(); today.setHours(0,0,0,0);
+    for(const name in wb.Sheets){
+      const ws=wb.Sheets[name]; if(!ws) continue;
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,blankrows:false});
+      if(!rows.length) continue;
+      let hdrIdx=-1;
+      for(let i=0;i<Math.min(rows.length,6);i++){
+        if(rows[i] && rows[i].some(c=>{const s=String(c||''); return s.indexOf('日期')>=0||s.indexOf('时间')>=0;})){ hdrIdx=i; break; }
+      }
+      if(hdrIdx<0) continue;
+      const hdr=rows[hdrIdx];
+      const dc=[];
+      for(let j=0;j<hdr.length;j++){ const s=String(hdr[j]||''); if(s.indexOf('日期')>=0||s.indexOf('时间')>=0) dc.push(j); }
+      for(let i=hdrIdx+1;i<rows.length;i++){
+        const r=rows[i]; if(!r) continue;
+        for(const j of dc){
+          const v=r[j]; if(v==null||v==='') continue;
+          let d=null;
+          if(v instanceof Date) d=v;
+          else { const t=String(v).trim(); if(t){ const dt=new Date(t.replace(' ','T')); if(!isNaN(dt.getTime())) d=dt; } }
+          if(d){ d.setHours(0,0,0,0); if(!maxDate||d>maxDate) maxDate=d; }
+        }
+      }
+    }
+    if(maxDate && maxDate>today) maxDate=today;
+  }catch(e){ console.error('[deriveCutoff] 失败', e); }
+  return maxDate;
+}
 function rebuildFromWorkbook(wb){
   const SHEET='服务产品收入统计';
   const ws=wb.Sheets[SHEET];
@@ -1376,7 +1408,9 @@ function rebuildFromWorkbook(wb){
   const NETS_NEW=Object.keys(map).map(k=>({办事处:map[k].办事处,服务中心:map[k].服务中心,服务网点:map[k].服务网点,
     合计:Math.round(map[k].合计*100)/100,品项:map[k].品项,来源:Object.keys(map[k].来源)}));
   if(!NETS_NEW.length){ alert('未解析到任何网点数据'); return null; }
-  /* 同步后截止日保持数据自带「统计截止日」不变（不自动滚动到前一天），符合"固定截止日"铁律 */
+  /* 同步后：用本次导入的 Excel 真实数据日期重新推算统计截止日，确保"剩余天数"随数据更新 */
+  const syncMax = deriveCutoffFromWorkbook(wb);
+  if(syncMax){ DEFAULT_ASOF = syncMax; DASHBOARD_DATA.meta.统计截止日 = isoDate(syncMax); }
   computeTime(DEFAULT_ASOF);
   /* 写回全局 */
   DASHBOARD_DATA.网点=NETS_NEW;
@@ -1822,23 +1856,8 @@ setAdminMode(false); // 默认锁定：隐藏 设置目标/固化/导出/导入/
       const wb = XLSX.read(bytes, {type:"array"});
       const res = rebuildFromWorkbook(wb);
       if(res){
-        // 从内嵌 Excel「服务产品收入统计」表的「过账日期」列取最大值作为统计截止日
-        let maxDate = null;
-        try{
-          const wsDate = wb.Sheets['服务产品收入统计'];
-          if(wsDate){
-            const rowsDate = XLSX.utils.sheet_to_json(wsDate,{header:1,defval:null,blankrows:false});
-            let hdrIdxDate = -1;
-            for(let i=0;i<rowsDate.length;i++){ if(rowsDate[i] && String(rowsDate[i][0]||'').trim()==='过账日期'){ hdrIdxDate=i; break; } }
-            if(hdrIdxDate>=0){
-              for(let i=hdrIdxDate+1;i<rowsDate.length;i++){
-                const r=rowsDate[i]; if(!r || r[0]==null || r[0]==='') continue;
-                const d=new Date(r[0]);
-                if(!isNaN(d.getTime()) && (!maxDate || d>maxDate)) maxDate=d;
-              }
-            }
-          }
-        }catch(e){ console.error('[offline] 读取过账日期失败', e); }
+        // 从整个工作簿所有「日期/时间」类列取最大日期作为统计截止日（封顶今天）
+        const maxDate = deriveCutoffFromWorkbook(wb);
         const cutDate = maxDate ? isoDate(maxDate) : '2026-08-19';
         DASHBOARD_DATA.meta._stamp = new Date().toISOString();
         DASHBOARD_DATA.meta.统计截止日 = cutDate;
