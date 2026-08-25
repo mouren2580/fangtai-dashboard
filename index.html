@@ -112,6 +112,10 @@
   .note{font-size:12px;color:var(--sub);margin-top:10px;line-height:1.7}
   .fv-sum{font-size:13px;color:#8a5a52;background:#fff3f1;border:1px solid #f6d6cf;border-radius:10px;padding:9px 12px;margin-bottom:12px}
   .fv-sum b{color:#e23b2e}
+  .fv-ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:6px 0 10px}
+  .fv-lab{font-size:12px;color:var(--sub);display:flex;flex-direction:column;gap:3px}
+  .fv-lab select,.fv-off,.fv-q{padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;max-width:260px}
+  .fv-q{min-width:200px}
   @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.obar .name{width:90px}.obar .nums{width:170px}.modules{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:600px){.modules{grid-template-columns:1fr}}
   /* 整体概览 hero */
@@ -365,7 +369,23 @@
       </div>
       <div class="desc">防火阀占比 = <b>止回阀数量 ÷ 烟机安装量</b>（百分比，精确到小数点后两位）。<b>止回阀数量</b>取自 <b>CSM配件表</b>（销售分类=止回阀）的数量合计；<b>烟机安装量</b>取自 <b>工单表</b>（产品组=吸油烟机、服务项目=安装/改装）的工单量。按 <b>办事处 → 网点 → 服务工程师</b> 三级下钻，可看各层级占比。</div>
       <div id="fvKpis" class="kpis" style="margin:14px 0 6px"></div>
-      <div id="fvCrumb" class="crumb"></div>
+      <div class="fv-ctrls">
+        <label class="fv-lab">排序方式
+          <select id="fvSortSel">
+            <option value="office">办事处排序</option>
+            <option value="net">服务网点排序</option>
+            <option value="tech">服务工程师排序</option>
+          </select>
+        </label>
+        <label class="fv-lab">范围
+          <select id="fvScopeSel">
+            <option value="all">整个大区</option>
+            <option value="office">指定办事处</option>
+          </select>
+        </label>
+        <select id="fvOfficeSel" class="fv-off" style="display:none"></select>
+        <input id="fvQuery" class="fv-q" placeholder="查询网点 / 工程师名称…" style="display:none">
+      </div>
       <div id="fvSum" class="fv-sum" style="display:none"></div>
       <div id="fvList"></div>
       <div class="note" id="fvNote"></div>
@@ -1693,9 +1713,10 @@ let woLevel = 0;
 let woCur = null;
 let woCurNet = null;
 let woDim = 'office_flat';
-let fvLevel = 0;
-let fvCur = null;
-let fvCurNet = null;
+let fvSort = 'office';     // 'office' | 'net' | 'tech'
+let fvScope = 'all';       // 'all' | 'office'
+let fvOffice = '';         // 指定办事处时的办事处名
+let fvQuery = '';          // 网点/工程师名称查询
 function fmtInt(n){ return (n==null?'0':String(n)).replace(/\d(?=(\d{3})+$)/g,'$&,'); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function kpiCard(l,v,sub,color){
@@ -1725,41 +1746,70 @@ function renderFireValve(){
     + kpiCard('烟机安装量', fmtInt(meta['烟机安装量']), '吸油烟机·安装/改装', 'var(--blue)');
   document.getElementById('fvScope').textContent = isYearView ? '📅 年度累计' : ('单月 · '+CURRENT_MONTH);
   document.getElementById('fvBadge').textContent = '防火阀占比 '+ratio.toFixed(2)+'%';
-  document.getElementById('fvNote').textContent = '说明：止回阀取自 CSM配件表（销售分类=止回阀）数量合计；烟机安装量＝工单表（产品组=吸油烟机、服务项目=安装/改装）工单量；数据截止 '+meta['截止']+'。百分比＝止回阀 ÷ 烟机安装，精确到小数点后两位。';
-  fvLevel=0; fvCur=null; fvCurNet=null;
-  renderFvLevel();
+  document.getElementById('fvNote').textContent = '说明：止回阀取自 CSM配件表（销售分类=止回阀）数量合计；烟机安装量＝工单表（产品组=吸油烟机、服务项目=安装/改装）工单量；数据截止 '+meta['截止']+'。百分比＝止回阀 ÷ 烟机安装，精确到小数点后两位。可切换排序方式与范围，或查询指定网点/工程师。';
+  setupFvCtrls();
+  renderFvView();
 }
-function renderFvLevel(){
+function setupFvCtrls(){
   const D=WORKORDER_DATA; if(!D) return;
-  const crumb=document.getElementById('fvCrumb');
+  const sortSel=document.getElementById('fvSortSel');
+  const scopeSel=document.getElementById('fvScopeSel');
+  const officeSel=document.getElementById('fvOfficeSel');
+  const query=document.getElementById('fvQuery');
+  if(officeSel && !officeSel.options.length && D.office.length){
+    D.office.forEach(o=>{ const op=document.createElement('option'); op.value=o.name; op.textContent=o.name; officeSel.appendChild(op); });
+  }
+  if(sortSel) sortSel.value=fvSort;
+  if(scopeSel) scopeSel.value=fvScope;
+  if(officeSel) officeSel.value=fvOffice;
+  if(query) query.value=fvQuery;
+  if(officeSel) officeSel.style.display = fvScope==='office' ? '' : 'none';
+  if(query) query.style.display = (fvSort==='net'||fvSort==='tech') ? '' : 'none';
+  if(sortSel) sortSel.onchange=()=>{ fvSort=sortSel.value; renderFireValve(); };
+  if(scopeSel) scopeSel.onchange=()=>{ fvScope=scopeSel.value; if(fvScope==='office' && !fvOffice && D.office.length) fvOffice=D.office[0].name; renderFireValve(); };
+  if(officeSel) officeSel.onchange=()=>{ fvOffice=officeSel.value; renderFvView(); };
+  if(query) query.oninput=()=>{ fvQuery=query.value.trim(); renderFvView(); };
+}
+function collectFv(){
+  const D=WORKORDER_DATA; if(!D) return [];
+  const ratioOf=nd=> (nd.yj>0 ? (nd.zh||0)/nd.yj*100 : 0);
+  let rows=[];
+  if(fvSort==='office'){
+    let offs=D.office;
+    if(fvScope==='office' && fvOffice) offs=offs.filter(o=>o.name===fvOffice);
+    rows=offs.map(o=>({name:o.name, zh:o.zh||0, yj:o.yj||0, ratio:ratioOf(o), sub:o.nets.length+' 网点 · '+o.nets.reduce((s,n)=>s+n.techs.length,0)+' 工程师'}));
+  } else if(fvSort==='net'){
+    let nets=[];
+    D.office.forEach(o=> o.nets.forEach(n=> nets.push({name:n.name, zh:n.zh||0, yj:n.yj||0, office:o.name, techs:n.techs.length})));
+    if(fvScope==='office' && fvOffice) nets=nets.filter(n=>n.office===fvOffice);
+    if(fvQuery) nets=nets.filter(n=>n.name.indexOf(fvQuery)>=0);
+    rows=nets.map(n=>({name:n.name, zh:n.zh, yj:n.yj, ratio:ratioOf(n), sub:n.office+' · '+n.techs+' 工程师'}));
+  } else {
+    let techs=[];
+    D.office.forEach(o=> o.nets.forEach(n=> n.techs.forEach(t=> techs.push({name:t.name+(t.code?'（'+t.code+'）':''), zh:t.zh||0, yj:t.yj||0, office:o.name, net:n.name}))));
+    if(fvScope==='office' && fvOffice) techs=techs.filter(t=>t.office===fvOffice);
+    if(fvQuery) techs=techs.filter(t=>t.name.indexOf(fvQuery)>=0);
+    rows=techs.map(t=>({name:t.name, zh:t.zh, yj:t.yj, ratio:ratioOf(t), sub:t.office+' / '+t.net}));
+  }
+  rows.sort((a,b)=> (b.ratio-a.ratio) || (b.yj-a.yj) || a.name.localeCompare(b.name,'zh'));
+  return rows;
+}
+function renderFvView(){
+  const D=WORKORDER_DATA; if(!D) return;
   const list=document.getElementById('fvList');
   const sum=document.getElementById('fvSum');
   list.innerHTML='';
-  let nodes, crumbHtml;
-  if(fvLevel===0){
-    crumbHtml='<b>防火阀占比 · 全部办事处</b>';
-    nodes=D.office;
-  } else if(fvLevel===1){
-    const off=D.office.find(o=>o.name===fvCur); if(!off) return;
-    crumbHtml=`<a onclick="fvLevel=0;renderFvLevel()">防火阀占比</a> › <b>${esc(fvCur)}</b>`;
-    nodes=off.nets;
-  } else {
-    const off=D.office.find(o=>o.name===fvCur); if(!off) return;
-    const net=off.nets.find(n=>n.name===fvCurNet); if(!net) return;
-    crumbHtml=`<a onclick="fvLevel=0;renderFvLevel()">防火阀占比</a> › <a onclick="fvLevel=1;renderFvLevel()">${esc(fvCur)}</a> › <b>${esc(fvCurNet)}</b>`;
-    nodes=net.techs;
-  }
-  crumb.innerHTML=crumbHtml;
-  let tzh=0, tyj=0; nodes.forEach(nd=>{ tzh+=(nd.zh||0); tyj+=(nd.yj||0); });
-  const lvlRatio = tyj>0 ? (tzh/tyj*100) : 0;
-  sum.innerHTML = `本层级合计：止回阀 <b>${fmtInt(tzh)}</b> ・ 烟机安装 <b>${fmtInt(tyj)}</b> ＝ <b style="color:#e23b2e">${lvlRatio.toFixed(2)}%</b>`;
-  sum.style.display='';
-  const max=100;
-  nodes.forEach(nd=>{
-    const zh=nd.zh||0, yj=nd.yj||0;
-    const ratio = yj>0 ? (zh/yj*100) : 0;
-    const go = (fvLevel<2) ? (()=>{ if(fvLevel===0){fvCur=nd.name; fvLevel=1;} else {fvCurNet=nd.name; fvLevel=2;} renderFvLevel(); }) : null;
-    list.appendChild(woBar(nd.name+(nd.code?'（'+nd.code+'）':''), ratio, max, go, `止回阀 ${fmtInt(zh)} / 烟机安装 ${fmtInt(yj)}`, ratio.toFixed(2)+'%', '#e23b2e'));
+  const rows=collectFv();
+  let tzh=0,tyj=0; rows.forEach(r=>{ tzh+=r.zh; tyj+=r.yj; });
+  const lvlRatio = tyj>0 ? tzh/tyj*100 : 0;
+  const dim = fvSort==='office'?'办事处':(fvSort==='net'?'服务网点':'服务工程师');
+  const scopeTxt = (fvScope==='office'&&fvOffice)?(' · '+fvOffice):' · 整个大区';
+  const qTxt = fvQuery?(' · 含"'+fvQuery+'"'):'';
+  if(sum) sum.innerHTML = `${dim}${scopeTxt}${qTxt}：止回阀 <b>${fmtInt(tzh)}</b> ・ 烟机安装 <b>${fmtInt(tyj)}</b> ＝ <b style="color:#e23b2e">${lvlRatio.toFixed(2)}%</b>（共 ${rows.length} 条，按占比降序）`;
+  if(sum) sum.style.display='';
+  if(!rows.length){ list.innerHTML='<div class="empty">无匹配数据</div>'; return; }
+  rows.forEach(r=>{
+    list.appendChild(woBar(r.name, r.ratio, 100, null, `止回阀 ${fmtInt(r.zh)} / 烟机安装 ${fmtInt(r.yj)}`, r.ratio.toFixed(2)+'%', '#e23b2e'));
   });
 }
 function renderWoLevel(){
