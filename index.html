@@ -341,17 +341,13 @@
         <h2 style="margin:0">📋 工单量统计 <span class="pill mute" id="woScope">单月 · 2026-08</span></h2>
         <span class="badge" id="woBadge" style="background:var(--blue-soft);color:var(--blue)"></span>
       </div>
-      <div class="desc">数据源：<b>工单表</b>（第6个sheet）+ <b>CSM配件表</b>（第3个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。用下拉框切换维度：<b>办事处 / 服务网点 / 服务工程师</b> 三级可分别看工单量排名或下钻，亦可看 <b>产品组 / 工单类型 / 服务项目</b> 排名。（防火阀占比已独立成单独板块）</div>
+      <div class="desc">数据源：<b>工单表</b>（第6个sheet）+ <b>CSM配件表</b>（第3个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。用下拉框切换维度：<b>办事处 / 服务网点 / 服务工程师</b> 三级可分别看工单量排名；更多维度（产品组 / 工单类型 / 服务项目 等）后期需要时再补充。（防火阀占比已独立成单独板块）</div>
       <div id="woKpis" class="kpis" style="margin:14px 0 6px"></div>
       <div style="margin:4px 0 10px">
         <select id="woDimSel" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;max-width:100%">
-          <option value="office">地域下钻（办事处→网点→工程师）</option>
           <option value="office_flat">办事处（按工单量排名）</option>
           <option value="net_flat">服务网点（按工单量排名）</option>
           <option value="tech_flat">服务工程师（按工单量排名）</option>
-          <option value="pgroup">产品组</option>
-          <option value="wotype">工单类型</option>
-          <option value="sitem">服务项目</option>
         </select>
       </div>
       <div id="woCrumb" class="crumb"></div>
@@ -1696,7 +1692,7 @@ document.querySelectorAll('#tgtSeg button').forEach(b=>b.onclick=()=>{setView(b.
 let woLevel = 0;
 let woCur = null;
 let woCurNet = null;
-let woDim = 'office';
+let woDim = 'office_flat';
 let fvLevel = 0;
 let fvCur = null;
 let fvCurNet = null;
