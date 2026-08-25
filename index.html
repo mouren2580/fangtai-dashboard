@@ -335,13 +335,18 @@
         <h2 style="margin:0">📋 工单量统计 <span class="pill mute" id="woScope">单月 · 2026-08</span></h2>
         <span class="badge" id="woBadge" style="background:var(--blue-soft);color:var(--blue)"></span>
       </div>
-      <div class="desc">数据源：<b>工单表</b>（第6个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。默认按 <b>办事处 → 网点 → 服务工程师</b> 三级下钻；亦可切换查看 <b>产品组 / 工单类型 / 服务项目</b> 的工单量排名。</div>
+      <div class="desc">数据源：<b>工单表</b>（第6个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。用下拉框切换维度：<b>办事处 / 服务网点 / 服务工程师</b> 三级可分别看工单量排名，或按 <b>办事处→网点→工程师</b> 下钻，亦可看 <b>产品组 / 工单类型 / 服务项目</b> 排名。</div>
       <div id="woKpis" class="kpis" style="margin:14px 0 6px"></div>
-      <div class="seg" id="woDimSeg" style="margin:4px 0 10px">
-        <button class="on" data-d="office">办事处→网点→工程师</button>
-        <button data-d="pgroup">产品组</button>
-        <button data-d="wotype">工单类型</button>
-        <button data-d="sitem">服务项目</button>
+      <div style="margin:4px 0 10px">
+        <select id="woDimSel" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;max-width:100%">
+          <option value="office">地域下钻（办事处→网点→工程师）</option>
+          <option value="office_flat">办事处（按工单量排名）</option>
+          <option value="net_flat">服务网点（按工单量排名）</option>
+          <option value="tech_flat">服务工程师（按工单量排名）</option>
+          <option value="pgroup">产品组</option>
+          <option value="wotype">工单类型</option>
+          <option value="sitem">服务项目</option>
+        </select>
       </div>
       <div id="woCrumb" class="crumb"></div>
       <div id="woList"></div>
@@ -1712,17 +1717,31 @@ function renderWoFlat(arr, label){
   crumb.innerHTML='<b>'+label+'</b>（共 '+arr.length+' 类 · 按工单量降序）';
   if(!arr || !arr.length){ list.innerHTML='<div class="empty">无数据</div>'; return; }
   const max=Math.max.apply(null, arr.map(x=>x.cnt).concat([1]));
-  arr.forEach(x=> list.appendChild(woBar(x.name, x.cnt, max, null, '')));
+  arr.forEach(x=> list.appendChild(woBar(x.name, x.cnt, max, null, x.sub||'')));
 }
-function setWoSeg(){
-  const seg=document.getElementById('woDimSeg'); if(!seg) return;
-  seg.querySelectorAll('button').forEach(b=>{
-    b.classList.toggle('on', b.getAttribute('data-d')===woDim);
-    b.onclick=()=>{ woDim=b.getAttribute('data-d'); setWoSeg(); renderWoView(); };
-  });
+function flatOffices(){
+  return WORKORDER_DATA.office.map(o=>({name:o.name, cnt:o.cnt, sub:o.nets.length+' 网点'})).sort((a,b)=>b.cnt-a.cnt);
+}
+function flatNets(){
+  const r=[];
+  WORKORDER_DATA.office.forEach(o=> o.nets.forEach(n=> r.push({name:n.name, cnt:n.cnt, sub:o.name+' · '+n.techs.length+' 工程师'})));
+  return r.sort((a,b)=>b.cnt-a.cnt);
+}
+function flatTechs(){
+  const r=[];
+  WORKORDER_DATA.office.forEach(o=> o.nets.forEach(n=> n.techs.forEach(t=> r.push({name:t.name+(t.code?'（'+t.code+'）':''), cnt:t.cnt, sub:o.name+' / '+n.name}))));
+  return r.sort((a,b)=>b.cnt-a.cnt);
+}
+function setWoSel(){
+  const sel=document.getElementById('woDimSel'); if(!sel) return;
+  sel.value=woDim;
+  sel.onchange=()=>{ woDim=sel.value; renderWoView(); };
 }
 function renderWoView(){
   if(woDim==='office'){ woLevel=0; woCur=null; woCurNet=null; renderWoLevel(); }
+  else if(woDim==='office_flat'){ renderWoFlat(flatOffices(), '办事处（按工单量排名）'); }
+  else if(woDim==='net_flat'){ renderWoFlat(flatNets(), '服务网点（按工单量排名）'); }
+  else if(woDim==='tech_flat'){ renderWoFlat(flatTechs(), '服务工程师（按工单量排名）'); }
   else if(woDim==='pgroup'){ renderWoFlat(WORKORDER_DATA.pgroup, '产品组'); }
   else if(woDim==='wotype'){ renderWoFlat(WORKORDER_DATA.wotype, '工单类型'); }
   else if(woDim==='sitem'){ renderWoFlat(WORKORDER_DATA.sitem, '服务项目'); }
@@ -1744,7 +1763,7 @@ function renderWorkOrder(){
   document.getElementById('woScope').textContent = isYearView ? '📅 年度累计' : ('单月 · '+CURRENT_MONTH);
   document.getElementById('woBadge').textContent = '总工单 '+fmtInt(meta['总工单数']);
   document.getElementById('woNote').textContent = '说明：工单量按工单编号去重，仅统计服务完成时间落在服务月周期 '+meta['周期']+' 内的工单；数据截止 '+meta['截止']+'（数据源：工单表第6个sheet）。';
-  setWoSeg();
+  setWoSel();
   renderWoView();
 }
 function renderAll(){
