@@ -206,6 +206,10 @@
       <div class="ico">📋</div><div class="t">工单量统计</div>
       <div class="s" id="colWoS"></div>
     </div>
+    <div class="colCard" data-mod="fvSec" onclick="toggleModule('fvSec')">
+      <div class="ico">🧯</div><div class="t">防火阀占比</div>
+      <div class="s" id="colFvS"></div>
+    </div>
   </div>
 
   <!-- 模块1：办事处 · 网点明细 -->
@@ -337,7 +341,7 @@
         <h2 style="margin:0">📋 工单量统计 <span class="pill mute" id="woScope">单月 · 2026-08</span></h2>
         <span class="badge" id="woBadge" style="background:var(--blue-soft);color:var(--blue)"></span>
       </div>
-      <div class="desc">数据源：<b>工单表</b>（第6个sheet）+ <b>CSM配件表</b>（第3个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。用下拉框切换维度：<b>办事处 / 服务网点 / 服务工程师</b> 三级可分别看工单量排名或下钻；<b>防火阀占比</b> = 止回阀数量 ÷ 烟机安装量（产品组=吸油烟机、服务项目=安装/改装），亦可看 <b>产品组 / 工单类型 / 服务项目</b> 排名。</div>
+      <div class="desc">数据源：<b>工单表</b>（第6个sheet）+ <b>CSM配件表</b>（第3个sheet）。按 <b>服务完成时间</b> 落在服务月周期内统计，工单编号去重计数。用下拉框切换维度：<b>办事处 / 服务网点 / 服务工程师</b> 三级可分别看工单量排名或下钻，亦可看 <b>产品组 / 工单类型 / 服务项目</b> 排名。（防火阀占比已独立成单独板块）</div>
       <div id="woKpis" class="kpis" style="margin:14px 0 6px"></div>
       <div style="margin:4px 0 10px">
         <select id="woDimSel" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;max-width:100%">
@@ -345,16 +349,30 @@
           <option value="office_flat">办事处（按工单量排名）</option>
           <option value="net_flat">服务网点（按工单量排名）</option>
           <option value="tech_flat">服务工程师（按工单量排名）</option>
-          <option value="firevalve">防火阀占比（止回阀 / 烟机安装）</option>
           <option value="pgroup">产品组</option>
           <option value="wotype">工单类型</option>
           <option value="sitem">服务项目</option>
         </select>
       </div>
       <div id="woCrumb" class="crumb"></div>
-      <div id="woFireSum" class="fv-sum" style="display:none"></div>
       <div id="woList"></div>
       <div class="note" id="woNote"></div>
+    </div>
+  </div>
+
+  <!-- 模块：防火阀占比（独立于工单板块） -->
+  <div class="panel" id="fvSec">
+    <div class="sec">
+      <div class="hero-hd">
+        <h2 style="margin:0">🧯 防火阀占比 <span class="pill mute" id="fvScope">单月 · 2026-08</span></h2>
+        <span class="badge" id="fvBadge" style="background:#fff3f1;color:#e23b2e"></span>
+      </div>
+      <div class="desc">防火阀占比 = <b>止回阀数量 ÷ 烟机安装量</b>（百分比，精确到小数点后两位）。<b>止回阀数量</b>取自 <b>CSM配件表</b>（销售分类=止回阀）的数量合计；<b>烟机安装量</b>取自 <b>工单表</b>（产品组=吸油烟机、服务项目=安装/改装）的工单量。按 <b>办事处 → 网点 → 服务工程师</b> 三级下钻，可看各层级占比。</div>
+      <div id="fvKpis" class="kpis" style="margin:14px 0 6px"></div>
+      <div id="fvCrumb" class="crumb"></div>
+      <div id="fvSum" class="fv-sum" style="display:none"></div>
+      <div id="fvList"></div>
+      <div class="note" id="fvNote"></div>
     </div>
   </div>
 
@@ -1467,7 +1485,7 @@ document.getElementById('asOfSaveBtn').onclick=()=>{ alert('截止日期已固�
 
 /* ---------- 六列导航 / 模块切换（互斥，一次展开一个） ---------- */
 function toggleModule(id){
-  const panels=['mod1','mod2','mod3','mod4','techSec','breakoutMod','woSec'];
+  const panels=['mod1','mod2','mod3','mod4','techSec','breakoutMod','woSec','fvSec'];
   const willOpen=!document.getElementById(id).classList.contains('open');
   panels.forEach(m=>{
     document.getElementById(m).classList.toggle('open', willOpen && m===id);
@@ -1492,6 +1510,7 @@ function updateColSummaries(){
   const cb=document.getElementById('colBreakout'); if(cb) cb.textContent='周度·双维度';
   const hb=document.getElementById('heroBadge'); if(hb) hb.textContent=PERIOD_LABEL;
   const cwo=document.getElementById('colWoS'); if(cwo && typeof WORKORDER_DATA!=='undefined' && WORKORDER_DATA) cwo.textContent=WORKORDER_DATA.meta['总工单数']+' 单 · '+WORKORDER_DATA.meta['工程师数']+' 工程师';
+  const cfv=document.getElementById('colFvS'); if(cfv && typeof WORKORDER_DATA!=='undefined' && WORKORDER_DATA) cfv.textContent='整体 '+WORKORDER_DATA.meta['防火阀占比'].toFixed(2)+'%';
 }
 /* 全区各品项分析 */
 let selectedItem=null;
@@ -1678,6 +1697,9 @@ let woLevel = 0;
 let woCur = null;
 let woCurNet = null;
 let woDim = 'office';
+let fvLevel = 0;
+let fvCur = null;
+let fvCurNet = null;
 function fmtInt(n){ return (n==null?'0':String(n)).replace(/\d(?=(\d{3})+$)/g,'$&,'); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function kpiCard(l,v,sub,color){
@@ -1692,24 +1714,43 @@ function woBar(name, cnt, max, onClick, sub, disp, color){
   if(onClick) el.onclick=onClick;
   return el;
 }
-function renderWoFire(){
+function renderFireValve(){
+  const panel=document.getElementById('fvSec');
+  if(!panel) return;
+  if(isYearView){ panel.style.display='none'; return; }
+  panel.style.display='';
+  const D=WORKORDER_DATA;
+  if(!D){ panel.style.display='none'; return; }
+  const meta=D.meta;
+  const ratio=meta['防火阀占比']||0;
+  document.getElementById('fvKpis').innerHTML =
+    kpiCard('整体防火阀占比', ratio.toFixed(2)+'%', '止回阀 ÷ 烟机安装', '#e23b2e')
+    + kpiCard('止回阀数量', fmtInt(meta['止回阀总数']), 'CSM配件表·止回阀', 'var(--orange)')
+    + kpiCard('烟机安装量', fmtInt(meta['烟机安装量']), '吸油烟机·安装/改装', 'var(--blue)');
+  document.getElementById('fvScope').textContent = isYearView ? '📅 年度累计' : ('单月 · '+CURRENT_MONTH);
+  document.getElementById('fvBadge').textContent = '防火阀占比 '+ratio.toFixed(2)+'%';
+  document.getElementById('fvNote').textContent = '说明：止回阀取自 CSM配件表（销售分类=止回阀）数量合计；烟机安装量＝工单表（产品组=吸油烟机、服务项目=安装/改装）工单量；数据截止 '+meta['截止']+'。百分比＝止回阀 ÷ 烟机安装，精确到小数点后两位。';
+  fvLevel=0; fvCur=null; fvCurNet=null;
+  renderFvLevel();
+}
+function renderFvLevel(){
   const D=WORKORDER_DATA; if(!D) return;
-  const crumb=document.getElementById('woCrumb');
-  const list=document.getElementById('woList');
-  const sum=document.getElementById('woFireSum');
+  const crumb=document.getElementById('fvCrumb');
+  const list=document.getElementById('fvList');
+  const sum=document.getElementById('fvSum');
   list.innerHTML='';
   let nodes, crumbHtml;
-  if(woLevel===0){
+  if(fvLevel===0){
     crumbHtml='<b>防火阀占比 · 全部办事处</b>';
     nodes=D.office;
-  } else if(woLevel===1){
-    const off=D.office.find(o=>o.name===woCur); if(!off) return;
-    crumbHtml=`<a onclick="woLevel=0;renderWoView()">防火阀占比</a> › <b>${esc(woCur)}</b>`;
+  } else if(fvLevel===1){
+    const off=D.office.find(o=>o.name===fvCur); if(!off) return;
+    crumbHtml=`<a onclick="fvLevel=0;renderFvLevel()">防火阀占比</a> › <b>${esc(fvCur)}</b>`;
     nodes=off.nets;
   } else {
-    const off=D.office.find(o=>o.name===woCur); if(!off) return;
-    const net=off.nets.find(n=>n.name===woCurNet); if(!net) return;
-    crumbHtml=`<a onclick="woLevel=0;renderWoView()">防火阀占比</a> › <a onclick="woLevel=1;renderWoView()">${esc(woCur)}</a> › <b>${esc(woCurNet)}</b>`;
+    const off=D.office.find(o=>o.name===fvCur); if(!off) return;
+    const net=off.nets.find(n=>n.name===fvCurNet); if(!net) return;
+    crumbHtml=`<a onclick="fvLevel=0;renderFvLevel()">防火阀占比</a> › <a onclick="fvLevel=1;renderFvLevel()">${esc(fvCur)}</a> › <b>${esc(fvCurNet)}</b>`;
     nodes=net.techs;
   }
   crumb.innerHTML=crumbHtml;
@@ -1721,8 +1762,8 @@ function renderWoFire(){
   nodes.forEach(nd=>{
     const zh=nd.zh||0, yj=nd.yj||0;
     const ratio = yj>0 ? (zh/yj*100) : 0;
-    const go = (woLevel<2) ? (()=>{ if(woLevel===0){woCur=nd.name; woLevel=1;} else {woCurNet=nd.name; woLevel=2;} renderWoView(); }) : null;
-    list.appendChild(woBar(nd.name+(nd.code?'（'+nd.code+'）':''), ratio, max, go, `止回阀 ${fmtInt(zh)} / 烟机安装 ${fmtInt(yj)}`, ratio.toFixed(2)+'%', 'var(--red)'));
+    const go = (fvLevel<2) ? (()=>{ if(fvLevel===0){fvCur=nd.name; fvLevel=1;} else {fvCurNet=nd.name; fvLevel=2;} renderFvLevel(); }) : null;
+    list.appendChild(woBar(nd.name+(nd.code?'（'+nd.code+'）':''), ratio, max, go, `止回阀 ${fmtInt(zh)} / 烟机安装 ${fmtInt(yj)}`, ratio.toFixed(2)+'%', '#e23b2e'));
   });
 }
 function renderWoLevel(){
@@ -1775,12 +1816,10 @@ function setWoSel(){
   sel.onchange=()=>{ woDim=sel.value; renderWoView(); };
 }
 function renderWoView(){
-  const sum=document.getElementById('woFireSum'); if(sum) sum.style.display='none';
   if(woDim==='office'){ woLevel=0; woCur=null; woCurNet=null; renderWoLevel(); }
   else if(woDim==='office_flat'){ renderWoFlat(flatOffices(), '办事处（按工单量排名）'); }
   else if(woDim==='net_flat'){ renderWoFlat(flatNets(), '服务网点（按工单量排名）'); }
   else if(woDim==='tech_flat'){ renderWoFlat(flatTechs(), '服务工程师（按工单量排名）'); }
-  else if(woDim==='firevalve'){ renderWoFire(); }
   else if(woDim==='pgroup'){ renderWoFlat(WORKORDER_DATA.pgroup, '产品组'); }
   else if(woDim==='wotype'){ renderWoFlat(WORKORDER_DATA.wotype, '工单类型'); }
   else if(woDim==='sitem'){ renderWoFlat(WORKORDER_DATA.sitem, '服务项目'); }
@@ -1814,6 +1853,7 @@ function renderAll(){
   renderBigCare();
   updateColSummaries();
   renderWorkOrder();
+  renderFireValve();
   if(selectedOffice) renderDrill();
   
   renderLastYear();
