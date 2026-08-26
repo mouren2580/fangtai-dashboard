@@ -481,7 +481,7 @@
       </div>
       <div class="subttl">品类排名 <span class="muted" id="vppRankWin"></span>（点条形选择该配件看工程师明细）</div>
       <div id="vppRank"></div>
-      <div class="subttl" style="margin-top:16px">配件明细 · 服务工程师完成情况</div>
+      <div class="subttl" style="margin-top:16px">工程师视图 · <span class="muted">「全部」看工程师×品类交叉表，选单品类看该品类工程师排名</span></div>
       <div class="vp-tabs" id="vppTabs"></div>
       <div id="vppDetail"></div>
       <div class="note" id="vppNote"></div>
@@ -2074,9 +2074,10 @@ function renderWoView(){
 }
 
 /* ---------- 增值配件明细 ---------- */
-let vppRange='month';   // 'month' | 'last3' | 'yest'
-let vppSel=null;        // 选中的配件名称
-let vppEngSort='month'; // 服务工程师表排序字段：'yest' | 'last3' | 'month'
+let vppRange='month';   // 'month' | 'last7' | 'last3' | 'yest'
+let vppSel=null;        // null=全部(工程师×品类透视表) | 选中的配件名称
+let vppEngSort='month'; // 单品类排名表排序字段：'yest' | 'last3' | 'last7' | 'month'
+let vppPivotSort='total'; // 透视表排序：'total' 或 品类名
 
 function renderValueAddedParts(){
   const panel=document.getElementById('vpPartsSec');
@@ -2111,7 +2112,7 @@ function renderVppRank(){
   const D=VALUE_PARTS_DATA;
   const list=document.getElementById('vppRank');
   list.innerHTML='';
-  document.getElementById('vppRankWin').textContent = ({month:'当月',last3:'近3日',yest:'昨日'})[vppRange];
+  document.getElementById('vppRankWin').textContent = ({month:'当月',last7:'近7日',last3:'近3日',yest:'昨日'})[vppRange];
   const arr=D.products.slice().sort((a,b)=> vppQty(b,vppRange)-vppQty(a,vppRange));
   const max=Math.max(1, arr.length? vppQty(arr[0],vppRange):1);
   arr.forEach(p=>{
@@ -2125,6 +2126,11 @@ function renderVppTabs(){
   const D=VALUE_PARTS_DATA;
   const tabs=document.getElementById('vppTabs');
   tabs.innerHTML='';
+  const all=document.createElement('div');
+  all.className='vp-chip'+(vppSel===null?' on':'');
+  all.textContent='📊 全部(工程师×品类)';
+  all.onclick=()=>{ vppSel=null; renderVppTabs(); renderVppRank(); renderVppDetail(); };
+  tabs.appendChild(all);
   D.products.forEach(p=>{
     const c=document.createElement('div');
     c.className='vp-chip'+(vppSel===p.name?' on':'');
@@ -2132,47 +2138,90 @@ function renderVppTabs(){
     c.onclick=()=>{ vppSel=p.name; renderVppTabs(); renderVppRank(); renderVppDetail(); };
     tabs.appendChild(c);
   });
-  if(!vppSel && D.products.length) vppSel=D.products[0].name;
 }
 function renderVppDetail(){
   const D=VALUE_PARTS_DATA;
   const box=document.getElementById('vppDetail');
   if(!D.products.length){ box.innerHTML='<div class="empty">无数据</div>'; return; }
-  if(!vppSel) vppSel=D.products[0].name;
-  const p=D.products.find(x=>x.name===vppSel);
+  if(vppSel===null){ renderVppPivot(box, D); }
+  else { renderVppSingle(box, D, vppSel); }
+}
+function renderVppSingle(box, D, selName){
+  const p=D.products.find(x=>x.name===selName);
   if(!p){ box.innerHTML=''; return; }
-  const winName=({month:'当月(服务月)',last3:'近3日',yest:'昨日'})[vppRange];
   let h='<div class="kpis" style="margin:4px 0 12px">'
     + kpiCard('当月(服务月)', fmtInt(Math.round(p.qty_month))+' 件', '服务月累计', 'var(--blue)')
     + kpiCard('近7日', fmtInt(Math.round(p.qty_last7))+' 件', '近7日累计', 'var(--bo)')
     + kpiCard('近3日', fmtInt(Math.round(p.qty_last3))+' 件', '近3日累计', 'var(--orange)')
     + kpiCard('昨日', fmtInt(Math.round(p.qty_yest))+' 件', '截止日当天', '#e0861a')
     + '</div>';
-  // 服务工程师完成情况（昨日 / 近3日 / 当月累计，一张表，可点表头排序）
-  const eng=p.engineers.filter(e=> (e.yest||0)+(e.last3||0)+(e.month||0) > 0);
+  const eng=p.engineers.filter(e=> (e.yest||0)+(e.last3||0)+(e.last7||0)+(e.month||0) > 0);
   const esort = vppEngSort || 'month';
   eng.sort((a,b)=> (b[esort]||0)-(a[esort]||0));
-  const esortName = {month:'当月累计', last3:'近3日', yest:'昨日'}[esort];
-  h+='<div class="muted" style="margin-bottom:4px">服务工程师完成情况（昨日 / 近3日 / 当月累计，按 '+esortName+' 降序'+(eng.length? '，共 '+eng.length+' 人':'')+'）</div>';
-  if(!eng.length){
-    h+='<div class="empty">暂无服务工程师完成记录</div>';
-  } else {
+  const esortName = {month:'当月累计', last7:'近7日', last3:'近3日', yest:'昨日'}[esort];
+  h+='<div class="muted" style="margin-bottom:4px">「'+esc(p.name)+'」服务工程师完成情况（昨日 / 近3日 / 近7日 / 当月累计，按 '+esortName+' 降序'+(eng.length? '，共 '+eng.length+' 人':'')+'）</div>';
+  if(!eng.length){ h+='<div class="empty">暂无服务工程师完成记录</div>'; }
+  else {
     h+='<table class="vpd-tbl"><thead><tr><th class="rank">#</th><th>服务工程师</th>'
       +'<th class="num srt" data-s="yest" style="cursor:pointer" title="点击按昨日排序">昨日'+(esort==='yest'?' ▾':'')+'</th>'
       +'<th class="num srt" data-s="last3" style="cursor:pointer" title="点击按近3日排序">近3日'+(esort==='last3'?' ▾':'')+'</th>'
+      +'<th class="num srt" data-s="last7" style="cursor:pointer" title="点击按近7日排序">近7日'+(esort==='last7'?' ▾':'')+'</th>'
       +'<th class="num srt" data-s="month" style="cursor:pointer" title="点击按当月累计排序">当月累计'+(esort==='month'?' ▾':'')+'</th>'
       +'</tr></thead><tbody>';
     eng.forEach((e,i)=>{
       h+='<tr><td class="rank">'+(i+1)+'</td><td>'+esc(e.name)+'</td>'
         +'<td class="num">'+fmtInt(Math.round(e.yest||0))+'</td>'
         +'<td class="num">'+fmtInt(Math.round(e.last3||0))+'</td>'
+        +'<td class="num">'+fmtInt(Math.round(e.last7||0))+'</td>'
         +'<td class="num">'+fmtInt(Math.round(e.month||0))+'</td></tr>';
     });
     h+='</tbody></table>';
   }
   box.innerHTML=h;
+  box.querySelectorAll('th.srt').forEach(th=>{ th.onclick=()=>{ vppEngSort=th.dataset.s; renderValueAddedParts(); }; });
+}
+function renderVppPivot(box, D){
+  const winField={month:'month',last7:'last7',last3:'last3',yest:'yest'}[vppRange];
+  const winName={month:'当月(服务月)',last7:'近7日',last3:'近3日',yest:'昨日'}[vppRange];
+  const engMap=new Map();
+  D.products.forEach(p=>{
+    p.engineers.forEach(e=>{
+      if(!engMap.has(e.name)) engMap.set(e.name,{name:e.name,yest:0,last3:0,last7:0,month:0,byProd:{}});
+      const g=engMap.get(e.name);
+      g.yest+=(e.yest||0); g.last3+=(e.last3||0); g.last7+=(e.last7||0); g.month+=(e.month||0);
+      g.byProd[p.name]={yest:(e.yest||0),last3:(e.last3||0),last7:(e.last7||0),month:(e.month||0)};
+    });
+  });
+  let rows=[...engMap.values()].filter(g=>(g[winField]||0)>0);
+  if(vppPivotSort==='total'){ rows.sort((a,b)=>(b[winField]||0)-(a[winField]||0)); }
+  else { rows.sort((a,b)=> ((b.byProd[vppPivotSort]?b.byProd[vppPivotSort][winField]:0)-(a.byProd[vppPivotSort]?a.byProd[vppPivotSort][winField]:0))); }
+  const cols=D.products.slice().sort((a,b)=> vppQty(b,vppRange)-vppQty(a,vppRange));
+  const sortLbl = vppPivotSort==='total' ? '合计' : ('「'+vppPivotSort+'」');
+  let h='<div class="muted" style="margin-bottom:4px">工程师 × 品类 交叉完成表（'+winName+'；每行=该工程师在各品类的完成数量；仅显示本窗口有完成记录的工程师，按 '+sortLbl+' 降序，共 '+rows.length+' 人；点击列头可改排序）</div>';
+  h+='<div style="overflow-x:auto"><table class="vpd-tbl"><thead><tr><th class="rank">#</th><th>服务工程师</th>';
+  cols.forEach(c=>{
+    const on = vppPivotSort===c.name;
+    h+='<th class="num srt" data-p="'+c.name.replace(/"/g,'&quot;')+'" style="cursor:pointer;white-space:nowrap" title="点击按该品类排序">'+esc(c.name+(c.special?'🔧':''))+(on?' ▾':'')+'</th>';
+  });
+  h+='<th class="num srt" data-p="__total__" style="cursor:pointer" title="点击按合计排序">合计'+(vppPivotSort==='total'?' ▾':'')+'</th></tr></thead><tbody>';
+  const colSum={}; cols.forEach(c=>colSum[c.name]=0);
+  rows.forEach((g,i)=>{
+    h+='<tr><td class="rank">'+(i+1)+'</td><td>'+esc(g.name)+'</td>';
+    cols.forEach(c=>{
+      const v = g.byProd[c.name] ? g.byProd[c.name][winField] : 0;
+      colSum[c.name]+=v;
+      h+='<td class="num">'+fmtInt(Math.round(v))+'</td>';
+    });
+    h+='<td class="num" style="font-weight:600">'+fmtInt(Math.round(g[winField]||0))+'</td></tr>';
+  });
+  let tot=0; rows.forEach(g=> tot+=(g[winField]||0));
+  h+='<tr style="background:#eef3f8;font-weight:600"><td></td><td>合计</td>';
+  cols.forEach(c=> h+='<td class="num">'+fmtInt(Math.round(colSum[c.name]))+'</td>');
+  h+='<td class="num">'+fmtInt(Math.round(tot))+'</td></tr>';
+  h+='</tbody></table></div>';
+  box.innerHTML=h;
   box.querySelectorAll('th.srt').forEach(th=>{
-    th.onclick=()=>{ vppEngSort=th.dataset.s; renderValueAddedParts(); };
+    th.onclick=()=>{ vppPivotSort = th.dataset.p==='__total__' ? 'total' : th.dataset.p; renderValueAddedParts(); };
   });
 }
 function renderWorkOrder(){
