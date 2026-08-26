@@ -2075,6 +2075,7 @@ function renderWoView(){
 /* ---------- 增值配件明细 ---------- */
 let vppRange='month';   // 'month' | 'last3' | 'yest'
 let vppSel=null;        // 选中的配件名称
+let vppEngSort='month'; // 服务工程师表排序字段：'yest' | 'last3' | 'month'
 
 function renderValueAddedParts(){
   const panel=document.getElementById('vpPartsSec');
@@ -2145,22 +2146,32 @@ function renderVppDetail(){
     + kpiCard('近3日', fmtInt(Math.round(p.qty_last3))+' 件', '近3日累计', 'var(--orange)')
     + kpiCard('昨日', fmtInt(Math.round(p.qty_yest))+' 件', '截止日当天', '#e0861a')
     + '</div>';
-  // 服务工程师完成情况（当前窗口）
-  const eng=p.engineers.filter(e=>vppQty(e,vppRange)>0);
-  eng.sort((a,b)=> vppQty(b,vppRange)-vppQty(a,vppRange));
-  h+='<div class="muted" style="margin-bottom:4px">服务工程师完成情况（'+winName+'，按数量降序'+(eng.length? '，共 '+eng.length+' 人':'')+'）</div>';
+  // 服务工程师完成情况（昨日 / 近3日 / 当月累计，一张表，可点表头排序）
+  const eng=p.engineers.filter(e=> (e.yest||0)+(e.last3||0)+(e.month||0) > 0);
+  const esort = vppEngSort || 'month';
+  eng.sort((a,b)=> (b[esort]||0)-(a[esort]||0));
+  const esortName = {month:'当月累计', last3:'近3日', yest:'昨日'}[esort];
+  h+='<div class="muted" style="margin-bottom:4px">服务工程师完成情况（昨日 / 近3日 / 当月累计，按 '+esortName+' 降序'+(eng.length? '，共 '+eng.length+' 人':'')+'）</div>';
   if(!eng.length){
-    h+='<div class="empty">该时段暂无服务工程师完成记录</div>';
+    h+='<div class="empty">暂无服务工程师完成记录</div>';
   } else {
-    h+='<table class="vpd-tbl"><thead><tr><th class="rank">#</th><th>服务工程师</th><th class="num">'+winName+'</th><th class="num">当月累计</th></tr></thead><tbody>';
+    h+='<table class="vpd-tbl"><thead><tr><th class="rank">#</th><th>服务工程师</th>'
+      +'<th class="num srt" data-s="yest" style="cursor:pointer" title="点击按昨日排序">昨日'+(esort==='yest'?' ▾':'')+'</th>'
+      +'<th class="num srt" data-s="last3" style="cursor:pointer" title="点击按近3日排序">近3日'+(esort==='last3'?' ▾':'')+'</th>'
+      +'<th class="num srt" data-s="month" style="cursor:pointer" title="点击按当月累计排序">当月累计'+(esort==='month'?' ▾':'')+'</th>'
+      +'</tr></thead><tbody>';
     eng.forEach((e,i)=>{
       h+='<tr><td class="rank">'+(i+1)+'</td><td>'+esc(e.name)+'</td>'
-        +'<td class="num">'+fmtInt(Math.round(vppQty(e,vppRange)))+'</td>'
-        +'<td class="num">'+fmtInt(Math.round(e.month))+'</td></tr>';
+        +'<td class="num">'+fmtInt(Math.round(e.yest||0))+'</td>'
+        +'<td class="num">'+fmtInt(Math.round(e.last3||0))+'</td>'
+        +'<td class="num">'+fmtInt(Math.round(e.month||0))+'</td></tr>';
     });
     h+='</tbody></table>';
   }
   box.innerHTML=h;
+  box.querySelectorAll('th.srt').forEach(th=>{
+    th.onclick=()=>{ vppEngSort=th.dataset.s; renderValueAddedParts(); };
+  });
 }
 function renderWorkOrder(){
   const panel=document.getElementById('woSec');
