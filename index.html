@@ -367,7 +367,8 @@
         <button data-w="year">年度累计</button>
       </div>
       <div style="margin:10px 0 6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <select id="extOffice" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit"></select>
+        <span style="font-size:13px;color:var(--sub);font-weight:600">范围</span>
+        <span id="extOfficeBtns" style="display:flex;flex-wrap:wrap;gap:8px"></span>
         <input id="extSearch" placeholder="搜索工程师…" style="padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit;width:180px">
         <span id="extCount" style="font-size:12px;color:var(--sub)"></span>
       </div>
@@ -647,6 +648,7 @@ let EXTEND_WARRANTY_DATA = {"meta":{"来源":"CSM服务项目","筛选":"销售�
 let EXTEND_TIME_DATA = {"windows":{"yesterday":{"meta":{"来源":"CSM服务项目","筛选":"销售分类=延保服务","金额口径":"上缴金额","年限区分":"服务收费项目列(一年/二年/三年)","截止":"2026-08-26（冻结）","时间窗口":"按录入完成时间切片"},"offices":["宁夏办事处","新疆办事处"],"techs":[{"id":"张喜珠","name":"张喜珠","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":2,"amt":687.0},"tqty":2,"tamt":687.0},{"id":"马锋","name":"马锋","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":389.3},"tqty":1,"tamt":389.3},{"id":"黄钢","name":"黄钢","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5}],"total":{"y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":4,"amt":1419.8}}},"last3":{"meta":{"来源":"CSM服务项目","筛选":"销售分类=延保服务","金额口径":"上缴金额","年限区分":"服务收费项目列(一年/二年/三年)","截止":"2026-08-26（冻结）","时间窗口":"按录入完成时间切片"},"offices":["呼和浩特办事处","宁夏办事处","新疆办事处"],"techs":[{"id":"张喜珠","name":"张喜珠","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":3,"amt":1076.3},"tqty":3,"tamt":1076.3},{"id":"张学文","name":"张学文","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":458.0},"tqty":1,"tamt":458.0},{"id":"马少宁","name":"马少宁","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":458.0},"tqty":1,"tamt":458.0},{"id":"马锋","name":"马锋","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":389.3},"tqty":1,"tamt":389.3},{"id":"车攀宁","name":"车攀宁","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"黄钢","name":"黄钢","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"贺亮","name":"贺亮","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"薛雷","name":"薛雷","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"刘晓丰","name":"刘晓丰","office":"呼和浩特办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5}],"total":{"y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":11,"amt":4099.1}}},"last7":{"meta":{"来源":"CSM服务项目","筛选":"销售分类=延保服务","金额口径":"上缴金额","年限区分":"服务收费项目列(一年/二年/三年)","截止":"2026-08-26（冻结）","时间窗口":"按录入完成时间切片"},"offices":["兰州办事处","包头办事处","呼和浩特办事处","宁夏办事处","新疆办事处","西宁办事处"],"techs":[{"id":"张喜珠","name":"张喜珠","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":4,"amt":1419.8},"tqty":4,"tamt":1419.8},{"id":"马锋","name":"马锋","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":2,"amt":732.8},"tqty":2,"tamt":732.8},{"id":"张学文","name":"张学文","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":458.0},"tqty":1,"tamt":458.0},{"id":"马少宁","name":"马少宁","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":458.0},"tqty":1,"tamt":458.0},{"id":"连勇峰","name":"连勇峰","office":"包头办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":458.0},"tqty":1,"tamt":458.0},{"id":"张奇","name":"张奇","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":389.3},"tqty":1,"tamt":389.3},{"id":"周有文","name":"周有文","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":389.3},"tqty":1,"tamt":389.3},{"id":"谢振升","name":"谢振升","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":389.3},"tqty":1,"tamt":389.3},{"id":"赵飞飞","name":"赵飞飞","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"王泽玉","name":"王泽玉","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"车攀宁","name":"车攀宁","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"张雷杰","name":"张雷杰","office":"新疆办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"黄钢","name":"黄钢","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"贺亮","name":"贺亮","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"薛雷","name":"薛雷","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"梁金堂","name":"梁金堂","office":"宁夏办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"王文斌","name":"王文斌","office":"兰州办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"吴鹏飞","name":"吴鹏飞","office":"兰州办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"贲红康","name":"贲红康","office":"西宁办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"王宏明","name":"王宏明","office":"包头办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5},{"id":"刘晓丰","name":"刘晓丰","office":"呼和浩特办事处","y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":1,"amt":343.5},"tqty":1,"tamt":343.5}],"total":{"y1":{"qty":0,"amt":0.0},"y2":{"qty":0,"amt":0.0},"y3":{"qty":25,"amt":9160.0}}}}};   // 延保时间窗口(昨日/近3日/近7日)，_reinject_extendtime.py 注入
 let EXTEND_YEAR_DATA = null;   // 延保年度累计(1–8)由 computeExtendYear() 计算
 let extWin = null;             // 延保面板时间窗口: yesterday | last3 | last7 | month | year
+let extScope = null;           // 延保面板范围: null=整个大区(西北大区) | 办事处名称
 /*__EXTENDTIME_END__*/
 const BASE_MONTH = "2026-08";  // 基准月锚点(去年对比/数据固化)；刻意放在 MONTH_DATA 块之外，避免被 _inject_month.py 重跑覆盖
 /*__MONTHS_START__*/
@@ -1196,16 +1198,28 @@ function syncExtWinUI(){
   const seg=document.getElementById('extWin'); if(!seg) return;
   seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.w===extWin));
 }
+function renderExtOfficeBtns(){
+  const box=document.getElementById('extOfficeBtns'); if(!box) return;
+  const present=VPP_OFFICES.slice();
+  box.innerHTML='';
+  const all=document.createElement('button');
+  all.className='vp-off'+(extScope===null?' active':'');
+  all.textContent='整个大区';
+  all.onclick=()=>{ extScope=null; renderExtOfficeBtns(); renderExtendBody(); };
+  box.appendChild(all);
+  present.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='vp-off'+(extScope===o?' active':'');
+    b.textContent=o;
+    b.onclick=()=>{ extScope=o; renderExtOfficeBtns(); renderExtendBody(); };
+    box.appendChild(b);
+  });
+}
 function renderExtendWarranty(){
   if(extWin===null||extWin===undefined) extWin = isYearView?'year':'month';
   const D=extDataSource(); if(!D||!D.techs) return;
   const box=document.getElementById('extendBox'); if(!box) return;
-  const sel=document.getElementById('extOffice');
-  if(sel && sel.dataset.filled!=='1'){
-    const offs=(D.offices||[]).slice();
-    sel.innerHTML='<option value="">全部办事处</option>'+offs.map(o=>`<option value="${o}">${o}</option>`).join('');
-    sel.dataset.filled='1'; sel.onchange=renderExtendBody;
-  }
+  renderExtOfficeBtns();
   const inp=document.getElementById('extSearch');
   if(inp && inp.dataset.bound!=='1'){ inp.dataset.bound='1'; inp.oninput=renderExtendBody; }
   const seg=document.getElementById('extWin');
@@ -1219,11 +1233,15 @@ function renderExtendWarranty(){
 function renderExtendBody(){
   const D=extDataSource(); if(!D) return;
   const box=document.getElementById('extendBox'); if(!box) return;
-  const sel=document.getElementById('extOffice'); const off=sel?sel.value:'';
+  const off=extScope||'';
   const inp=document.getElementById('extSearch'); const kw=(inp?inp.value:'').trim();
   const rows=D.techs.filter(t=>(!off||t.office===off)&&(!kw||t.name.indexOf(kw)>=0));
-  const t=D.total; const fmtA=v=>v.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const scopeLbl = extWinLabel(extWin);
+  // 按范围聚合合计：选单个办事处→仅该办；整个大区→全区
+  const ft={y1:{qty:0,amt:0},y2:{qty:0,amt:0},y3:{qty:0,amt:0}};
+  rows.forEach(t0=>{ ft.y1.qty+=t0.y1.qty; ft.y1.amt+=t0.y1.amt; ft.y2.qty+=t0.y2.qty; ft.y2.amt+=t0.y2.amt; ft.y3.qty+=t0.y3.qty; ft.y3.amt+=t0.y3.amt; });
+  const t=ft;
+  const fmtA=v=>v.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const scopeLbl = extWinLabel(extWin) + (off? (' · '+off) : ' · 整个大区（西北大区）');
   const ysum=(cls,label,o)=>`<span style="display:inline-flex;flex-direction:column;padding:6px 14px;border-radius:10px;background:${cls.bg};color:${cls.fg};min-width:118px"><span style="font-size:11px;opacity:.85">${label}</span><span style="font-size:15px;font-weight:700">¥${fmtA(o.amt)}</span><span style="font-size:11px;opacity:.8">${o.qty} 单</span></span>`;
   const cs1={bg:'#e8f0fe',fg:'#1a56c4'}, cs2={bg:'#e6f6ec',fg:'#1a7a3c'}, cs3={bg:'#f3eafe',fg:'#7a3ac4'};
   let sum=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 12px">`
@@ -1241,7 +1259,8 @@ function renderExtendBody(){
       +`<td style="background:#fbf7fe">${t0.y3.qty}</td><td style="background:#fbf7fe;font-weight:600;color:#7a3ac4">${fmtA(t0.y3.amt)}</td>`
       +`<td><b>${t0.tqty}</b></td><td><b>${fmtA(t0.tamt)}</b></td></tr>`;
   });
-  h+=`<tr style="font-weight:700;background:var(--card-2)"><td class="name">⭐ 全区合计</td><td>—</td>`
+  const totLabel = off ? ('⭐ '+off+' 合计') : '⭐ 全区合计';
+  h+=`<tr style="font-weight:700;background:var(--card-2)"><td class="name">${totLabel}</td><td>${off||'—'}</td>`
     +`<td>${t.y1.qty}</td><td style="color:#1a56c4">${fmtA(t.y1.amt)}</td>`
     +`<td>${t.y2.qty}</td><td style="color:#1a7a3c">${fmtA(t.y2.amt)}</td>`
     +`<td>${t.y3.qty}</td><td style="color:#7a3ac4">${fmtA(t.y3.amt)}</td>`
