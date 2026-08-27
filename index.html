@@ -1377,7 +1377,8 @@ function openTgt(){
 function closeTgt(){document.getElementById('mask').classList.remove('show');}
 function renderTgtTable(){
   const isYear=(period==='year');
-  let h=`<thead><tr><th class="rowh">办事处 ＼ 目标</th><th>${wholeTargetLbl()}</th>`;
+  let h=`<thead><tr><th class="rowh">办事处 ＼ 目标</th>`;
+  if(!isYear) h+=`<th>${wholeTargetLbl()}</th>`;
   if(isYear){
     h+=`<th>清洁耗材目标<br><span style="font-weight:400;color:var(--sub)">（全年）</span></th>`;
     h+=`<th>清洗保养目标<br><span style="font-weight:400;color:var(--sub)">（全年）</span></th>`;
@@ -1392,7 +1393,7 @@ function renderTgtTable(){
     const ba=officeBreakoutActual(o);
     const cm=t.清洁耗材||0, qb=t.清洗保养||0, yb=t.延保服务||0;
     h+=`<tr><td class="rowh">${o}</td>`;
-    h+=`<td><input data-o="${o}" data-k="整体" value="${t.整体||0}"></td>`;
+    if(!isYear) h+=`<td><input data-o="${o}" data-k="整体" value="${t.整体||0}"></td>`;
     if(isYear){
       h+=`<td><input class="ytItem" data-o="${o}" data-k="清洁耗材" value="${cm}"></td>`;
       h+=`<td><input class="ytItem" data-o="${o}" data-k="清洗保养" value="${qb}"></td>`;
@@ -2568,12 +2569,13 @@ function renderYearTargets(){
   const yWholeActual=o=>yOfficeNets(o).reduce((s,n)=>s+n.合计,0);
   const yItemActualAll=it=>yNets.reduce((s,n)=>s+((n.品项&&n.品项[it])||0),0);
   const yWholeActualAll=()=>yNets.reduce((s,n)=>s+n.合计,0);
+  const sum3=o=>(yt(o).清洁耗材||0)+(yt(o).清洗保养||0)+(yt(o).延保服务||0);
+  const sum3All=()=>OFFICE_ORDER.reduce((s,o)=>s+sum3(o),0);
   const itemsDef=[
-    {k:'整体',         lbl:'整体目标',      act:o=>yWholeActual(o),         actAll:yWholeActualAll},
     {k:'清洁耗材',     lbl:'清洁耗材',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
     {k:'清洗保养',     lbl:'清洗保养',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
     {k:'延保服务',     lbl:'延保服务',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
-    {k:'三大爆品合计', lbl:'三大爆品合计',  act:o=>yItemActual('清洁耗材',o)+yItemActual('清洗保养',o)+yItemActual('延保服务',o), actAll:()=>yItemActualAll('清洁耗材')+yItemActualAll('清洗保养')+yItemActualAll('延保服务')},
+    {k:'三大爆品合计', lbl:'三大爆品合计',  act:o=>yItemActual('清洁耗材',o)+yItemActual('清洗保养',o)+yItemActual('延保服务',o), actAll:()=>yItemActualAll('清洁耗材')+yItemActualAll('清洗保养')+yItemActualAll('延保服务'), tgtFn:sum3, tgtFnAll:sum3All},
   ];
   const cell=x=>{
     const r = x.tgt>0 ? x.act/x.tgt : null;
@@ -2582,9 +2584,9 @@ function renderYearTargets(){
     const bg = (cls==='good')?'rgba(46,191,145,.14)':(cls==='warn')?'rgba(255,159,64,.16)':(cls==='bad')?'rgba(239,83,80,.14)':'#eef1f6';
     return `<td class="${x.total?'tot':''}" style="vertical-align:top;min-width:150px"><div style="font-size:13px;font-weight:600">${money(x.act)}</div><div style="font-size:11px;color:var(--sub);margin:2px 0">目标 ${money(x.tgt)}</div><span class="pill" style="background:${bg};color:${col};font-size:11px">达成率 ${pctTxt}</span></td>`;
   };
-  const rowFor=(o)=>({o, items:itemsDef.map(d=>({act:d.act(o,d.k), tgt:yt(o)[d.k]||0}))});
+  const rowFor=(o)=>({o, items:itemsDef.map(d=>({act:d.act(o,d.k), tgt:(d.tgtFn?d.tgtFn(o):(yt(o)[d.k]||0))}))});
   const rows=OFFICE_ORDER.map(rowFor);
-  const totItems=itemsDef.map(d=>({act:d.actAll(d.k), tgt:OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)}));
+  const totItems=itemsDef.map(d=>({act:d.actAll(d.k), tgt:(d.tgtFnAll?d.tgtFnAll():(OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)))}));
   const ta=totItems.reduce((s,x)=>s+x.act,0), tt=totItems.reduce((s,x)=>s+x.tgt,0);
   totItems.push({act:ta, tgt:tt, total:true});
   const allZero = totItems.every(x=>x.tgt<=0);
