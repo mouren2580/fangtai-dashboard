@@ -2118,12 +2118,24 @@ function vppQty(o, win){
   if(o['qty_'+k]!==undefined) return o['qty_'+k];   // 产品对象(qty_yest/qty_last3/qty_month)
   return o[k]||0;                                     // 工程师对象(yest/last3/month)
 }
+// 按当前 vppOffice 范围返回各品类的四窗口数量（全区=产品级字段；单办=从工程师聚合）
+function vppOfficeProducts(){
+  const D=VALUE_PARTS_DATA;
+  if(!vppOffice) return D.products.map(p=>({name:p.name, special:p.special, qty_month:p.qty_month, qty_last7:p.qty_last7, qty_last3:p.qty_last3, qty_yest:p.qty_yest}));
+  const map={};
+  D.products.forEach(p=>{ map[p.name]={name:p.name, special:p.special, qty_month:0,qty_last7:0,qty_last3:0,qty_yest:0}; });
+  D.products.forEach(p=> p.engineers.forEach(e=>{ if(e.office===vppOffice){ const m=map[p.name]; m.qty_month+=(e.month||0); m.qty_last7+=(e.last7||0); m.qty_last3+=(e.last3||0); m.qty_yest+=(e.yest||0); } }));
+  return Object.values(map);
+}
 function renderVppRank(){
   const D=VALUE_PARTS_DATA;
   const list=document.getElementById('vppRank');
   list.innerHTML='';
-  document.getElementById('vppRankWin').textContent = ({month:'当月',last7:'近7日',last3:'近3日',yest:'昨日'})[vppRange];
-  const arr=D.products.slice().sort((a,b)=> vppQty(b,vppRange)-vppQty(a,vppRange));
+  const winName=({month:'当月',last7:'近7日',last3:'近3日',yest:'昨日'})[vppRange];
+  const officeLbl = vppOffice ? ('（'+vppOffice+'）') : '';
+  document.getElementById('vppRankWin').textContent = winName + officeLbl;
+  // 按当前范围取各品类数量（选中办事处时从工程师聚合），仅显示有完成记录者
+  const arr=vppOfficeProducts().filter(p=> vppQty(p,vppRange)>0).sort((a,b)=> vppQty(b,vppRange)-vppQty(a,vppRange));
   const max=Math.max(1, arr.length? vppQty(arr[0],vppRange):1);
   arr.forEach(p=>{
     const q=vppQty(p,vppRange);
@@ -2167,24 +2179,26 @@ function renderVppOffice(){
   const all=document.createElement('button');
   all.className='vp-off'+(vppOffice===null?' active':'');
   all.textContent='全部(西北大区)';
-  all.onclick=()=>{ vppOffice=null; renderVppOffice(); renderVppDetail(); };
+  all.onclick=()=>{ vppOffice=null; renderVppOffice(); renderVppRank(); renderVppDetail(); };
   box.appendChild(all);
   present.forEach(o=>{
     const b=document.createElement('button');
     b.className='vp-off'+(vppOffice===o?' active':'');
     b.textContent=o;
-    b.onclick=()=>{ vppOffice=o; renderVppOffice(); renderVppDetail(); };
+    b.onclick=()=>{ vppOffice=o; renderVppOffice(); renderVppRank(); renderVppDetail(); };
     box.appendChild(b);
   });
 }
 function renderVppSingle(box, D, selName){
   const p=D.products.find(x=>x.name===selName);
   if(!p){ box.innerHTML=''; return; }
+  // 当前范围下该品类的四窗口总量（全区=产品级字段，单办=工程师聚合），与工程师表/品类排名一致
+  const pp = vppOffice ? (vppOfficeProducts().find(x=>x.name===selName)||p) : p;
   let h='<div class="kpis" style="margin:4px 0 12px">'
-    + kpiCard('当月(服务月)', fmtInt(Math.round(p.qty_month))+' 件', '服务月累计', 'var(--blue)')
-    + kpiCard('近7日', fmtInt(Math.round(p.qty_last7))+' 件', '近7日累计', 'var(--bo)')
-    + kpiCard('近3日', fmtInt(Math.round(p.qty_last3))+' 件', '近3日累计', 'var(--orange)')
-    + kpiCard('昨日', fmtInt(Math.round(p.qty_yest))+' 件', '截止日当天', '#e0861a')
+    + kpiCard('当月(服务月)', fmtInt(Math.round(pp.qty_month))+' 件', '服务月累计', 'var(--blue)')
+    + kpiCard('近7日', fmtInt(Math.round(pp.qty_last7))+' 件', '近7日累计', 'var(--bo)')
+    + kpiCard('近3日', fmtInt(Math.round(pp.qty_last3))+' 件', '近3日累计', 'var(--orange)')
+    + kpiCard('昨日', fmtInt(Math.round(pp.qty_yest))+' 件', '截止日当天', '#e0861a')
     + '</div>';
   let eng=p.engineers.filter(e=> (e.yest||0)+(e.last3||0)+(e.last7||0)+(e.month||0) > 0);
   if(vppOffice) eng=eng.filter(e=> e.office===vppOffice);
