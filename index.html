@@ -301,6 +301,15 @@
     </div>
   </div>
 
+  <!-- 模块：各办事处全年三大爆品目标完成进度（仅年度累计视图显示） -->
+  <div class="panel" id="yearTargetPanel" style="display:none">
+    <div class="sec">
+      <h2>🎯 各办事处全年三大爆品目标完成进度 <span class="pill mute">年度累计</span></h2>
+      <div class="desc">实际 = 1–N 月累计（年度累计视图口径，随月份推进自动累加）；目标 = 全年目标（右上角「⚙ 设置目标 → 年度累计目标」填写）。<b>达成率 = 实际 ÷ 全年目标</b>，颜色按是否跑赢<b>年度时间进度</b>判定：绿=领先 / 橙=预警 / 红=落后。</div>
+      <div id="yearTargetBody" style="overflow:auto"></div>
+    </div>
+  </div>
+
   <!-- 模块2：各产品线分析 -->
   <div class="panel" id="mod2">
     <!-- 大保养占比分析 -->
@@ -847,7 +856,8 @@ const LS_KEY = 'fangtai_targets_v4';   // v4：目标按月份隔离，localStor
 function seedTargets(){
   const t={month:{},year:{}};
   for(const o of OFFICE_ORDER){
-    t.month[o]={整体:0,爆品:0}; t.year[o]={整体:0,爆品:0};
+    const z={整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0};
+    t.month[o]=Object.assign({},z); t.year[o]=Object.assign({},z);
   }
   return t;
 }
@@ -858,9 +868,10 @@ function normTargets(d){
     if(!d[p]||typeof d[p]!=='object') d[p]={};
     for(const o of OFFICE_ORDER){
       const t=d[p][o];
-      if(!t||typeof t!=='object'){ d[p][o]={整体:0,爆品:0}; continue; }
+      if(!t||typeof t!=='object'){ d[p][o]={整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0}; continue; }
       if(typeof t.爆品==='object'&&t.爆品!==null){ let s=0;for(const it of BREAKOUT)s+=(t.爆品[it]||0); t.爆品=s; }
       if(typeof t.爆品!=='number'||!isFinite(t.爆品)) t.爆品=0;
+      for(const k of ['清洁耗材','清洗保养','延保服务']) if(typeof t[k]!=='number'||!isFinite(t[k])) t[k]=0;
       if(typeof t.整体!=='number'||!isFinite(t.整体)){ const _o=t['整'+'机']; t.整体=(typeof _o==='number'&&isFinite(_o))?_o:0; }
     }
   }
@@ -1379,17 +1390,45 @@ function openTgt(){
 }
 function closeTgt(){document.getElementById('mask').classList.remove('show');}
 function renderTgtTable(){
-  let h=`<thead><tr><th class="rowh">办事处 ＼ 目标</th><th>${wholeTargetLbl()}</th><th>三大爆品目标<br><span style="font-weight:400;color:var(--sub)">（整体）</span></th><th>三大爆品实际<br><span style="font-weight:400;color:var(--sub)">（参考·不可改）</span></th></tr></thead><tbody>`;
+  const isYear=(period==='year');
+  let h=`<thead><tr><th class="rowh">办事处 ＼ 目标</th><th>${wholeTargetLbl()}</th>`;
+  if(isYear){
+    h+=`<th>清洁耗材目标<br><span style="font-weight:400;color:var(--sub)">（全年）</span></th>`;
+    h+=`<th>清洗保养目标<br><span style="font-weight:400;color:var(--sub)">（全年）</span></th>`;
+    h+=`<th>延保服务目标<br><span style="font-weight:400;color:var(--sub)">（全年）</span></th>`;
+    h+=`<th>三大爆品合计目标<br><span style="font-weight:400;color:var(--sub)">（自动＝前三项之和·只读）</span></th>`;
+  } else {
+    h+=`<th>三大爆品目标<br><span style="font-weight:400;color:var(--sub)">（整体）</span></th>`;
+  }
+  h+=`<th>三大爆品实际<br><span style="font-weight:400;color:var(--sub)">（参考·不可改）</span></th></tr></thead><tbody>`;
   OFFICE_ORDER.forEach(o=>{
     const t=TARGETS[period][o];
     const ba=officeBreakoutActual(o);
+    const cm=t.清洁耗材||0, qb=t.清洗保养||0, yb=t.延保服务||0;
     h+=`<tr><td class="rowh">${o}</td>`;
     h+=`<td><input data-o="${o}" data-k="整体" value="${t.整体||0}"></td>`;
-    h+=`<td><input data-o="${o}" data-k="爆品" value="${t.爆品||0}"></td>`;
+    if(isYear){
+      h+=`<td><input class="ytItem" data-o="${o}" data-k="清洁耗材" value="${cm}"></td>`;
+      h+=`<td><input class="ytItem" data-o="${o}" data-k="清洗保养" value="${qb}"></td>`;
+      h+=`<td><input class="ytItem" data-o="${o}" data-k="延保服务" value="${yb}"></td>`;
+      h+=`<td class="tot" id="ytSum_${o}">${fmt(cm+qb+yb)}</td>`;
+    } else {
+      h+=`<td><input data-o="${o}" data-k="爆品" value="${t.爆品||0}"></td>`;
+    }
     h+=`<td class="tot">${fmt(ba)}</td></tr>`;
   });
   h+=`</tbody>`;
   document.getElementById('tgtTable').innerHTML=h;
+  if(isYear){
+    document.querySelectorAll('#tgtTable .ytItem').forEach(i=>{
+      i.oninput=()=>{
+        const o=i.dataset.o;
+        const g=k=>{const e=document.querySelector(`#tgtTable input.ytItem[data-o="${o}"][data-k="${k}"]`);return e?(parseFloat(e.value)||0):0;};
+        const s=g('清洁耗材')+g('清洗保养')+g('延保服务');
+        const cell=document.getElementById('ytSum_'+o); if(cell) cell.textContent=fmt(s);
+      };
+    });
+  }
 }
 document.getElementById('setBtn').onclick=openTgt;
 document.getElementById('closeTgtBtn').onclick=closeTgt;
@@ -1410,8 +1449,15 @@ document.getElementById('saveTgtBtn').onclick=()=>{
   document.querySelectorAll('#tgtTable input').forEach(i=>{
     const o=i.dataset.o, k=i.dataset.k, v=parseFloat(i.value)||0;
     if(k==='整体') TARGETS[period][o].整体=v;
-    else TARGETS[period][o].爆品=v;
+    else if(k==='爆品') TARGETS[period][o].爆品=v;
+    else if(k==='清洁耗材') TARGETS[period][o].清洁耗材=v;
+    else if(k==='清洗保养') TARGETS[period][o].清洗保养=v;
+    else if(k==='延保服务') TARGETS[period][o].延保服务=v;
   });
+  /* 年度视图：三大爆品合计目标 = 三子项之和（自动，避免口径不一致） */
+  if(period==='year'){
+    OFFICE_ORDER.forEach(o=>{ const t=TARGETS[period][o]; t.爆品=(t.清洁耗材||0)+(t.清洗保养||0)+(t.延保服务||0); });
+  }
   TARGETS._stamp=new Date().toISOString();
   TARGETS_BY_MONTH[CURRENT_MONTH]=TARGETS;
   try{localStorage.setItem(LS_KEY,JSON.stringify(TARGETS_BY_MONTH));}catch(e){}
@@ -1445,7 +1491,7 @@ document.getElementById('impFile').onchange=e=>{
 };
 /* ---------- 固化：把当前目标 + 去年数据写死进一个新的 HTML ---------- */
 document.getElementById('freezeBtn').onclick=()=>{
-  if(isYearView){ alert('年度累计视图下不可固化目标，请先切回「单月」再操作。'); return; }
+  /* 单月视图：固化当月目标；年度累计视图：固化全年目标（year 子对象）进 HTML，换电脑/清缓存不丢 */
   const stamp=new Date().toISOString();
   TARGETS._stamp=stamp; LASTYEAR._stamp=stamp;
   TARGETS_BY_MONTH[CURRENT_MONTH]=TARGETS;
@@ -1498,8 +1544,8 @@ function ensureTargets(){
   if(!LASTYEAR_BY_MONTH[CURRENT_MONTH]) LASTYEAR_BY_MONTH[CURRENT_MONTH]=seedLastYear();
   const t=TARGETS_BY_MONTH[CURRENT_MONTH];
   for(const o of OFFICE_ORDER){
-    if(!t.month[o]) t.month[o]={整体:0,爆品:0};
-    if(!t.year[o])  t.year[o]={整体:0,爆品:0};
+    if(!t.month[o]) t.month[o]={整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0};
+    if(!t.year[o])  t.year[o]={整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0};
   }
   const ly=LASTYEAR_BY_MONTH[CURRENT_MONTH];
   for(const o of OFFICE_ORDER){ if(!ly[o]) ly[o]={}; for(const it of SELECT_3P1) if(typeof ly[o][it]!=='number') ly[o][it]=0; }
@@ -1833,7 +1879,7 @@ function buildYearData(){
   NETS=netsArr; ITEMS=allItems; CURRENT_MONTH='年度累计';
   /* 4. 目标：取各月内置的「year」年度目标（各月一致，取第一个非零者） */
   let yrT=null;
-  for(const mk in TARGETS_BY_MONTH){ const t=TARGETS_BY_MONTH[mk]; if(t&&t.year){ const any=Object.values(t.year).some(v=>v&&v.整体>0); if(any){yrT=t.year;break;} } }
+  for(const mk in TARGETS_BY_MONTH){ const t=TARGETS_BY_MONTH[mk]; if(t&&t.year){ const any=Object.values(t.year).some(v=>v&&(v.整体>0||v.清洁耗材>0||v.清洗保养>0||v.延保服务>0)); if(any){yrT=t.year;break;} } }
   if(!yrT && typeof EMBED_TARGETS!=='undefined' && EMBED_TARGETS.year) yrT=EMBED_TARGETS.year;
   TARGETS={month:seedTargets().month, year: yrT||seedTargets().year, _stamp:''};
   boSpan='month';   // 年度视图强制月度口径，避免周度读取单月 WEEKLY_DATA 出错
@@ -2485,6 +2531,9 @@ function renderAll(){
   if(techPanel) techPanel.classList.add('open'); // 技师明细月度/年度均展开显示（.panel默认display:none，需.open才可见）
   const weekB=document.getElementById('weekBadge'); if(weekB) weekB.style.display=yv?'none':'';
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
+  /* 各办事处全年三大爆品目标完成进度：仅年度累计视图显示并渲染 */
+  const ytp=document.getElementById('yearTargetPanel'); if(ytp) ytp.style.display=yv?'block':'none';
+  if(yv) renderYearTargets();
   /* 年度累计视图：mod1 说明/图例改为年度口径，去掉「日均/120%剩余」等单月措辞，避免误导 */
   const mod1desc=document.querySelector('#mod1 .desc'), mod1leg=document.querySelector('#mod1 .legend');
   const RANK_DESC_MONTH='按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。';
@@ -2501,6 +2550,49 @@ function renderFootNote(){
     `目标填好后点「🔒 固化目标」，会生成一个把目标写死进 HTML 的新文件，换电脑 / 清缓存 / 发给同事都不会丢。`+
     `「🕒 时间设置」可手动指定统计截止日；同步 Excel 后默认自动取前一天（Excel 数据通常截止到昨天），时间进度随之重算。`;
 }
+
+/* ---------- 各办事处全年三大爆品目标完成进度（仅年度累计视图） ---------- */
+function yt(o){ return (TARGETS&&TARGETS.year&&TARGETS.year[o]) || {整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0}; }
+function renderYearTargets(){
+  const box=document.getElementById('yearTargetBody'); if(!box) return;
+  const itemsDef=[{k:'清洁耗材'},{k:'清洗保养'},{k:'延保服务'}];
+  const cell=x=>{
+    const r = x.tgt>0 ? x.act/x.tgt : null;
+    const cls = rateClass(r), col=rateColor(r);
+    const pctTxt = r===null?'—':(r*100).toFixed(1)+'%';
+    const bg = (cls==='good')?'rgba(46,191,145,.14)':(cls==='warn')?'rgba(255,159,64,.16)':(cls==='bad')?'rgba(239,83,80,.14)':'#eef1f6';
+    return `<td class="${x.total?'tot':''}" style="vertical-align:top;min-width:150px"><div style="font-size:13px;font-weight:600">${money(x.act)}</div><div style="font-size:11px;color:var(--sub);margin:2px 0">目标 ${money(x.tgt)}</div><span class="pill" style="background:${bg};color:${col};font-size:11px">达成率 ${pctTxt}</span></td>`;
+  };
+  const rowFor=(o)=>{
+    const t=yt(o);
+    const items=itemsDef.map(d=>({act:itemActualOffice(d.k,o), tgt:t[d.k]||0}));
+    const aSum=items.reduce((s,x)=>s+x.act,0), tSum=items.reduce((s,x)=>s+x.tgt,0);
+    items.push({act:aSum, tgt:tSum, total:true});
+    return {o, items};
+  };
+  const rows=OFFICE_ORDER.map(rowFor);
+  const totItems=itemsDef.map(d=>({act:OFFICE_ORDER.reduce((s,o)=>s+itemActualOffice(d.k,o),0), tgt:OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)}));
+  const ta=totItems.reduce((s,x)=>s+x.act,0), tt=totItems.reduce((s,x)=>s+x.tgt,0);
+  totItems.push({act:ta, tgt:tt, total:true});
+  const allZero = totItems.every(x=>x.tgt<=0);
+  let h=`<table class="tedit" style="min-width:880px"><thead><tr><th class="rowh">办事处 ＼ 全年目标</th>`;
+  ['清洁耗材','清洗保养','延保服务','三大爆品合计'].forEach(it=>h+=`<th>${it}</th>`);
+  h+=`</tr></thead><tbody>`;
+  rows.forEach(r=>{
+    h+=`<tr><td class="rowh">${r.o}</td>`;
+    r.items.forEach(x=>h+=cell(x));
+    h+=`</tr>`;
+  });
+  h+=`<tr style="font-weight:700;background:var(--card-2)"><td class="rowh">全区合计</td>`;
+  totItems.forEach(x=>h+=cell(x));
+  h+=`</tr>`;
+  h+=`</tbody></table>`;
+  if(allZero){
+    h=`<div class="banner" style="margin:0 0 12px"><span>⚠ 尚未设置全年目标。请点击右上角「🔒 锁定」输入密码解锁 → 「⚙ 设置目标」→ 切到「年度累计目标」填写各办事处 清洁耗材 / 清洗保养 / 延保服务 年度目标（三大爆品合计自动求和）。保存后此处显示完成进度。</span></div>`+h;
+  }
+  box.innerHTML=h;
+}
+
 document.getElementById('lockBtn').onclick=tryUnlock;
 populateDtOffice();
 syncPeriodUI();
