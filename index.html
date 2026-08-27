@@ -2511,9 +2511,15 @@ function renderAll(){
   if(techPanel) techPanel.classList.add('open'); // 技师明细月度/年度均展开显示（.panel默认display:none，需.open才可见）
   const weekB=document.getElementById('weekBadge'); if(weekB) weekB.style.display=yv?'none':'';
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
-  /* 各办事处全年三大爆品目标完成进度：仅年度累计视图显示并渲染 */
-  const ytp=document.getElementById('yearTargetPanel'); if(ytp) ytp.style.display=yv?'block':'none';
-  if(yv) renderYearTargets();
+  /* 各办事处全年目标完成进度：单月视图=全年进度概览，年度累计视图=全年进度（均显示并渲染） */
+  const ytp=document.getElementById('yearTargetPanel');
+  if(ytp){ ytp.style.display='block'; renderYearTargets(); }
+  const ytPill=document.querySelector('#yearTargetPanel h2 .pill');
+  if(ytPill) ytPill.textContent = yv?'年度累计':'全年进度概览';
+  const ytDesc=document.querySelector('#yearTargetPanel .desc');
+  if(ytDesc) ytDesc.innerHTML = yv
+    ? '实际 = 1–8 月累计（年度累计口径，随月份推进自动累加）；目标 = 全年目标（右上角「⚙ 设置目标 → 年度累计目标」填写）。<b>达成率 = 实际 ÷ 全年目标</b>，颜色按是否跑赢<b>年度时间进度</b>判定：绿=领先 / 橙=预警 / 红=落后。'
+    : '📊 <b>全年进度概览</b>：实际 = 1–当前月累计（截至 '+(DASHBOARD_DATA.meta.统计截止日||'')+'）；目标 = 全年目标（右上角「⚙ 设置目标 → 年度累计目标」填写）。<b>达成率 = 实际 ÷ 全年目标</b>，颜色按年度时间进度判定：绿=领先 / 橙=预警 / 红=落后。';
   /* 年度累计视图：mod1 说明/图例改为年度口径，去掉「日均/120%剩余」等单月措辞，避免误导 */
   const mod1desc=document.querySelector('#mod1 .desc'), mod1leg=document.querySelector('#mod1 .legend');
   const RANK_DESC_MONTH='按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。';
@@ -2532,10 +2538,43 @@ function renderFootNote(){
 }
 
 /* ---------- 各办事处全年三大爆品目标完成进度（仅年度累计视图） ---------- */
-function yt(o){ return (TARGETS&&TARGETS.year&&TARGETS.year[o]) || {整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0}; }
+function yt(o){ return ((TARGETS_BY_MONTH['年度累计']&&TARGETS_BY_MONTH['年度累计'].year&&TARGETS_BY_MONTH['年度累计'].year[o]) || (TARGETS&&TARGETS.year&&TARGETS.year[o]) || {整体:0,爆品:0,清洁耗材:0,清洗保养:0,延保服务:0}); }
+
+/* 全年累计实际（独立于当前视图 NETS，避免污染单月 NETS）：聚合 MONTH_DATA 全部月份的 网点×品项 */
+function getYearNets(){
+  const allItems=[];
+  for(const mk in MONTH_DATA){ const its=(MONTH_DATA[mk].D.meta&&MONTH_DATA[mk].D.meta.品项)||[]; for(const it of its) if(allItems.indexOf(it)<0) allItems.push(it); }
+  const yNets={};
+  for(const mk in MONTH_DATA){
+    const nets=MONTH_DATA[mk].D.网点||[];
+    for(const n of nets){
+      const key=n.办事处+'||'+n.服务网点;
+      if(!yNets[key]){
+        const itm={}; for(const it of allItems) itm[it]=0;
+        yNets[key]={办事处:n.办事处, 服务网点:n.服务网点, 合计:0, 品项:itm};
+      }
+      yNets[key].合计 += (n.合计||0);
+      for(const it of allItems) yNets[key].品项[it] += ((n.品项&&n.品项[it])||0);
+    }
+  }
+  return Object.keys(yNets).map(k=>yNets[k]);
+}
 function renderYearTargets(){
   const box=document.getElementById('yearTargetBody'); if(!box) return;
-  const itemsDef=[{k:'清洁耗材'},{k:'清洗保养'},{k:'延保服务'}];
+  const money=n=>'¥'+Math.round(n||0).toLocaleString('zh-CN');
+  const yNets=getYearNets();
+  const yOfficeNets=o=>yNets.filter(n=>n.办事处===o);
+  const yItemActual=(it,o)=>yOfficeNets(o).reduce((s,n)=>s+((n.品项&&n.品项[it])||0),0);
+  const yWholeActual=o=>yOfficeNets(o).reduce((s,n)=>s+n.合计,0);
+  const yItemActualAll=it=>yNets.reduce((s,n)=>s+((n.品项&&n.品项[it])||0),0);
+  const yWholeActualAll=()=>yNets.reduce((s,n)=>s+n.合计,0);
+  const itemsDef=[
+    {k:'整体',         lbl:'整体目标',      act:o=>yWholeActual(o),         actAll:yWholeActualAll},
+    {k:'清洁耗材',     lbl:'清洁耗材',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
+    {k:'清洗保养',     lbl:'清洗保养',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
+    {k:'延保服务',     lbl:'延保服务',      act:(o,k)=>yItemActual(k,o),    actAll:it=>yItemActualAll(it)},
+    {k:'三大爆品合计', lbl:'三大爆品合计',  act:o=>yItemActual('清洁耗材',o)+yItemActual('清洗保养',o)+yItemActual('延保服务',o), actAll:()=>yItemActualAll('清洁耗材')+yItemActualAll('清洗保养')+yItemActualAll('延保服务')},
+  ];
   const cell=x=>{
     const r = x.tgt>0 ? x.act/x.tgt : null;
     const cls = rateClass(r), col=rateColor(r);
@@ -2543,20 +2582,14 @@ function renderYearTargets(){
     const bg = (cls==='good')?'rgba(46,191,145,.14)':(cls==='warn')?'rgba(255,159,64,.16)':(cls==='bad')?'rgba(239,83,80,.14)':'#eef1f6';
     return `<td class="${x.total?'tot':''}" style="vertical-align:top;min-width:150px"><div style="font-size:13px;font-weight:600">${money(x.act)}</div><div style="font-size:11px;color:var(--sub);margin:2px 0">目标 ${money(x.tgt)}</div><span class="pill" style="background:${bg};color:${col};font-size:11px">达成率 ${pctTxt}</span></td>`;
   };
-  const rowFor=(o)=>{
-    const t=yt(o);
-    const items=itemsDef.map(d=>({act:itemActualOffice(d.k,o), tgt:t[d.k]||0}));
-    const aSum=items.reduce((s,x)=>s+x.act,0), tSum=items.reduce((s,x)=>s+x.tgt,0);
-    items.push({act:aSum, tgt:tSum, total:true});
-    return {o, items};
-  };
+  const rowFor=(o)=>({o, items:itemsDef.map(d=>({act:d.act(o,d.k), tgt:yt(o)[d.k]||0}))});
   const rows=OFFICE_ORDER.map(rowFor);
-  const totItems=itemsDef.map(d=>({act:OFFICE_ORDER.reduce((s,o)=>s+itemActualOffice(d.k,o),0), tgt:OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)}));
+  const totItems=itemsDef.map(d=>({act:d.actAll(d.k), tgt:OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)}));
   const ta=totItems.reduce((s,x)=>s+x.act,0), tt=totItems.reduce((s,x)=>s+x.tgt,0);
   totItems.push({act:ta, tgt:tt, total:true});
   const allZero = totItems.every(x=>x.tgt<=0);
-  let h=`<table class="tedit" style="min-width:880px"><thead><tr><th class="rowh">办事处 ＼ 全年目标</th>`;
-  ['清洁耗材','清洗保养','延保服务','三大爆品合计'].forEach(it=>h+=`<th>${it}</th>`);
+  let h=`<table class="tedit" style="min-width:1080px"><thead><tr><th class="rowh">办事处 ＼ 全年目标</th>`;
+  itemsDef.forEach(d=>h+=`<th>${d.lbl}</th>`);
   h+=`</tr></thead><tbody>`;
   rows.forEach(r=>{
     h+=`<tr><td class="rowh">${r.o}</td>`;
