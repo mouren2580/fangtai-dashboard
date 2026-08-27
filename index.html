@@ -211,22 +211,7 @@
     <span class="x" onclick="document.getElementById('banner').style.display='none'">✕</span>
   </div>
 
-  <!-- 增值专项 · 月份切换条（独立于主看板单月/年度累计，驱动 工单量/防火阀占比/增值产品/增值配件明细/大保养占比） -->
-  <div class="mfbar" id="mfBar" style="display:flex;align-items:center;gap:14px;margin:12px 0;padding:10px 14px;background:#fff;border:1px solid #e6ebf2;border-radius:12px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(20,40,80,.04)">
-    <span class="mfbar-t" style="font-weight:800;color:#1f2733;font-size:14px">📅 增值专项月份</span>
-    <span class="seg" id="mfSeg">
-      <button data-m="base" class="on" title="当前看板基准（2026年8月）">基准·8月</button>
-      <button data-m="2026-01">1月</button>
-      <button data-m="2026-02">2月</button>
-      <button data-m="2026-03">3月</button>
-      <button data-m="2026-04">4月</button>
-      <button data-m="2026-05">5月</button>
-      <button data-m="2026-06">6月</button>
-      <button data-m="2026-07">7月</button>
-      <button data-m="year">全年·1-8</button>
-    </span>
-    <span class="mfbar-l" id="mfLbl" style="margin-left:auto;font-weight:800;color:#1c6dd0;font-size:13px">基准·8月</span>
-  </div>
+  <!-- 增值专项月份已合并到顶部「月份」下拉框：切月时主看板与工单量/防火阀/增值产品/增值配件明细/大保养占比同步切换 -->
 
   <!-- 整体概览（西北大区总数） -->
   <div class="sec hero">
@@ -722,7 +707,8 @@ function applyMonth(m){
   const sel=document.getElementById('monthSel'); if(sel) sel.value=m;
   renderAll();
   if (typeof renderTech === "function") renderTech();  // 切月后刷新服务工程师明细(读全局最新 TECH_DATA)；放模板里避免被重注入覆盖
-  if (typeof mfApply === "function" && typeof __mfMonth !== "undefined" && __mfMonth) { try { mfApply(__mfMonth); } catch(e){ console.error("mfApply hook", e); } }
+  /* 月份切换时同步驱动增值专项模块（工单量/防火阀/增值产品/增值配件/大保养），使其与主看板同一月份 */
+  if (typeof mfApply === "function") { try { mfApply(CURRENT_MONTH==='2026-08'?'base':CURRENT_MONTH); } catch(e){ console.error("mfApply hook", e); } }
 }
 /*__MONTHS_END__*/
 let WORKORDER_DATA = null;
@@ -1945,6 +1931,7 @@ function setView(p){
     TARGETS = TARGETS_BY_MONTH['年度累计'] || seedTargets();
     LASTYEAR = LASTYEAR_BY_MONTH['年度累计'] || seedLastYear();
     extWin='year';
+    if(typeof mfApply==='function'){ try{ mfApply('year'); }catch(e){ console.error('mfApply year', e); } }
     syncPeriodUI();
     renderAll();
     if(typeof renderTech==='function') renderTech(); // 刷新服务工程师明细为年度累计数据
@@ -1994,7 +1981,7 @@ function woBar(name, cnt, max, onClick, sub, disp, color){
 function renderFireValve(){
   const panel=document.getElementById('fvSec');
   if(!panel) return;
-  if(isYearView){ panel.style.display='none'; return; }
+  /* 年度累计视图下也显示全年累计数据（不再隐藏） */
   panel.style.display='';
   const D=WORKORDER_DATA;
   if(!D){ panel.style.display='none'; return; }
@@ -2078,7 +2065,7 @@ let vpExpanded=null;
 function renderValueAdded(){
   const panel=document.getElementById('vpSec');
   if(!panel) return;
-  if(isYearView){ panel.style.display='none'; return; }
+  /* 年度累计视图下也显示全年累计数据（不再隐藏） */
   panel.style.display='';
   const D=VALUE_ADDED_DATA; if(!D){ panel.style.display='none'; return; }
   const meta=D.meta, P=D.products;
@@ -2088,7 +2075,7 @@ function renderValueAdded(){
    + kpiCard('有销量项数', meta['有销量项数']+' 项', '服务月内', 'var(--green)')
    + kpiCard('全区增值产品总计数', fmtInt(meta['全区总计数'])+' 件', 'CSM配件表计数', 'var(--orange)')
    + kpiCard('止回阀', fmtInt(zh)+' 件', '特殊口径计数', '#e23b2e');
-  document.getElementById('vpScope').textContent = '单月 · '+meta['月份'];
+  document.getElementById('vpScope').textContent = isYearView ? '📅 年度累计' : ('单月 · '+meta['月份']);
   document.getElementById('vpBadge').textContent='增值产品共 '+fmtInt(meta['全区总计数'])+' 件';
   document.getElementById('vpNote').innerHTML='说明：普通产品按 <b>配件编码=产品编码</b> 计数，服务月内（录入完成时间 '+meta['服务月']+'，截止 '+meta['截止日']+'）；<b>止回阀</b>按 <b>销售分类=止回阀 且 上缴金额&gt;0</b> 计数。看板仅显示「名称」，产品名称/编码仅供后台校验。';
   setupVpCtrls();
@@ -2244,7 +2231,7 @@ var __MF_BASE = null;  // 首次调用时捕获的 4 块基准(8月)全局，用
 function mfCaptureBase(){
   if(!__MF_BASE) __MF_BASE = { workorder: WORKORDER_DATA, valueadded: VALUE_ADDED_DATA, valueparts: VALUE_PARTS_DATA, bigcare: BIG_CARE_DATA };
 }
-function mfSrc(m){ if(m===null || m==='2026-08') return __MF_BASE; return (typeof MONTHLY_FOUR!=='undefined' && MONTHLY_FOUR && MONTHLY_FOUR[m]) ? MONTHLY_FOUR[m] : null; }
+function mfSrc(m){ if(m===null || m==='2026-08' || m==='base') return __MF_BASE; if(m==='year') return (typeof MONTHLY_FOUR!=='undefined' && MONTHLY_FOUR && MONTHLY_FOUR.year) ? MONTHLY_FOUR.year : null; return (typeof MONTHLY_FOUR!=='undefined' && MONTHLY_FOUR && MONTHLY_FOUR.months && MONTHLY_FOUR.months[m]) ? MONTHLY_FOUR.months[m] : null; }
 function mfApply(m){
   if(typeof MONTHLY_FOUR==='undefined' || !MONTHLY_FOUR) return;
   mfCaptureBase();
@@ -2275,23 +2262,14 @@ function mfApply(m){
   } catch(e){}
   mfSyncUI();
 }
-function mfSyncUI(){
-  var lbl = (__mfMonth===null)?'基准·8月':(__mfMonth==='year'?'全年累计(1-8月)':(__mfMonth.slice(5)+'月'));
-  var el = document.getElementById('mfLbl'); if(el) el.textContent = lbl;
-  document.querySelectorAll('#mfSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.m === (__mfMonth||'base')); });
-}
-document.querySelectorAll('#mfSeg button').forEach(function(b){
-  b.onclick = function(){
-    if(typeof isYearView!=='undefined' && isYearView) setView('month'); // 先退出年度累计视图
-    mfApply(b.dataset.m);
-  };
-});
+function mfSyncUI(){}
+/* 增值专项月份按钮已移除，统一由顶部 monthSel 控制（applyMonth 内调用 mfApply 同步） */
 const VPP_OFFICES=['西宁办事处','新疆办事处','呼和浩特办事处','包头办事处','兰州办事处','宁夏办事处'];
 
 function renderValueAddedParts(){
   const panel=document.getElementById('vpPartsSec');
   if(!panel) return;
-  if(isYearView){ panel.style.display='none'; return; }
+  /* 年度累计视图下也显示全年累计数据（不再隐藏） */
   panel.style.display='';
   const D=VALUE_PARTS_DATA;
   if(!D){ panel.style.display='none'; return; }
@@ -2476,7 +2454,7 @@ function renderVppPivot(box, D){
 function renderWorkOrder(){
   const panel=document.getElementById('woSec');
   if(!panel) return;
-  if(isYearView){ panel.style.display='none'; return; }
+  /* 年度累计视图下也显示全年累计数据（不再隐藏） */
   panel.style.display='';
   const D=WORKORDER_DATA;
   if(!D){ panel.style.display='none'; return; }
