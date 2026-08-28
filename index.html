@@ -222,15 +222,6 @@
     <div class="kpis" id="kpis" style="margin-bottom:0"></div>
   </div>
 
-  <!-- 各办事处全年三大爆品目标完成进度（常驻顶部，任何模块均可看到） -->
-  <div class="panel" id="yearTargetPanel" style="display:none">
-    <div class="sec">
-      <h2>🎯 各办事处全年三大爆品目标完成进度 <span class="pill mute">年度累计</span></h2>
-      <div class="desc">实际 = 1–N 月累计（年度累计视图口径，随月份推进自动累加）；目标 = 全年目标（右上角「⚙ 设置目标 → 年度累计目标」填写）。<b>达成率 = 实际 ÷ 全年目标</b>，颜色按是否跑赢<b>年度时间进度</b>判定：绿=领先 / 橙=预警 / 红=落后。</div>
-      <div id="yearTargetBody" style="overflow:auto"></div>
-    </div>
-  </div>
-
   <!-- 四列导航 -->
   <div class="modules" id="colNav">
     <div class="colCard on" data-mod="mod1" onclick="toggleModule('mod1')">
@@ -367,6 +358,13 @@
         <span id="extCount" style="font-size:12px;color:var(--sub)"></span>
       </div>
       <div id="extendBox" style="margin-top:8px;overflow:auto;max-height:560px"></div>
+    </div>
+
+    <!-- 各办事处全年三大爆品目标完成进度（仅"三大爆品"模块内展示，随该模块展开/折叠） -->
+    <div class="sec" id="yearTargetPanel">
+      <h2>🎯 各办事处全年三大爆品目标完成进度 <span class="pill mute">年度累计</span></h2>
+      <div class="desc">实际 = 1–N 月累计（年度累计视图口径，随月份推进自动累加）；目标 = 全年目标（右上角「⚙ 设置目标 → 年度累计目标」填写）。<b>达成率 = 实际 ÷ 全年目标</b>，颜色按是否跑赢<b>年度时间进度</b>判定：绿=领先 / 橙=预警 / 红=落后。</div>
+      <div id="yearTargetBody" style="overflow:auto"></div>
     </div>
   </div>
 
@@ -2514,7 +2512,7 @@ function renderAll(){
   const rankLbl=document.getElementById('rankPeriodLbl'); if(rankLbl) rankLbl.textContent=yv?'年度累计':'月度';
   /* 各办事处全年目标完成进度：单月视图=全年进度概览，年度累计视图=全年进度（均显示并渲染） */
   const ytp=document.getElementById('yearTargetPanel');
-  if(ytp){ ytp.style.display='block'; renderYearTargets(); }
+  if(ytp){ renderYearTargets(); } // 跟随"三大爆品"模块(breakoutMod)展开/折叠，仅在该模块内显示
   const ytPill=document.querySelector('#yearTargetPanel h2 .pill');
   if(ytPill) ytPill.textContent = yv?'年度累计':'全年进度概览';
   const ytDesc=document.querySelector('#yearTargetPanel .desc');
