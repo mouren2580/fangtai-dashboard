@@ -1189,14 +1189,20 @@ function extDataSource(){
   if(extWin==='last3' && EXTEND_TIME_DATA) return EXTEND_TIME_DATA.windows.last3;
   if(extWin==='last7' && EXTEND_TIME_DATA) return EXTEND_TIME_DATA.windows.last7;
   if(extWin==='year') return EXTEND_YEAR_DATA;
-  return (MONTH_DATA['2026-08'] && MONTH_DATA['2026-08'].E) || EXTEND_WARRANTY_DATA;
+  const cm = CURRENT_MONTH || '2026-08';
+  return (MONTH_DATA[cm] && MONTH_DATA[cm].E) || EXTEND_WARRANTY_DATA;
 }
 function extWinLabel(w){
-  if(w==='yesterday') return '昨日销售（录入完成时间 = 2026-08-26）';
-  if(w==='last3') return '近3日（08-24 ~ 08-26）';
-  if(w==='last7') return '近7日（08-20 ~ 08-26）';
+  const cut = (DASHBOARD_DATA && DASHBOARD_DATA.meta && DASHBOARD_DATA.meta['统计截止日']) || '';
+  const d = cut ? cut.slice(5,10).replace('-0','-').replace('-','.') : '';   // "08.28"
+  const d3 = cut ? (function(){ const dd=new Date(cut); const s=new Date(dd); s.setDate(dd.getDate()-2); return s.toISOString().slice(5,10).replace('-0','-').replace('-','.'); })() : '';
+  const d7 = cut ? (function(){ const dd=new Date(cut); const s=new Date(dd); s.setDate(dd.getDate()-6); return s.toISOString().slice(5,10).replace('-0','-').replace('-','.'); })() : '';
+  const mLabel = (DASHBOARD_DATA && DASHBOARD_DATA.meta && DASHBOARD_DATA.meta['月份'] || '').replace('2026-','') + '月';
+  if(w==='yesterday') return '昨日销售（录入完成时间 = '+cut+'）';
+  if(w==='last3') return '近3日（'+d3+' ~ '+d+'）';
+  if(w==='last7') return '近7日（'+d7+' ~ '+d+'）';
   if(w==='year') return '📅 年度累计（'+YEAR_RANGE+'）';
-  return '当月（8月服务月累计）';
+  return '当月（'+mLabel+'服务月累计）';
 }
 function syncExtWinUI(){
   const seg=document.getElementById('extWin'); if(!seg) return;
