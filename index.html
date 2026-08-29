@@ -2628,16 +2628,30 @@ function renderYearTargets(){
   ];
   const cell=x=>{
     const r = x.tgt>0 ? x.act/x.tgt : null;
-    const cls = rateClass(r), col=rateColor(r);
+    /* 年度目标面板：用年度时间进度（服务年 12.28–12.27）判定颜色，不用月度 TIME_PROG */
+    const yProg = yearTimeProg();
+    const cls = r===null?'mute':(r>=yProg?'good':(r>=yProg*0.8?'warn':'bad'));
+    const col = r===null?'#b9c1cc':(r>=yProg?'var(--green)':(r>=yProg*0.8?'var(--orange)':'var(--red)'));
     const pctTxt = r===null?'—':(r*100).toFixed(1)+'%';
     const bg = (cls==='good')?'rgba(46,191,145,.14)':(cls==='warn')?'rgba(255,159,64,.16)':(cls==='bad')?'rgba(239,83,80,.14)':'#eef1f6';
     return `<td class="${x.total?'tot':''}" style="vertical-align:top;min-width:150px"><div style="font-size:13px;font-weight:600">${money(x.act)}</div><div style="font-size:11px;color:var(--sub);margin:2px 0">目标 ${money(x.tgt)}</div><span class="pill" style="background:${bg};color:${col};font-size:11px">达成率 ${pctTxt}</span></td>`;
   };
+  /* 年度时间进度：服务年固定 12.28–12.27（365天），按统计截止日计算已过比例 */
+  function yearTimeProg(){
+    const cut = (DASHBOARD_DATA&&DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta['统计截止日'])||'';
+    if(!cut) return 0;
+    const yStart=new Date((DASHBOARD_DATA.meta.年份||2026)-1+'-12-28T00:00:00');
+    const yEnd=new Date((DASHBOARD_DATA.meta.年份||2026)+'-12-27T00:00:00');
+    const cd=new Date(cut+'T00:00:00');
+    if(isNaN(cd.getTime())) return 0;
+    const total=Math.round((yEnd-yStart)/86400000)+1;
+    const elapsed=Math.max(0,Math.round((cd-yStart)/86400000)+1);
+    return Math.min(1,Math.max(0,elapsed/total));
+  }
   const rowFor=(o)=>({o, items:itemsDef.map(d=>({act:d.act(o,d.k), tgt:(d.tgtFn?d.tgtFn(o):(yt(o)[d.k]||0))}))});
   const rows=OFFICE_ORDER.map(rowFor);
   const totItems=itemsDef.map(d=>({act:d.actAll(d.k), tgt:(d.tgtFnAll?d.tgtFnAll():(OFFICE_ORDER.reduce((s,o)=>s+(yt(o)[d.k]||0),0)))}));
   const ta=totItems.reduce((s,x)=>s+x.act,0), tt=totItems.reduce((s,x)=>s+x.tgt,0);
-  totItems.push({act:ta, tgt:tt, total:true});
   const allZero = totItems.every(x=>x.tgt<=0);
   let h=`<table class="tedit" style="min-width:1080px"><thead><tr><th class="rowh">办事处 ＼ 全年目标</th>`;
   itemsDef.forEach(d=>h+=`<th>${d.lbl}</th>`);
