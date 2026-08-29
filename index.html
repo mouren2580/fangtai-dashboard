@@ -2565,9 +2565,8 @@ function renderAll(){
   // 注：同比去年(mod4)在年度视图仍显示（自动聚合各月去年数据或支持手动设置年度累计）
   const yv=isYearView;
   // 仅按月有意义的明细板块：单月展开、年度累计视图收起（.panel默认display:none，需.open才可见）
-  ['mod2','vpSec','vpPartsSec'].forEach(function(id){ const el=document.getElementById(id); if(el) el.classList.toggle('open', !yv); });
-  // 同比去年(mod4)：月度/年度视图均展开
-  const mod4=document.getElementById('mod4'); if(mod4) mod4.classList.add('open');
+  // 同比去年(mod4)：年度累计视图下隐藏（用户不填去年数据，仅显示今年；月视图仍展示）
+  ['mod2','mod4','vpSec','vpPartsSec'].forEach(function(id){ const el=document.getElementById(id); if(el) el.classList.toggle('open', !yv); });
   const bigBox=document.getElementById('bigCareBox'), bigSeg=document.getElementById('bigCareSeg');
   if(bigBox) bigBox.style.display=yv?'none':'';
   if(bigSeg) bigSeg.style.display=yv?'none':'';
