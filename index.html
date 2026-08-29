@@ -312,7 +312,7 @@
     <div class="sec">
       <h2 id="lyTitle">📈 同比去年 · 3+1 产品差值</h2>
       <div class="desc">3+1 产品 = 清洗保养 · 延保服务 · 清洁耗材 · 止回阀。「今年」取当前表格实际（按网点×品项汇总），「去年」为手动填写的<b>去年同月</b>（右上角「📅 设置去年」），单元格显示 <b>差值 = 今年 − 去年</b> 与 <b>同比%</b>。切换月份时对比口径自动跟随（如 9 月对比去年9月）。点击品项表头可在下方查看各办事处分布。</div>
-      <div class="banner" id="lyBanner" style="display:none;margin-bottom:12px"><span>⚠ 去年同月数据尚未填写，当前差值 = 今年全额、同比暂无法计算。点右上角「📅 设置去年」填写。</span></div>
+      <div class="banner" id="lyBanner" style="display:none;margin-bottom:12px"><span></span></div>
       <div id="lyBars"></div>
       <div id="lyDetail" style="margin-top:16px"></div>
     </div>
@@ -542,7 +542,7 @@
 <div class="mask" id="lyMask">
   <div class="modal">
     <div class="mh">
-      <h3>设置去年8月 · 3+1 产品</h3>
+      <h3 id="lyModalTitle">设置去年8月 · 3+1 产品</h3>
       <div class="spacer" style="flex:1"></div>
       <button class="btn" id="lyFillYBtn">按今年填充</button>
       <button class="btn" id="lyZeroBtn">全部清零</button>
@@ -551,7 +551,7 @@
     <div class="foot">
       <button class="btn primary" id="lySaveBtn">保存去年</button>
       <button class="btn" id="lyCloseBtn">取消</button>
-      <span class="hint">填写各办事处去年8月 3+1 产品实际（口径与今年一致）。保存后看板差值即时更新。</span>
+      <span class="hint" id="lyHint">填写各办事处去年8月 3+1 产品实际（口径与今年一致）。保存后看板差值即时更新。</span>
     </div>
   </div>
 </div>
@@ -902,6 +902,18 @@ function seedLastYear(){
   const m={};
   for(const o of OFFICE_ORDER){ m[o]={}; for(const it of SELECT_3P1) m[o][it]=0; }
   return m;
+}
+/* 从已设置的各月 LASTYEAR 聚合为年度累计（用于年视图） */
+function aggregateYearLastYear(){
+  const acc=seedLastYear();
+  let hasData=false;
+  for(const mk in LASTYEAR_BY_MONTH){
+    if(mk==='年度累计') continue;
+    const ly=LASTYEAR_BY_MONTH[mk]; if(!ly) continue;
+    for(const o of OFFICE_ORDER){ if(!ly[o]) continue; for(const it of SELECT_3P1){ if(typeof ly[o][it]==='number'){ acc[o][it]+=ly[o][it]; hasData=true; } } }
+  }
+  if(hasData) acc._stamp='auto-aggregated';
+  return acc;
 }
 function normLastYear(d){
   if(!d||typeof d!=='object') return null;
@@ -1589,9 +1601,10 @@ let lySelected=null;
 function renderLastYear(){
   const lb=document.getElementById('lyBanner'); if(lb) lb.style.display='none';
   const tEl=document.getElementById('lyTitle');
-  const mm = CURRENT_MONTH.slice(5);  // 当前服务月 = 去年同月对比口径
-  /* 通用口径：本月 3+1 今年实际 vs 去年同月（按月份隔离在 LASTYEAR_BY_MONTH[CURRENT_MONTH]） */
-  if(tEl) tEl.textContent = `📈 同比去年${mm}月 · 3+1 产品差值`;
+  const isYr = isYearView;
+  const mm = isYr ? YEAR_RANGE : CURRENT_MONTH.slice(5);
+  /* 通用口径：3+1 今年实际 vs 去年（月视图=去年同月，年视图=去年年度累计） */
+  if(tEl) tEl.textContent = `📈 同比去年${isYr?'（'+YEAR_RANGE+'累计）':mm+'月'} · 3+1 产品差值`;
   const allZero = OFFICE_ORDER.every(o=>SELECT_3P1.every(it=>((LASTYEAR[o]&&LASTYEAR[o][it])||0)===0));
   if(lb) lb.style.display=allZero?'block':'none';
   let html=`<div class="lymat"><table class="tedit"><thead><tr><th class="rowh">办事处 ＼ 3+1产品</th>`;
@@ -1616,6 +1629,16 @@ function renderLastYear(){
   });
   html+=`</tbody></table></div>`;
   document.getElementById('lyBars').innerHTML=html;
+  /* 动态更新面板说明与提示 */
+  const lySec = document.querySelector('#mod4 .sec');
+  if(lySec){
+    const dc = lySec.querySelector('.desc');
+    if(dc) dc.textContent = `3+1 产品 = 清洗保养 · 延保服务 · 清洁耗材 · 止回阀。「今年」取当前表格实际（按网点×品项汇总），「去年」为手动填写的<b>${isYr?'去年'+YEAR_RANGE+'累计':'去年同月'}</b>（右上角「📅 设置去年」），单元格显示 <b>差值 = 今年 − 去年</b> 与 <b>同比%</b>。${isYr?'年度视图：可手动设置去年年度累计数据，或系统自动聚合各月已填写的去年数据。':'切换月份时对比口径自动跟随（如 9 月对比去年9月）。'}点击品项表头可在下方查看各办事处分布。`;
+  }
+  if(lb && lb.style.display==='block'){
+    const sp = lb.querySelector('span');
+    if(sp) sp.textContent = `⚠ 去年${isYr?YEAR_RANGE+'累计':mm+'月'}数据尚未填写，当前差值 = 今年全额、同比暂无法计算。点右上角「📅 设置去年」${isYr?'填写年度累计数据。':''}填写。`;
+  }
 }
 function lySelect(it){
   lySelected=it;
@@ -1640,8 +1663,9 @@ function lySelect(it){
 }
 /* 去年弹窗 */
 function renderLyTable(){
-  const mm = CURRENT_MONTH.slice(5);
-  let h=`<thead><tr><th class="rowh">办事处 ＼ 去年${mm}月</th>`;
+  const isYr = isYearView;
+  const mm = isYr ? YEAR_RANGE+'累计' : CURRENT_MONTH.slice(5)+'月';
+  let h=`<thead><tr><th class="rowh">办事处 ＼ 去年${mm}</th>`;
   SELECT_3P1.forEach(it=>h+=`<th>${it}<br><span class="sub">今年 ${fmt(itemActual(it))}</span></th>`);
   h+=`</tr></thead><tbody>`;
   OFFICE_ORDER.forEach(o=>{
@@ -1651,16 +1675,22 @@ function renderLyTable(){
   });
   h+=`</tbody>`;
   document.getElementById('lyTable').innerHTML=h;
+  /* 动态更新弹窗标题与提示 */
+  const mt=document.getElementById('lyModalTitle');
+  if(mt) mt.textContent = `设置去年${mm} · 3+1 产品`;
+  const ht=document.getElementById('lyHint');
+  if(ht) ht.textContent = `填写各办事处去年${mm} 3+1 产品实际（口径与今年一致）。${isYr?'年度累计 = 去年各月合计，可手动填写或由系统自动聚合。':''}保存后看板差值即时更新。`;
 }
 document.getElementById('lyBtn').onclick=()=>{ if(!adminUnlocked){ alert('请先点击右上角「🔒 锁定」按钮解锁后再设置去年数据。'); return; } document.getElementById('lyMask').classList.add('show');renderLyTable();};
 document.getElementById('lyCloseBtn').onclick=()=>document.getElementById('lyMask').classList.remove('show');
 document.getElementById('lyMask').onclick=e=>{if(e.target.id==='lyMask')document.getElementById('lyMask').classList.remove('show');};
-document.getElementById('lyZeroBtn').onclick=()=>{OFFICE_ORDER.forEach(o=>SELECT_3P1.forEach(it=>{if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=0;}));LASTYEAR_BY_MONTH[CURRENT_MONTH]=LASTYEAR;try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}renderLyTable();};
-document.getElementById('lyFillYBtn').onclick=()=>{OFFICE_ORDER.forEach(o=>SELECT_3P1.forEach(it=>{if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=Math.round(itemActualOffice(it,o));}));LASTYEAR_BY_MONTH[CURRENT_MONTH]=LASTYEAR;try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}renderLyTable();};
+document.getElementById('lyZeroBtn').onclick=()=>{OFFICE_ORDER.forEach(o=>SELECT_3P1.forEach(it=>{if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=0;}));const lyKey=isYearView?'年度累计':CURRENT_MONTH; LASTYEAR_BY_MONTH[lyKey]=LASTYEAR;try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}renderLyTable();};
+document.getElementById('lyFillYBtn').onclick=()=>{OFFICE_ORDER.forEach(o=>SELECT_3P1.forEach(it=>{if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=Math.round(itemActualOffice(it,o));}));const lyKey=isYearView?'年度累计':CURRENT_MONTH; LASTYEAR_BY_MONTH[lyKey]=LASTYEAR;try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}renderLyTable();};
 document.getElementById('lySaveBtn').onclick=()=>{
   document.querySelectorAll('#lyTable input').forEach(i=>{const o=i.dataset.o,it=i.dataset.it,v=parseFloat(i.value)||0;if(!LASTYEAR[o])LASTYEAR[o]={};LASTYEAR[o][it]=v;});
   LASTYEAR._stamp=new Date().toISOString();
-  LASTYEAR_BY_MONTH[CURRENT_MONTH]=LASTYEAR;
+  const lyKey = isYearView ? '年度累计' : CURRENT_MONTH;
+  LASTYEAR_BY_MONTH[lyKey]=LASTYEAR;
   try{localStorage.setItem(LS_LASTYEAR_KEY,JSON.stringify(LASTYEAR_BY_MONTH));}catch(e){}
   document.getElementById('lyMask').classList.remove('show');
   renderLastYear();
@@ -1961,7 +1991,7 @@ function setView(p){
     period='year'; isYearView=true;
     buildYearData();
     TARGETS = TARGETS_BY_MONTH['年度累计'] || seedTargets();
-    LASTYEAR = LASTYEAR_BY_MONTH['年度累计'] || seedLastYear();
+    LASTYEAR = LASTYEAR_BY_MONTH['年度累计'] || aggregateYearLastYear();
     extWin='year';
     if(typeof mfApply==='function'){ try{ mfApply('year'); }catch(e){ console.error('mfApply year', e); } }
     syncPeriodUI();
@@ -2531,10 +2561,13 @@ function renderAll(){
     ds.textContent=txt; ds.style.display=txt?'inline-block':'none';
   }
   renderFootNote();
-  // 年度累计视图：隐藏仅按月有意义的明细板块（大保养占比 / 延保年限×工程师 / 同比去年 / 服务工程师 / 周徽标），避免与累计口径混淆
+  // 年度累计视图：隐藏仅按月有意义的明细板块（大保养占比 / 延保年限×工程师 / 服务工程师 / 周徽标），避免与累计口径混淆
+  // 注：同比去年(mod4)在年度视图仍显示（自动聚合各月去年数据或支持手动设置年度累计）
   const yv=isYearView;
   // 仅按月有意义的明细板块：单月展开、年度累计视图收起（.panel默认display:none，需.open才可见）
-  ['mod2','mod4','vpSec','vpPartsSec'].forEach(function(id){ const el=document.getElementById(id); if(el) el.classList.toggle('open', !yv); });
+  ['mod2','vpSec','vpPartsSec'].forEach(function(id){ const el=document.getElementById(id); if(el) el.classList.toggle('open', !yv); });
+  // 同比去年(mod4)：月度/年度视图均展开
+  const mod4=document.getElementById('mod4'); if(mod4) mod4.classList.add('open');
   const bigBox=document.getElementById('bigCareBox'), bigSeg=document.getElementById('bigCareSeg');
   if(bigBox) bigBox.style.display=yv?'none':'';
   if(bigSeg) bigSeg.style.display=yv?'none':'';
