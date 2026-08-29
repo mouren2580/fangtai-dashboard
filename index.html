@@ -1990,6 +1990,7 @@ function setView(p){
   if(p==='year'){
     period='year'; isYearView=true;
     buildYearData();
+    PERIOD_LABEL = YEAR_RANGE + ' 累计';   // 年视图：整体概览周期徽标显示年度累计口径（原为单月标签，会误导"年度未显示"）
     TARGETS = TARGETS_BY_MONTH['年度累计'] || seedTargets();
     LASTYEAR = LASTYEAR_BY_MONTH['年度累计'] || aggregateYearLastYear();
     extWin='year';
