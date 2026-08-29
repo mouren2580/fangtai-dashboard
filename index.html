@@ -783,7 +783,7 @@ function saveAsOf(d){
 function updateAsOfBadge(){
   const b=document.getElementById('asOfBadge'); if(!b) return;
   // 默认（未手动设置时）按「前一天」= 最近一个完整数据日 口径显示
-  const eff = DEFAULT_ASOF;
+  const eff = DEFAULT_ASOF();
   b.textContent='截止 '+isoDate(eff);
   b.style.display='inline-block';
 }
@@ -821,15 +821,14 @@ function svcYearEnd(calYear){ return new Date(calYear,11,27); }
 function reinitOrder(){ OFFICE_ORDER=[...new Set(NETS.map(n=>n.办事处))]; OFFICE_ORDER.sort((a,b)=>officeActual(b)-officeActual(a)); }
 // 截止日固定读数据自带「统计截止日」(DEFAULT_ASOF)，不依赖本地存储/手动设置，避免自行漂移
 AS_OF_DATE = null;
-/* 默认数据截止日：优先读 DASHBOARD_DATA.meta.统计截止日（由 build 脚本 --date 写入），缺失时退回今天。
-   口径：已完成天数 = 截止日 − 周期开始(上月28日) + 1，如 8.8 → 12 天、剩余 19 天。
-   用户同步Excel或点「🕒时间设置」可再调整。 */
-const DEFAULT_ASOF = (function(){
+/* 默认数据截止日：每次调用实时读当前 DASHBOARD_DATA.meta.统计截止日（切月后自动跟随）。
+   口径：已完成天数 = 截止日 − 周期开始(上月28日) + 1 */
+function DEFAULT_ASOF(){
   const s=(DASHBOARD_DATA.meta&&DASHBOARD_DATA.meta.统计截止日)||'';
   const d=s?new Date(s+'T00:00:00'):null;
   return (d&&!isNaN(d.getTime()))?d:new Date();
-})();
-computeTime(DEFAULT_ASOF);
+}
+computeTime(DEFAULT_ASOF());
 reinitOrder();
 
 /* ---------- 已固化数据（由「🔒 固化目标」按钮自动写入，请勿手改） ---------- */
@@ -1716,7 +1715,7 @@ function rebuildFromWorkbook(wb){
     合计:Math.round(map[k].合计*100)/100,品项:map[k].品项,来源:Object.keys(map[k].来源)}));
   if(!NETS_NEW.length){ alert('未解析到任何网点数据'); return null; }
   /* 同步后截止日保持数据自带「统计截止日」不变（不自动滚动到前一天），符合"固定截止日"铁律 */
-  computeTime(DEFAULT_ASOF);
+  computeTime(DEFAULT_ASOF());
   /* 写回全局 */
   DASHBOARD_DATA.网点=NETS_NEW;
   DASHBOARD_DATA.meta.品项=ITEMS_NEW;
@@ -1742,7 +1741,7 @@ document.getElementById('syncFile').onchange=e=>{
         if(changed){
           try{ DASHBOARD_DATA.meta._stamp=new Date().toISOString(); localStorage.setItem('fangtai_data_v1', JSON.stringify({data:DASHBOARD_DATA, stamp:DASHBOARD_DATA.meta._stamp})); }catch(e){}
         }
-        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n截止日保持「${isoDate(DEFAULT_ASOF)}」(数据自带，不自动滚动) · 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}`+(changed?'':'\n（数据未变化，「数据更新时间」保持不变）'));
+        alert(`✅ 已同步数据\n网点 ${res.n} 个 · 实际合计 ¥${res.total.toLocaleString('zh-CN',{maximumFractionDigits:0})}\n截止日保持「${isoDate(DEFAULT_ASOF())}」(数据自带，不自动滚动) · 已过 ${TIME.日} 天 · 时间进度 ${pct(TIME_PROG)}`+(changed?'':'\n（数据未变化，「数据更新时间」保持不变）'));
       }
     }catch(err){ alert('Excel 解析失败：'+err.message); }
     e.target.value='';
