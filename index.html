@@ -3,6 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+/*__CACHEBUST_START__*/
+/* 缓存穿透：静态链接更新后，书签/浏览器可能仍取到缓存的旧页面。
+   每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
+   只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
+   版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
+(function(){
+  var BUILD = "20260902-1013";
+  try{
+    if(location.protocol!=='http:' && location.protocol!=='https:') return;
+    var n=parseInt(sessionStorage.getItem('_cbN')||'0',10);
+    if(n>=2) return;                                   // 兜底防死循环
+    function go(v){
+      try{sessionStorage.setItem('_cbN',String(n+1));}catch(e){}
+      var u=new URL(location.href);
+      u.searchParams.set('v',v);
+      u.searchParams.set('_',Date.now());              // 随机串 → 必然回源
+      location.replace(u.toString());
+    }
+    var cur=new URL(location.href).searchParams.get('v');
+    fetch('version.json?_='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){
+        if(!j||!j.v) return;
+        if(j.v!==BUILD) go(j.v);                       // 服务端有新版 → 拉最新
+        else if(cur!==BUILD) go(BUILD);                // 已是最新，仅校正地址栏版本
+        else { try{sessionStorage.removeItem('_cbN');}catch(e){} }
+      })
+      .catch(function(){});
+  }catch(e){}
+})();
+/*__CACHEBUST_END__*/
+</script>
 <title>方太 西北大区 服务产品看板</title>
 <style>
   :root{
