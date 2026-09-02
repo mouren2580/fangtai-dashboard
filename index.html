@@ -12,8 +12,8 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
+var BUILD = "20260902-1023";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
-  var BUILD = "20260902-1013";
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
     var n=parseInt(sessionStorage.getItem('_cbN')||'0',10);
@@ -1840,7 +1840,10 @@ function updateColSummaries(){
   if(ct && typeof TECH_DATA!=='undefined' && TECH_DATA) ct.textContent=TECH_DATA.count+' 工程师 · '+money(TECH_DATA.total);
   const c4=document.getElementById('col4s'); if(c4) c4.textContent='清洗保养·延保·耗材·止回阀';
   const cb=document.getElementById('colBreakout'); if(cb) cb.textContent='周度·双维度';
-  const hb=document.getElementById('heroBadge'); if(hb) hb.textContent=PERIOD_LABEL;
+  const hb=document.getElementById('heroBadge');
+  const _bt=(typeof BUILD!=='undefined'&&BUILD)?(' · 数据版 '+BUILD+' · 截止 '+(DASHBOARD_DATA.meta['统计截止日']||'').slice(5)):'';
+  if(hb){ hb.textContent=PERIOD_LABEL+_bt; }
+  if(_bt){ try{ document.title='方太西北服务看板'+_bt; }catch(e){} }
   const cwo=document.getElementById('colWoS'); if(cwo && typeof WORKORDER_DATA!=='undefined' && WORKORDER_DATA) cwo.textContent=WORKORDER_DATA.meta['总工单数']+' 单 · '+WORKORDER_DATA.meta['工程师数']+' 工程师';
   const cfv=document.getElementById('colFvS'); if(cfv && typeof WORKORDER_DATA!=='undefined' && WORKORDER_DATA) cfv.textContent='整体 '+WORKORDER_DATA.meta['防火阀占比'].toFixed(2)+'%';
   const cvp=document.getElementById('colVpS'); if(cvp && typeof VALUE_ADDED_DATA!=='undefined' && VALUE_ADDED_DATA) cvp.textContent=VALUE_ADDED_DATA.meta['有销量项数']+'/'+VALUE_ADDED_DATA.meta['产品项数']+' 项有销量 · 共 '+fmtInt(VALUE_ADDED_DATA.meta['全区总计数'])+' 件';
