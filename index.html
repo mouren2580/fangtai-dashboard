@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260902-1023";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260902-1624";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -189,7 +189,7 @@ var BUILD = "20260902-1023";   // 全局：页面右上角会显示，便于肉�
   .vpd-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
   .vpd-tbl th,.vpd-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
   .vpd-tbl th{color:var(--sub);font-weight:600;background:#fafbfd}
-  .vpd-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .vpd-tbl th.num,.vpd-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
   .vpd-tbl tr:hover td{background:#f6faff}
   .vpd-tbl .rank{color:var(--sub);width:36px}
   @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.obar .name{width:90px}.obar .nums{width:170px}.modules{grid-template-columns:repeat(3,1fr)}}
