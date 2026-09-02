@@ -1836,7 +1836,7 @@ function renderBigCare(){
     } else {
       cells='<td class="name">'+(tot?'⭐ ':'')+r.name+'</td><td>'+r.id+'</td><td>'+r.office+'</td><td>'+r.net+'</td><td>'+r.big+'</td><td>'+r.den+'</td>';
     }
-    cells+='<td><div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:130px"><i style="width:'+w+'%;background:var(--orange)"></i></span><b>'+r.pct.toFixed(1)+'%</b></div></td>';
+    cells+='<td><div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:130px"><i style="width:'+w+'%;background:var(--orange)"></i></span><b style="margin-left:auto">'+r.pct.toFixed(1)+'%</b></div></td>';
     h+='<tr'+(tot?' style="font-weight:700;background:var(--card-2)"':'')+'>'+cells+'</tr>';
   });
   h+='</tbody></table>';
