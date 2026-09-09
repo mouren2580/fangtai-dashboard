@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260909-1736";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260909-1742";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -342,8 +342,7 @@ var BUILD = "20260909-1736";   // 全局：页面右上角会显示，便于肉�
       <h2>🧽 清洗保养分析 <span class="pill mute">CSM服务项目 · 销售分类=清洗保养</span></h2>
       <div class="desc">数据取自 <b>CSM服务项目</b> 表「销售分类 = 清洗保养」的每一单：<b>每行 = 1 单</b>，<b>数量</b> = 该服务项目的单子数，<b>上缴金额</b> = 该列合计。<b>上缴金额 = 0 视为免费清洗</b>（顾客已线上支付 / 有核销码），<b>&gt;0 为收费清洗</b>。全额上缴一般为中心技师，未全额上缴可能为网点技师（仅供参考）。可按维度 / 时间 / 免费·收费口径切换查看。<b>注：「保养超范围收费」属超范围加收调整项、非清洗服务（金额恒为0），不计入本模块</b>（与大保养占比分母剔除口径一致）。<b>免费 / 收费口径仅统计四项主保养（油烟机小/大保养、集成灶小/大保养）</b>，灶具保养等其他类别不计入免费/收费汇总。</div>
       <div class="seg" id="cleanDimSeg" style="margin:12px 0 6px">
-        <button data-d="region" class="on">整个大区</button>
-        <button data-d="office">按办事处</button>
+        <button data-d="office" class="on">按办事处</button>
         <button data-d="net">按服务网点</button>
         <button data-d="eng">按服务工程师</button>
       </div>
@@ -1935,7 +1934,7 @@ function renderBigCare(){
 document.querySelectorAll('#bigCareSeg button').forEach(function(b){b.onclick=function(){bigCareDim=b.dataset.d;document.querySelectorAll('#bigCareSeg button').forEach(function(x){x.classList.toggle('on',x.dataset.d===bigCareDim);});renderBigCare();};});
 
 /* ===== 清洗保养模块（CSM服务项目 · 销售分类=清洗保养） ===== */
-let cleanDim='region', cleanOffice='', cleanWin='month', cleanFee='all', cleanItem='all';
+let cleanDim='office', cleanOffice='', cleanWin='month', cleanFee='all', cleanItem='all';
 const CLEAN_MAIN_ITEMS=['油烟机小保养','油烟机大保养','集成灶小保养','集成灶大保养'];
 function cleanMonthAll(){ const m=CURRENT_MONTH; return (typeof CLEANING_DATA!=='undefined'&&CLEANING_DATA&&CLEANING_DATA.months)?(CLEANING_DATA.months[m]||[]):[]; }
 function cleaningRecs(){
@@ -1955,7 +1954,6 @@ function cleaningRecs(){
   return recs;
 }
 function cleanGroupKey(r){
-  if(cleanDim==='region') return '西北大区部';
   if(cleanDim==='office') return r.o;
   if(cleanDim==='net') return r.n;
   if(cleanDim==='eng') return r.e+(r.ei?('（'+r.ei+'）'):'');
@@ -1992,7 +1990,7 @@ function renderCleaning(){
   if(cleanDim==='office') cols=['办事处','数量','上缴金额','免费单','收费单'];
   else if(cleanDim==='net') cols=['服务网点','所属办事处','数量','上缴金额','免费单','收费单'];
   else if(cleanDim==='eng') cols=['服务工程师','所属办事处·网点','数量','上缴金额','免费单','收费单'];
-  else cols=['大区','数量','上缴金额','免费单','收费单'];
+  else cols=['办事处','数量','上缴金额','免费单','收费单'];
   let h='<table class="dt"><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
   rows.forEach(rw=>{ const g=cleanAgg(rw.recs);
     let cells='<td class="name">'+rw.k+'</td>';
