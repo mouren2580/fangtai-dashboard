@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260910-1057";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260910-1113";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -366,8 +366,11 @@ var BUILD = "20260910-1057";   // 全局：页面右上角会显示，便于肉�
           <button data-f="paid">收费清洗</button>
         </span>
         <span class="seg" id="cleanItemSeg">
-          <button data-i="all" class="on">全部项目</button>
-          <button data-i="main">仅主项(四项主保养)</button>
+          <button data-i="all" class="on">全部</button>
+          <button data-i="油烟机小保养">油烟机小保养</button>
+          <button data-i="油烟机大保养">油烟机大保养</button>
+          <button data-i="集成灶小保养">集成灶小保养</button>
+          <button data-i="集成灶大保养">集成灶大保养</button>
         </span>
       </div>
       <div id="cleanKpis" style="display:flex;gap:12px;flex-wrap:wrap;margin:6px 0"></div>
@@ -1979,8 +1982,9 @@ function renderCleaning(){
     kpiCard('免费清洗', fmtInt(free)+' 单', '上缴=0', 'var(--orange)') +
     kpiCard('收费清洗', fmtInt(paid)+' 单', fmt(paidAmt), 'var(--bo)');
   // 维度分组
+  const fRecs = cleanItem!=='all' ? recs.filter(r=>r.it===cleanItem) : recs;
   const groups={};
-  recs.forEach(r=>{const k=cleanGroupKey(r);(groups[k]=groups[k]||[]).push(r);});
+  fRecs.forEach(r=>{const k=cleanGroupKey(r);(groups[k]=groups[k]||[]).push(r);});
   const rows=Object.keys(groups).map(k=>({k,meta:cleanGroupMeta(groups[k][0]),recs:groups[k]}));
   rows.sort((a,b)=>b.recs.length-a.recs.length);
   let cols;
@@ -1995,21 +1999,22 @@ function renderCleaning(){
     cells+='<td>'+g.n+'</td><td>'+fmt(g.a)+'</td><td>'+g.f+'</td><td>'+g.p+'</td>';
     h+='<tr>'+cells+'</tr>';
   });
-  const tot=cleanAgg(recs);
+  const tot=cleanAgg(fRecs);
   h+='<tr style="font-weight:700;background:var(--card-2)"><td class="name">⭐ 合计</td>'+(cleanDim==='net'||cleanDim==='eng'?'<td></td>':'')+'<td>'+tot.n+'</td><td>'+fmt(tot.a)+'</td><td>'+tot.f+'</td><td>'+tot.p+'</td></tr>';
   h+='</tbody></table>';
   box.innerHTML = total===0 ? '<div class="empty">该服务月（'+CURRENT_MONTH+'）尚未上线清洗保养模块（9月起执行），或当前筛选无数据。</div>' : h;
   // 服务项目明细
   if(itemsBox){
     const imap={};
-    recs.forEach(r=>{ if(cleanItem==='main' && CLEAN_MAIN_ITEMS.indexOf(r.it)<0) return; (imap[r.it]=imap[r.it]||[]).push(r); });
+    recs.forEach(r=>{ if(cleanItem!=='all' && r.it!==cleanItem) return; (imap[r.it]=imap[r.it]||[]).push(r); });
     const order=Object.keys(imap).slice().sort((a,b)=>{ const ia=CLEAN_MAIN_ITEMS.indexOf(a),ib=CLEAN_MAIN_ITEMS.indexOf(b); if(ia>=0&&ib>=0) return ia-ib; if(ia>=0) return -1; if(ib>=0) return 1; return a.localeCompare(b,'zh'); });
-    let ih='<div style="font-weight:600;margin:6px 0 4px">服务收费项目明细（数量=单量，上缴金额=合计）</div>';
-    ih+='<table class="dt"><thead><tr><th>服务收费项目</th><th>数量</th><th>上缴金额</th><th>免费单</th><th>收费单</th></tr></thead><tbody>';
+    const isSingle = cleanItem!=='all';
+    let ih='<div style="font-weight:600;margin:6px 0 4px">服务收费项目明细'+(isSingle?('（'+cleanItem+'）'):'')+'</div>';
+    ih+='<table class="dt"><thead><tr><th>服务收费项目</th><th>数量</th>'+(isSingle?'':'<th>上缴金额</th><th>免费单</th><th>收费单</th>')+'</tr></thead><tbody>';
     let tn=0,ta=0,tf=0,tp=0;
     order.forEach(it=>{const rs=imap[it];const n=rs.length,a=rs.reduce((s,r)=>s+r.amt,0),f=rs.filter(r=>r.amt===0).length;tn+=n;ta+=a;tf+=f;tp+=n-f;
-      ih+='<tr'+(CLEAN_MAIN_ITEMS.indexOf(it)>=0?' style="background:rgba(37,99,235,.07)"':'')+'><td class="name">'+(CLEAN_MAIN_ITEMS.indexOf(it)>=0?'🔥 ':'')+it+'</td><td>'+n+'</td><td>'+fmt(a)+'</td><td>'+f+'</td><td>'+(n-f)+'</td></tr>';});
-    ih+='<tr style="font-weight:700;background:var(--card-2)"><td class="name">⭐ 合计</td><td>'+tn+'</td><td>'+fmt(ta)+'</td><td>'+tf+'</td><td>'+tp+'</td></tr>';
+      ih+='<tr'+(CLEAN_MAIN_ITEMS.indexOf(it)>=0?' style="background:rgba(37,99,235,.07)"':'')+'><td class="name">'+(CLEAN_MAIN_ITEMS.indexOf(it)>=0?'🔥 ':'')+it+'</td><td>'+n+'</td>'+(isSingle?'':'<td>'+fmt(a)+'</td><td>'+f+'</td><td>'+(n-f)+'</td>')+'</tr>';});
+    ih+='<tr style="font-weight:700;background:var(--card-2)"><td class="name">⭐ 合计</td><td>'+tn+'</td>'+(isSingle?'':'<td>'+fmt(ta)+'</td><td>'+tf+'</td><td>'+tp+'</td>')+'</tr>';
     ih+='</tbody></table>';
     itemsBox.innerHTML = order.length? ih : '<div class="empty">无符合筛选条件的服务项目。</div>';
   }
