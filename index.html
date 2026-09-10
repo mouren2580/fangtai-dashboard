@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260910-0957";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260910-1028";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -310,7 +310,7 @@ var BUILD = "20260910-0957";   // 全局：页面右上角会显示，便于肉�
   <div class="panel open" id="mod1">
     <div class="sec">
       <h2>📊 各办事处达成情况 <span class="pill mute" id="rankPeriodLbl">月度</span></h2>
-      <div class="desc">按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。点击任意办事处查看其下网点与品项明细。</div>
+      <div class="desc">按<b>单月达成率</b>（实际合计 ÷ 当月目标）排序：<b>上行条</b>＝整体服务产品达成率（虚线＝时间进度参考线），<b>下行橙色条</b>＝<b>三大爆品</b>进度（达成率见右侧小字）。</div>
       <div id="officeBars"></div>
       <div class="legend">
         <span><i style="background:var(--green)"></i>8月达成率 ≥ 时间进度（领先）</span>
@@ -319,10 +319,6 @@ var BUILD = "20260910-0957";   // 全局：页面右上角会显示，便于肉�
         <span><i style="background:var(--bo)"></i>8月三大爆品进度（橙色条）</span>
         <span><i style="background:#1f2733"></i>时间进度线</span>
       </div>
-    </div>
-    <div class="sec" id="drillSec" style="display:none">
-      <div class="crumb" id="crumb"></div>
-      <div id="drillBody"></div>
     </div>
   </div>
 
@@ -1113,7 +1109,7 @@ function renderOfficeBars(){
     const w=(x.a/maxv*100), tline=(x.t>0)?(x.t/maxv*100):null, col=rateColor(x.r);
     const bw=(x.ab/maxv*100), btline=(x.tb>0)?(x.tb/maxv*100):null;
     const rbs = x.rb===null?'未设爆品目标':pct(x.rb);
-    return `<div class="obar" onclick="selectOffice('${x.o}')">
+    return `<div class="obar">
       <div class="name">${x.o.replace('办事处','')}</div>
       <div class="tracks">
         <div class="track">
@@ -1147,6 +1143,7 @@ function selectNet(n){
   renderDrill();
 }
 function renderDrill(){
+  if(!document.getElementById('drillBody')) return;
   if(!selectedOffice) return;
   const o=selectedOffice;
   const a=officeActual(o), t=officeTargetWhole(o), r=rate(a,t);
