@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260910-1028";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260910-1057";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -1862,7 +1862,7 @@ document.getElementById('asOfSaveBtn').onclick=()=>{ alert('截止日期已固�
 
 /* ---------- 六列导航 / 模块切换（互斥，一次展开一个） ---------- */
 function toggleModule(id){
-  const panels=['mod1','mod2','mod3','mod4','techSec','breakoutMod','woSec','fvSec','vpSec','vpPartsSec'];
+  const panels=['mod1','mod2','mod3','mod4','techSec','breakoutMod','woSec','fvSec','vpSec','vpPartsSec','cleanSec'];
   const willOpen=!document.getElementById(id).classList.contains('open');
   panels.forEach(m=>{
     document.getElementById(m).classList.toggle('open', willOpen && m===id);
