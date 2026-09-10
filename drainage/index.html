@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>西北大区服务引流看板 · 2026年1-8月</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#fff; --ink:#1f2733; --sub:#6b7785; --line:#e6eaf0;
+  --brand:#1f6fb2; --brand2:#2a9d8f; --red:#e15759; --green:#2a9d8f; --amber:#e9a23b;
+  --shadow:0 2px 10px rgba(31,39,51,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:6px}
+header.top h1{font-size:22px;margin:0;letter-spacing:.5px}
+.badge{background:var(--brand);color:#fff;padding:3px 10px;border-radius:20px;font-size:12px}
+.badge.sub{background:#eef3f8;color:var(--brand)}
+.meta{color:var(--sub);font-size:12px;margin:2px 0 18px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px}
+.kpi{background:var(--card);border-radius:12px;padding:14px 14px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.kpi .k{font-size:12px;color:var(--sub);margin-bottom:6px}
+.kpi .v{font-size:21px;font-weight:700;letter-spacing:.3px}
+.kpi .s{font-size:11px;margin-top:4px;color:var(--sub)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:#fff;border:1px solid var(--line);padding:9px 16px;border-radius:10px;cursor:pointer;font-size:14px;color:var(--sub);box-shadow:var(--shadow)}
+.tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.panel{display:none;background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.panel.on{display:block}
+.controls{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.controls label{font-size:12px;color:var(--sub);margin-right:4px}
+select{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.chart{width:100%;overflow:hidden;margin:6px 0 18px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{background:#f7f9fc;color:var(--sub);font-weight:600;position:sticky;top:0}
+tbody tr:hover{background:#fafcff}
+.rankbar{position:relative;height:18px;background:#eef2f7;border-radius:5px;min-width:80px;overflow:hidden}
+.rankbar>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#7fc4e8,#1f6fb2);border-radius:5px}
+.rankval{position:relative;z-index:1;font-size:12px;padding-left:6px;line-height:18px;display:inline-block}
+.pos{color:var(--red);font-weight:600}
+.neg{color:var(--green);font-weight:600}
+.neu{color:var(--sub)}
+.sec-title{font-size:15px;font-weight:700;margin:4px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-title .dot{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.note{font-size:11px;color:var(--sub);margin-top:8px;line-height:1.6}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="hTitle">西北大区服务引流看板</h1>
+    <span class="badge" id="hPeriod">2026年1-8月</span>
+    <span class="badge sub" id="hCal">自然月口径</span>
+  </header>
+  <div class="meta" id="hMeta"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-t="drain">服务引流与数据</div>
+    <div class="tab" data-t="install">报装线索提交率</div>
+    <div class="tab" data-t="repair">保外报修线索提交率</div>
+  </div>
+
+  <!-- 服务引流 -->
+  <div class="panel on" id="p_drain">
+    <div class="controls">
+      <span><label>办事处</label>
+        <select id="d_office"></select></span>
+      <span><label>趋势指标</label>
+        <select id="d_metric">
+          <option value="actual">当月实际(万元)</option>
+          <option value="retail">零售引流(万元)</option>
+          <option value="ec">电商引流(万元)</option>
+          <option value="ach">整体达成率</option>
+          <option value="yoy">同比增长</option>
+        </select></span>
+    </div>
+    <div class="sec-title"><span class="dot"></span>月度趋势（1-8月）</div>
+    <div class="chart" id="d_chart"></div>
+    <div class="sec-title"><span class="dot"></span>年累计明细（按实际降序）</div>
+    <table id="d_table"></table>
+    <div class="note">说明：目标/实际/零售引流/电商引流单位均为「万元」；整体达成率与同比增长为比值（显示时已×100）。零售引流+电商引流=当月引流合计。</div>
+  </div>
+
+  <!-- 报装线索 -->
+  <div class="panel" id="p_install">
+    <div class="controls">
+      <span><label>办事处</label>
+        <select id="i_office"></select></span>
+    </div>
+    <div class="sec-title"><span class="dot"></span>线索提交率月度趋势（1-8月）</div>
+    <div class="chart" id="i_chart"></div>
+    <div class="sec-title"><span class="dot"></span>年累计明细</div>
+    <table id="i_table"></table>
+    <div class="note">线索提交率 = 提交线索数 ÷ 报装工单。累计列=1-8月合计数，年度累计率=累计提交线索÷累计报装工单。</div>
+  </div>
+
+  <!-- 保外报修线索 -->
+  <div class="panel" id="p_repair">
+    <div class="controls">
+      <span><label>办事处</label>
+        <select id="r_office"></select></span>
+    </div>
+    <div class="sec-title"><span class="dot"></span>线索提交率月度趋势（1-8月）</div>
+    <div class="chart" id="r_chart"></div>
+    <div class="sec-title"><span class="dot"></span>年累计明细</div>
+    <table id="r_table"></table>
+    <div class="note">线索提交率 = 提交线索数 ÷ 保外维修工单。累计列=1-8月合计数，年度累计率=累计提交线索÷累计保外维修工单。</div>
+  </div>
+</div>
+
+<script>
+const DATA = {"meta": {"title": "西北大区服务引流看板", "period": "2026年1-8月", "caliber": "自然月口径", "months": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月"], "source": "2026年服务工单引流.xlsx", "stamp": "2026-09-10T02:28:48Z"}, "offices": ["包头", "呼和浩特", "兰州", "宁夏", "西宁", "新疆"], "drainage": {"包头": {"monthly": [{"target": 1.65, "actual": 4.520765, "retail": 3.481, "ec": 1.039765, "ach": 2.73985757575758, "ly": 0.906, "yoy": 3.98980684326711}, {"target": 1.65, "actual": -0.36, "retail": -0.36, "ec": 0, "ach": -0.218181818181818, "ly": 1.1608, "yoy": -1.31013094417643}, {"target": 4.4, "actual": 0.528, "retail": 0.528, "ec": 0, "ach": 0.12, "ly": 13.76451, "yoy": -0.961640479755545}, {"target": 4.95, "actual": 14.044463, "retail": 12.872, "ec": 1.172463, "ach": 2.83726525252525, "ly": 2.760333, "yoy": 4.08795967732879}, {"target": 6.05, "actual": 12.2308, "retail": 12.2308, "ec": 0, "ach": 2.02161983471074, "ly": 4.178759, "yoy": 1.92689767464455}, {"target": 6.05, "actual": 10.258, "retail": 10.238, "ec": 0.02, "ach": 1.69553719008264, "ly": 15.034618, "yoy": -0.317707972360854}, {"target": 4.4, "actual": 6.422, "retail": 6.422, "ec": 0, "ach": 1.45954545454545, "ly": 5.202348, "yoy": 0.234442601686777}, {"target": 4.4, "actual": 4.574, "retail": 4.574, "ec": 0, "ach": 1.03954545454545, "ly": 1.853975, "yoy": 1.46713143381114}], "cum": {"target": 33.55, "actual": 52.218028, "retail": 49.9858, "ec": 2.232228, "ach": 1.55642408345753, "ly": 44.861343, "yoy": 0.163987177111483}}, "呼和浩特": {"monthly": [{"target": 0.3, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0.188, "yoy": -1}, {"target": 0.3, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0.55754, "yoy": -1}, {"target": 0.8, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 2.416956, "yoy": -1}, {"target": 0.9, "actual": 0.68241, "retail": 0.4779, "ec": 0.20451, "ach": 0.758233333333333, "ly": 1.995924, "yoy": -0.658098204140037}, {"target": 1.1, "actual": 5.4399, "retail": 5.4399, "ec": 0, "ach": 4.94536363636364, "ly": 2.8239, "yoy": 0.926378412833315}, {"target": 1.1, "actual": 0.5599, "retail": 0.5599, "ec": null, "ach": 0.509, "ly": 0.177543, "yoy": 2.15360222593963}, {"target": 0.8, "actual": 3.7772, "retail": 3.7772, "ec": 0, "ach": 4.7215, "ly": 0, "yoy": null}, {"target": 0.8, "actual": 1.72, "retail": 1.72, "ec": 0, "ach": 2.15, "ly": 1.6296, "yoy": 0.055473735886107}], "cum": {"target": 6.1, "actual": 12.17941, "retail": 11.9749, "ec": 0.20451, "ach": 1.99662459016393, "ly": 9.789463, "yoy": 0.24413463741576}}, "兰州": {"monthly": [{"target": 1.41, "actual": 1.7828, "retail": 1.5529, "ec": 0.2299, "ach": 1.26439716312057, "ly": 4.4259, "yoy": -0.597189272238415}, {"target": 1.41, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 3.822, "yoy": -1}, {"target": 3.76, "actual": 2.190841, "retail": 2.0479, "ec": 0.142941, "ach": 0.582670478723404, "ly": 7.14082, "yoy": -0.693194759145308}, {"target": 4.23, "actual": 0.726, "retail": 0.726, "ec": 0, "ach": 0.171631205673759, "ly": 2.542952, "yoy": -0.714505031947123}, {"target": 5.17, "actual": 10.104, "retail": 10.104, "ec": 0, "ach": 1.95435203094778, "ly": 4.7898, "yoy": 1.10948265063259}, {"target": 5.17, "actual": 22.61, "retail": 22.61, "ec": null, "ach": 4.37330754352031, "ly": 5.8039, "yoy": 2.89565636899326}, {"target": 3.76, "actual": 4.3878, "retail": 4.168, "ec": 0.2198, "ach": 1.16696808510638, "ly": 7.235, "yoy": -0.393531444367657}, {"target": 3.76, "actual": 4.298474, "retail": 3.9969, "ec": 0.301574, "ach": 1.14321117021277, "ly": 2.53, "yoy": 0.699001581027668}], "cum": {"target": 28.67, "actual": 46.099915, "retail": 45.2057, "ec": 0.894215, "ach": 1.60794959888385, "ly": 38.290372, "yoy": 0.203955788154787}}, "宁夏": {"monthly": [{"target": 0.87, "actual": 5.017204, "retail": 3.9719, "ec": 1.045304, "ach": 5.76690114942529, "ly": 0, "yoy": null}, {"target": 0.87, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0.378, "yoy": -1}, {"target": 2.32, "actual": 3.9419, "retail": 3.9419, "ec": 0, "ach": 1.69909482758621, "ly": 5.245205, "yoy": -0.24847551239656}, {"target": 2.61, "actual": 5.05776, "retail": 4.5124, "ec": 0.54536, "ach": 1.93783908045977, "ly": 4.037909, "yoy": 0.25256908959563}, {"target": 3.19, "actual": 3.176924, "retail": 2.7599, "ec": 0.417024, "ach": 0.995900940438872, "ly": 8.702935, "yoy": -0.634959470569411}, {"target": 3.19, "actual": 6.16833, "retail": 5.7384, "ec": 0.42993, "ach": 1.93364576802508, "ly": 3.8377, "yoy": 0.60729864241603}, {"target": 2.32, "actual": 2.7322, "retail": 2.6837, "ec": 0.0485, "ach": 1.1776724137931, "ly": 0.8699, "yoy": 2.14082078399816}, {"target": 2.32, "actual": 5.301222, "retail": 4.5079, "ec": 0.793322, "ach": 2.28500948275862, "ly": 2.249472, "yoy": 1.35665169426425}], "cum": {"target": 17.69, "actual": 31.39554, "retail": 28.1161, "ec": 3.27944, "ach": 1.7747620124364, "ly": 25.321121, "yoy": 0.239895342706194}}, "西宁": {"monthly": [{"target": 0.18, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0, "yoy": null}, {"target": 0.18, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0, "yoy": null}, {"target": 0.48, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 1.010865, "yoy": -1}, {"target": 0.54, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 2.189917, "yoy": -1}, {"target": 0.66, "actual": 0.348, "retail": 0.348, "ec": 0, "ach": 0.527272727272727, "ly": 1.489624, "yoy": -0.766384000257783}, {"target": 0.66, "actual": 1.2329, "retail": 0.918, "ec": 0.3149, "ach": 1.8680303030303, "ly": 0, "yoy": null}, {"target": 0.48, "actual": 0.776, "retail": 0.776, "ec": 0, "ach": 1.61666666666667, "ly": 0.22392, "yoy": 2.46552340121472}, {"target": 0.48, "actual": 0.238, "retail": 0.238, "ec": 0, "ach": 0.495833333333333, "ly": 0, "yoy": null}], "cum": {"target": 3.66, "actual": 2.5949, "retail": 2.28, "ec": 0.3149, "ach": 0.708989071038251, "ly": 4.914326, "yoy": -0.471972351854557}}, "新疆": {"monthly": [{"target": 0.51, "actual": 5.7679, "retail": 5.7679, "ec": 0, "ach": 11.3096078431373, "ly": 0.1997, "yoy": 27.8828242363545}, {"target": 0.51, "actual": 1.374, "retail": 1.374, "ec": 0, "ach": 2.69411764705882, "ly": 0, "yoy": null}, {"target": 1.36, "actual": 2.344, "retail": 2.344, "ec": 0, "ach": 1.72352941176471, "ly": 12.305, "yoy": -0.809508329947176}, {"target": 1.53, "actual": 0, "retail": 0, "ec": 0, "ach": 0, "ly": 0.340915, "yoy": -1}, {"target": 1.87, "actual": 8.756, "retail": 8.756, "ec": 0, "ach": 4.68235294117647, "ly": 0.076094, "yoy": 114.068205114727}, {"target": 1.87, "actual": 5.092716, "retail": 4.5, "ec": 0.592716, "ach": 2.72337754010695, "ly": 0.1999, "yoy": 24.4763181590795}, {"target": 1.36, "actual": 6.8815, "retail": 6.67, "ec": 0.2115, "ach": 5.05992647058823, "ly": 0.13992, "yoy": 48.181675242996}, {"target": 1.36, "actual": 2.670727, "retail": 2.304, "ec": 0.366727, "ach": 1.96376985294118, "ly": 0.22584, "yoy": 10.8257483173928}], "cum": {"target": 10.37, "actual": 32.886843, "retail": 31.7159, "ec": 1.170943, "ach": 3.17134455159113, "ly": 13.487369, "yoy": 1.43834383118012}}, "小计": {"monthly": [{"target": 4.92, "actual": 17.0837, "retail": 14.7737, "ec": 2.31, "ach": 3.47229674796748, "ly": 5.7196, "yoy": 1.98686971116861}, {"target": 4.92, "actual": 1.014, "retail": 1.014, "ec": 0, "ach": 0.20609756097561, "ly": 5.91834, "yoy": -0.828668173846045}, {"target": 13.12, "actual": 9.004741, "retail": 8.8618, "ec": 0.142941, "ach": 0.686336966463415, "ly": 41.883356, "yoy": -0.785004310542832}, {"target": 14.76, "actual": 20.510633, "retail": 18.5883, "ec": 1.922333, "ach": 1.38960928184282, "ly": 13.86795, "yoy": 0.478995309328343}, {"target": 18.04, "actual": 40.055624, "retail": 39.6386, "ec": 0.417024, "ach": 2.22037827050998, "ly": 22.061112, "yoy": 0.815666590151938}, {"target": 18.04, "actual": 45.921846, "retail": 44.5643, "ec": 1.357546, "ach": 2.54555687361419, "ly": 25.053661, "yoy": 0.832939545242509}, {"target": 13.12, "actual": 24.9767, "retail": 24.4969, "ec": 0.4798, "ach": 1.9037118902439, "ly": 13.671088, "yoy": 0.826972366793338}, {"target": 13.12, "actual": 18.802423, "retail": 17.3408, "ec": 1.461623, "ach": 1.43311150914634, "ly": 8.488887, "yoy": 1.21494561065544}], "cum": {"target": 100.04, "actual": 177.369667, "retail": 169.2784, "ec": 8.091267, "ach": 1.77298747501, "ly": 136.663994, "yoy": 0.297852212631807}, "label": "西北大区(小计)"}}, "install": {"包头": {"monthly": [{"orders": 1935, "clues": 1, "rate": 0.000516795865633075}, {"orders": 188, "clues": 1, "rate": 0.00531914893617021}, {"orders": 971, "clues": 1, "rate": 0.00102986611740474}, {"orders": 1555, "clues": 7, "rate": 0.0045016077170418}, {"orders": 1779, "clues": 9, "rate": 0.00505902192242833}, {"orders": 1783, "clues": 19, "rate": 0.0106561974200785}, {"orders": 1819, "clues": 8, "rate": 0.00439802089059923}, {"orders": 1744, "clues": 5, "rate": 0.00286697247706422}], "cum": {"orders": 11774, "clues": 51, "rate": 0.00433157805333786}}, "呼和浩特": {"monthly": [{"orders": 1636, "clues": 1, "rate": 0.000611246943765281}, {"orders": 129, "clues": 1, "rate": 0.00775193798449612}, {"orders": 1110, "clues": 0, "rate": 0}, {"orders": 1622, "clues": 2, "rate": 0.00123304562268804}, {"orders": 1909, "clues": 1, "rate": 0.000523834468308015}, {"orders": 1917, "clues": 3, "rate": 0.00156494522691706}, {"orders": 1943, "clues": 4, "rate": 0.00205867215645908}, {"orders": 1939, "clues": 2, "rate": 0.00103145951521403}], "cum": {"orders": 12205, "clues": 14, "rate": 0.0011470708725932}}, "兰州": {"monthly": [{"orders": 3615, "clues": 1, "rate": 0.000276625172890733}, {"orders": 86, "clues": 2, "rate": 0.0232558139534884}, {"orders": 2034, "clues": 5, "rate": 0.00245821042281219}, {"orders": 3049, "clues": 7, "rate": 0.00229583469990161}, {"orders": 3453, "clues": 7, "rate": 0.00202722270489429}, {"orders": 3687, "clues": 26, "rate": 0.0070518036343911}, {"orders": 3915, "clues": 7, "rate": 0.00178799489144317}, {"orders": 4371, "clues": 15, "rate": 0.00343170899107756}], "cum": {"orders": 24210, "clues": 70, "rate": 0.00289136720363486}}, "宁夏": {"monthly": [{"orders": 2679, "clues": 3, "rate": 0.00111982082866741}, {"orders": 73, "clues": 0, "rate": 0}, {"orders": 1580, "clues": 5, "rate": 0.00316455696202532}, {"orders": 2160, "clues": 10, "rate": 0.00462962962962963}, {"orders": 2177, "clues": 9, "rate": 0.0041341295360588}, {"orders": 2205, "clues": 12, "rate": 0.0054421768707483}, {"orders": 2442, "clues": 2, "rate": 0.000819000819000819}, {"orders": 2376, "clues": 5, "rate": 0.0021043771043771}], "cum": {"orders": 15692, "clues": 46, "rate": 0.00293143002803977}}, "西宁": {"monthly": [{"orders": 1661, "clues": 0, "rate": 0}, {"orders": 32, "clues": 0, "rate": 0}, {"orders": 873, "clues": 0, "rate": 0}, {"orders": 1300, "clues": 1, "rate": 0.000769230769230769}, {"orders": 1638, "clues": 1, "rate": 0.00061050061050061}, {"orders": 1464, "clues": 3, "rate": 0.00204918032786885}, {"orders": 1765, "clues": 5, "rate": 0.0028328611898017}, {"orders": 2071, "clues": 2, "rate": 0.000965717044905843}], "cum": {"orders": 10804, "clues": 12, "rate": 0.00111069974083673}}, "新疆": {"monthly": [{"orders": 4730, "clues": 3, "rate": 0.000634249471458774}, {"orders": 134, "clues": 1, "rate": 0.00746268656716418}, {"orders": 2812, "clues": 2, "rate": 0.000711237553342817}, {"orders": 3852, "clues": 0, "rate": 0}, {"orders": 4112, "clues": 2, "rate": 0.000486381322957198}, {"orders": 4918, "clues": 3, "rate": 0.000610004066693778}, {"orders": 4733, "clues": 0, "rate": 0}, {"orders": 5163, "clues": 0, "rate": 0}], "cum": {"orders": 30454, "clues": 11, "rate": 0.000361200499113417}}, "小计": {"monthly": [{"orders": 16256, "clues": 9, "rate": 0.000553641732283465}, {"orders": 642, "clues": 5, "rate": 0.00778816199376947}, {"orders": 9380, "clues": 13, "rate": 0.00138592750533049}, {"orders": 13538, "clues": 27, "rate": 0.00199438617225587}, {"orders": 15068, "clues": 29, "rate": 0.00192460844173082}, {"orders": 15974, "clues": 66, "rate": 0.00413171403530737}, {"orders": 16617, "clues": 26, "rate": 0.0015646626948306}, {"orders": 17664, "clues": 29, "rate": 0.00164175724637681}], "cum": {"orders": 105139, "clues": 204, "rate": 0.00194028857036875}}}, "repair": {"包头": {"monthly": [{"orders": 266, "clues": 6, "rate": 0.0225563909774436}, {"orders": 163, "clues": 2, "rate": 0.0122699386503067}, {"orders": 99, "clues": 0, "rate": 0}, {"orders": 100, "clues": 8, "rate": 0.08}, {"orders": 106, "clues": 3, "rate": 0.0283018867924528}, {"orders": 108, "clues": 2, "rate": 0.0185185185185185}, {"orders": 99, "clues": 2, "rate": 0.0202020202020202}, {"orders": 105, "clues": 3, "rate": 0.0285714285714286}], "cum": {"orders": 1046, "clues": 26, "rate": 0.0248565965583174}}, "呼和浩特": {"monthly": [{"orders": 403, "clues": 1, "rate": 0.00248138957816377}, {"orders": 250, "clues": 3, "rate": 0.012}, {"orders": 172, "clues": 1, "rate": 0.00581395348837209}, {"orders": 167, "clues": 7, "rate": 0.0419161676646707}, {"orders": 160, "clues": 7, "rate": 0.04375}, {"orders": 145, "clues": 3, "rate": 0.0206896551724138}, {"orders": 176, "clues": 1, "rate": 0.00568181818181818}, {"orders": 174, "clues": 1, "rate": 0.00574712643678161}], "cum": {"orders": 1647, "clues": 24, "rate": 0.0145719489981785}}, "兰州": {"monthly": [{"orders": 477, "clues": 5, "rate": 0.010482180293501}, {"orders": 264, "clues": 1, "rate": 0.00378787878787879}, {"orders": 209, "clues": 3, "rate": 0.0143540669856459}, {"orders": 238, "clues": 5, "rate": 0.0210084033613445}, {"orders": 232, "clues": 1, "rate": 0.00431034482758621}, {"orders": 206, "clues": 4, "rate": 0.0194174757281553}, {"orders": 234, "clues": 3, "rate": 0.0128205128205128}, {"orders": 251, "clues": 2, "rate": 0.00796812749003984}], "cum": {"orders": 2111, "clues": 24, "rate": 0.0113690194220748}}, "宁夏": {"monthly": [{"orders": 495, "clues": 4, "rate": 0.00808080808080808}, {"orders": 264, "clues": 0, "rate": 0}, {"orders": 272, "clues": 0, "rate": 0}, {"orders": 233, "clues": 15, "rate": 0.0643776824034335}, {"orders": 242, "clues": 8, "rate": 0.0330578512396694}, {"orders": 193, "clues": 13, "rate": 0.0673575129533679}, {"orders": 215, "clues": 13, "rate": 0.0604651162790698}, {"orders": 249, "clues": 7, "rate": 0.0281124497991968}], "cum": {"orders": 2163, "clues": 60, "rate": 0.0277392510402219}}, "西宁": {"monthly": [{"orders": 76, "clues": 0, "rate": 0}, {"orders": 54, "clues": 0, "rate": 0}, {"orders": 51, "clues": 0, "rate": 0}, {"orders": 63, "clues": 0, "rate": 0}, {"orders": 53, "clues": 1, "rate": 0.0188679245283019}, {"orders": 55, "clues": 6, "rate": 0.109090909090909}, {"orders": 63, "clues": 2, "rate": 0.0317460317460317}, {"orders": 64, "clues": 3, "rate": 0.046875}], "cum": {"orders": 479, "clues": 12, "rate": 0.0250521920668058}}, "新疆": {"monthly": [{"orders": 813, "clues": 11, "rate": 0.013530135301353}, {"orders": 646, "clues": 2, "rate": 0.00309597523219814}, {"orders": 521, "clues": 2, "rate": 0.00383877159309021}, {"orders": 529, "clues": 0, "rate": 0}, {"orders": 610, "clues": 1, "rate": 0.00163934426229508}, {"orders": 468, "clues": 2, "rate": 0.00427350427350427}, {"orders": 572, "clues": 1, "rate": 0.00174825174825175}, {"orders": 576, "clues": 0, "rate": 0}], "cum": {"orders": 4735, "clues": 19, "rate": 0.00401267159450898}}, "小计": {"monthly": [{"orders": 2530, "clues": 27, "rate": 0.0106719367588933}, {"orders": 1641, "clues": 8, "rate": 0.0048750761730652}, {"orders": 1324, "clues": 6, "rate": 0.00453172205438067}, {"orders": 1330, "clues": 35, "rate": 0.0263157894736842}, {"orders": 1403, "clues": 21, "rate": 0.014967925873129}, {"orders": 1175, "clues": 30, "rate": 0.025531914893617}, {"orders": 1359, "clues": 22, "rate": 0.0161883738042678}, {"orders": 1419, "clues": 16, "rate": 0.0112755461592671}], "cum": {"orders": 12181, "clues": 165, "rate": 0.0135456859042772}}}};
+const M = DATA.meta, OFF = DATA.offices, MO = M.months;
+const DR = DATA.drainage, INS = DATA.install, REP = DATA.repair;
+
+/* ---------- helpers ---------- */
+function num(v,d=2){ if(v===null||v===undefined||typeof v==='string') return '—'; return Number(v).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function pct(v,d=1){ if(v===null||v===undefined) return '—'; return (v*100).toFixed(d)+'%'; }
+function yoy(v){ if(v===null||v===undefined) return '—'; const x=v*100; return (x>=0?'+':'')+x.toFixed(1)+'%'; }
+function achColor(ach){ if(ach==null) return '#9aa6b2'; const x=ach*100; return x>=100?'#2a9d8f':(x>=80?'#e9a23b':'#e15759'); }
+function yoyColor(v){ if(v==null) return '#9aa6b2'; return v>=0?'#e15759':'#2a9d8f'; }
+function yoyClass(v){ if(v==null) return 'neu'; return v>=0?'pos':'neg'; }
+
+/* ---------- hero KPI (大区小计 累计) ---------- */
+function renderKPI(){
+  const c = DR['小计'].cum;
+  const cards = [
+    {k:'累计目标', v:num(c.target)+' 万', s:'万元'},
+    {k:'累计实际', v:num(c.actual)+' 万', s:'万元'},
+    {k:'累计零售引流', v:num(c.retail)+' 万', s:'万元'},
+    {k:'累计电商引流', v:num(c.ec)+' 万', s:'万元'},
+    {k:'整体达成率', v:pct(c.ach), s:'目标 '+num(c.target)+'万', color:achColor(c.ach)},
+    {k:'同比增长', v:yoy(c.yoy), s:'vs 25年 '+num(c.ly)+'万', color:yoyColor(c.yoy)},
+  ];
+  document.getElementById('kpis').innerHTML = cards.map(x=>
+    `<div class="kpi"><div class="k">${x.k}</div><div class="v" style="${x.color?('color:'+x.color):''}">${x.v}</div><div class="s">${x.s}</div></div>`
+  ).join('');
+  document.getElementById('hTitle').textContent = M.title;
+  document.getElementById('hPeriod').textContent = M.period;
+  document.getElementById('hCal').textContent = M.caliber;
+  document.getElementById('hMeta').textContent = `统计区间：${M.period}（自然月） ｜ 数据源：${M.source} ｜ 6 办事处：包头 / 呼和浩特 / 兰州 / 宁夏 / 西宁 / 新疆 ｜ 生成：${M.stamp}`;
+}
+
+/* ---------- line chart (SVG) ---------- */
+function lineChart(elId, labels, series){
+  const el=document.getElementById(elId);
+  const W=el.clientWidth||1000, H=300, pad={l:58,r:18,t:18,b:38};
+  // gather
+  let all=[];
+  series.forEach(s=>s.data.forEach(v=>{ if(v!==null&&v!==undefined) all.push(v); }));
+  if(all.length===0){ el.innerHTML='<div class="note">无数据</div>'; return; }
+  let min=Math.min(...all), max=Math.max(...all);
+  if(min===max){ max=min+1; }
+  // pad range
+  const range=max-min; min-=range*0.12; max+=range*0.12;
+  const x=i=> pad.l + (W-pad.l-pad.r)* (labels.length<=1?0.5:i/(labels.length-1));
+  const y=v=> pad.t + (H-pad.t-pad.b)*(1-(v-min)/(max-min));
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" font-family="sans-serif">`;
+  // grid + y labels
+  const ticks=4;
+  for(let t=0;t<=ticks;t++){
+    const val=min+(max-min)*t/ticks;
+    const yy=y(val);
+    svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#eef2f7"/>`;
+    svg+=`<text x="${pad.l-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="#9aa6b2">${fmtTick(val)}</text>`;
+  }
+  // x labels
+  labels.forEach((lb,i)=>{ svg+=`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="11" fill="#6b7785">${lb}</text>`; });
+  // lines
+  series.forEach(s=>{
+    let dpath='', started=false; const pts=[];
+    s.data.forEach((v,i)=>{ if(v===null||v===undefined){started=false;return;} pts.push([x(i),y(v)]); });
+    pts.forEach((p,idx)=>{ dpath+=(idx===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)+' '; });
+    svg+=`<path d="${dpath}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round"/>`;
+    s.data.forEach((v,i)=>{ if(v===null||v===undefined)return; svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.4" fill="${s.color}"/>`; });
+  });
+  svg+='</svg>';
+  // legend
+  const leg=series.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:12px;color:var(--sub)"><i style="width:12px;height:3px;background:${s.color};display:inline-block;border-radius:2px"></i>${s.name}</span>`).join('');
+  el.innerHTML=svg+`<div style="margin-top:6px">${leg}</div>`;
+}
+function fmtTick(v){ const a=Math.abs(v); if(a>=100) return v.toFixed(0); if(a>=1) return v.toFixed(1); return v.toFixed(2); }
+
+/* ---------- 服务引流 module ---------- */
+function fillOfficeSelect(id, withAll){
+  const sel=document.getElementById(id);
+  let html = withAll? '<option value="__all__">全部（大区小计）</option>':'';
+  OFF.forEach(o=> html+=`<option value="${o}">${o}</option>`);
+  if('小计' in DR) html+=`<option value="小计">西北大区(小计)</option>`;
+  sel.innerHTML=html;
+}
+function drainSeries(office, metric){
+  const rec = DR[office];
+  return rec.monthly.map(m=> m[metric]);
+}
+function renderDrain(){
+  const office=document.getElementById('d_office').value;
+  const metric=document.getElementById('d_metric').value;
+  const labels=MO;
+  const series=[{name:office==='__all__'?'大区小计':office, color:'#1f6fb2', data:drainSeries(office==='__all__'?'小计':office, metric)}];
+  lineChart('d_chart', labels, series);
+  // table
+  const rows=OFF.map(o=>({o, c:DR[o].cum})).sort((a,b)=> (b.c.actual||0)-(a.c.actual||0));
+  const maxA=Math.max(...rows.map(r=>r.c.actual||0));
+  let html=`<thead><tr><th>办事处</th><th>目标(万)</th><th>实际(万)</th><th>零售引流(万)</th><th>电商引流(万)</th><th>整体达成率</th><th>25年实际(万)</th><th>同比</th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const c=r.c;
+    const w=(c.actual&&maxA)? Math.max(4,(c.actual/maxA*100)):4;
+    html+=`<tr><td>${r.o}</td><td>${num(c.target)}</td>`
+      +`<td><div class="rankbar"><i style="width:${w}%"></i><span class="rankval">${num(c.actual)}</span></div></td>`
+      +`<td>${num(c.retail)}</td><td>${num(c.ec)}</td>`
+      +`<td style="color:${achColor(c.ach)};font-weight:600">${pct(c.ach)}</td>`
+      +`<td>${num(c.ly)}</td>`
+      +`<td class="${yoyClass(c.yoy)}">${yoy(c.yoy)}</td></tr>`;
+  });
+  // 小计 row
+  const sc=DR['小计'].cum;
+  html+=`<tr style="font-weight:700;background:#f7f9fc"><td>西北大区(小计)</td><td>${num(sc.target)}</td>`
+    +`<td>${num(sc.actual)}</td><td>${num(sc.retail)}</td><td>${num(sc.ec)}</td>`
+    +`<td style="color:${achColor(sc.ach)}">${pct(sc.ach)}</td><td>${num(sc.ly)}</td><td class="${yoyClass(sc.yoy)}">${yoy(sc.yoy)}</td></tr>`;
+  html+='</tbody>';
+  document.getElementById('d_table').innerHTML=html;
+}
+
+/* ---------- 线索提交率 module ---------- */
+function rateSeries(map, office){
+  return map[office].monthly.map(m=> m.rate);
+}
+function renderRate(kind){
+  const idPrefix = kind==='install'?'i':'r';
+  const map = kind==='install'?INS:REP;
+  const office=document.getElementById(idPrefix+'_office').value;
+  const series=[{name:office==='__all__'?'大区小计':office, color:'#2a9d8f', data:rateSeries(map, office==='__all__'?'小计':office)}];
+  lineChart(idPrefix+'_chart', MO, series);
+  const rows=OFF.map(o=>({o, c:map[o].cum})).sort((a,b)=> (b.c.rate||0)-(a.c.rate||0));
+  let html=`<thead><tr><th>办事处</th><th>工单(累计)</th><th>提交线索(累计)</th><th>线索提交率</th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const c=r.c;
+    html+=`<tr><td>${r.o}</td><td>${num(c.orders,0)}</td><td>${num(c.clues,0)}</td><td style="color:var(--brand);font-weight:600">${pct(c.rate,3)}</td></tr>`;
+  });
+  const sc=map['小计'].cum;
+  html+=`<tr style="font-weight:700;background:#f7f9fc"><td>西北大区(小计)</td><td>${num(sc.orders,0)}</td><td>${num(sc.clues,0)}</td><td style="color:var(--brand)">${pct(sc.rate,3)}</td></tr>`;
+  html+='</tbody>';
+  document.getElementById(idPrefix+'_table').innerHTML=html;
+}
+
+/* ---------- events ---------- */
+function bind(){
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById('p_'+t.dataset.t).classList.add('on');
+  }));
+  fillOfficeSelect('d_office', true); fillOfficeSelect('i_office', true); fillOfficeSelect('r_office', true);
+  document.getElementById('d_office').value='__all__';
+  document.getElementById('i_office').value='__all__';
+  document.getElementById('r_office').value='__all__';
+  ['d_office','d_metric'].forEach(id=>document.getElementById(id).addEventListener('change',renderDrain));
+  document.getElementById('i_office').addEventListener('change',()=>renderRate('install'));
+  document.getElementById('r_office').addEventListener('change',()=>renderRate('repair'));
+}
+renderKPI(); bind(); renderDrain(); renderRate('install'); renderRate('repair');
+</script>
+</body>
+</html>
