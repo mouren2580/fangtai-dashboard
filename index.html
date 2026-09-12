@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260912-1034";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260912-1125";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -1164,11 +1164,16 @@ function renderDrill(){
   const gapCard = (lbl, gap, need, p) => {
     if(t<=0) return `<div class="kpi"><div class="lbl">${lbl}</div><div class="val">—</div><div class="sub">设目标后显示</div></div>`;
     const done = gap<=0;
-    let c;
-    if(done) c = 'var(--green)';
-    else { const ratio = t>0 ? a/(t*p) : 0; const hue = Math.max(0, Math.min(120, ratio*120)); c = `hsl(${hue.toFixed(0)},72%,42%)`; }
+    let c, tint;
+    if(done){ c='hsl(140,72%,40%)'; tint='hsl(140,70%,93%)'; }
+    else {
+      const ratio = t>0 ? a/(t*p) : 0;
+      const hue = Math.max(0, Math.min(120, Math.pow(ratio,1.4)*120));   // 调陡：红区更大、过渡更集中
+      c = `hsl(${hue.toFixed(0)},90%,${(38+ratio*14).toFixed(0)}%)`;      // 高饱和 + 越接近目标越亮
+      tint = `hsl(${hue.toFixed(0)},85%,95%)`;                            // 极淡同色背景，强化辨识
+    }
     const needTxt = done ? '已达成' : (remainDays>0 ? fmt(need) : '—');
-    return `<div class="kpi"><div class="lbl">${lbl}</div>
+    return `<div class="kpi" style="border-left:5px solid ${c};background:${tint}"><div class="lbl">${lbl}</div>
       <div class="val" style="color:${c}">${done?'已达成':fmt(gap)}</div>
       <div class="sub">剩余每天需完成 <b style="color:${c};font-size:14px">${needTxt}</b>${done?'':'<span style="opacity:.7"> / 剩'+remainDays+'天</span>'}</div></div>`;
   };
