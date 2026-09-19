@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260919-0914";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260919-0922";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -99,6 +99,21 @@ var BUILD = "20260919-0914";   // 全局：页面右上角会显示，便于肉�
   .obar .tline{position:absolute;top:-3px;bottom:-3px;width:2px;background:#1f2733;opacity:.55}
   .obar .tline.bo{top:0;bottom:0;width:2px;background:var(--bo);opacity:.5}
   .obar .nums{width:250px;text-align:right;flex-shrink:0;font-size:13px}
+  /* 各品项占比环形图 */
+  .iPieWrap{display:flex;gap:26px;flex-wrap:wrap;align-items:center;margin:4px 0 20px}
+  .iPieSvgBox{flex:0 0 auto}
+  .iPieSlice{transition:opacity .15s;cursor:pointer}
+  .iPieSlice:hover{opacity:.7}
+  .iPieLegend{flex:1;min-width:280px}
+  .iPieLegend .hd{display:flex;justify-content:space-between;align-items:baseline;padding:0 8px 7px;border-bottom:1px solid var(--line);margin-bottom:6px;font-size:12px;color:var(--sub)}
+  .iPieLegend .hd b{font-size:15px;color:var(--ink)}
+  .iPieRow{display:grid;grid-template-columns:1fr auto auto;gap:6px 14px;align-items:center;font-size:13px;padding:5px 8px;border-radius:9px;cursor:pointer;transition:.15s}
+  .iPieRow:hover{background:var(--blue-soft)}
+  .iPieRow .nm{display:flex;align-items:center;gap:8px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .iPieRow .dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+  .iPieRow .amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--sub)}
+  .iPieRow .pc{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;width:58px}
+  .iPieZero{font-size:12px;color:var(--sub);padding:9px 8px 0;border-top:1px dashed var(--line);margin-top:6px}
   .obar .nums .r{font-weight:700;font-size:15px}
   .obar .nums .r2{font-size:12px;color:var(--sub)}
   .obar .nums .bo-r2{font-size:12px;color:var(--bo);font-weight:700}
@@ -330,7 +345,8 @@ var BUILD = "20260919-0914";   // 全局：页面右上角会显示，便于肉�
   <div class="panel" id="mod2">
     <div class="sec">
       <h2>📦 全区各品项分析</h2>
-      <div class="desc">全部品项按实际收入排序；点击任一品项查看各办事处分布。</div>
+      <div class="desc">上方<b>环形图</b>看各品项占全区实际收入的比重（中心为合计金额），下方<b>条形图</b>按实际收入排序。<b>点击环形扇区、右侧图例行或条形图</b>均可下钻查看该品项的各办事处分布。</div>
+      <div id="itemPie" class="iPieWrap"></div>
       <div id="itemBars"></div>
       <div id="itemDetail" style="margin-top:16px"></div>
     </div>
@@ -2070,15 +2086,56 @@ function initCleaning(){
   const os=document.getElementById('cleanOfficeSel'); if(os) os.onchange=()=>{cleanOffice=os.value;renderCleaning();};
 }
 initCleaning();
+/* 各品项占比环形图（纯 SVG 手绘，不依赖任何图表库，保证离线可用） */
+const PIE_COLORS=['#2b6cb0','#e8590c','#f08c00','#6741d9','#2f9e44','#1c7ed6','#868e96','#c2255c','#66a80f','#a97400','#adb5bd','#9775fa','#099268','#d9480f','#495057'];
+function pieColorOf(it){
+  const i=(typeof ITEMS!=='undefined'&&ITEMS)?ITEMS.indexOf(it):-1;
+  return PIE_COLORS[(i<0?0:i)%PIE_COLORS.length];
+}
+function renderItemPie(){
+  const box=document.getElementById('itemPie'); if(!box) return;
+  const all=ITEMS.map(it=>({it,a:itemActual(it)||0}));
+  const rows=all.filter(x=>x.a>0).sort((x,y)=>y.a-x.a);
+  const zeros=all.filter(x=>!(x.a>0)).map(x=>x.it);
+  const total=rows.reduce((s,r)=>s+r.a,0);
+  if(!total){ box.innerHTML='<div style="color:var(--sub);font-size:13px">本月暂无品项收入数据</div>'; return; }
+  const R=92, CX=130, CY=130, SW=38, C=2*Math.PI*R;
+  let acc=0, slices='';
+  rows.forEach(x=>{
+    const len=x.a/total*C;
+    const dash=Math.max(len-1.6,0.8);
+    const col=pieColorOf(x.it);
+    slices+='<circle class="iPieSlice" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+col
+      +'" stroke-width="'+SW+'" stroke-dasharray="'+dash.toFixed(2)+' '+(C-dash).toFixed(2)
+      +'" stroke-dashoffset="'+(-acc).toFixed(2)+'" transform="rotate(-90 '+CX+' '+CY+')"'
+      +' onclick="selectItem(\''+x.it+'\')"><title>'+x.it+' '+fmt(x.a)+'（占全区 '+pct(x.a/total)+'）</title></circle>';
+    acc+=len;
+  });
+  const svg='<div class="iPieSvgBox"><svg viewBox="0 0 260 260" width="260" height="260" role="img" aria-label="各品项实际收入占比环形图">'
+    +'<title>各品项实际收入占比</title>'
+    +'<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="var(--line)" stroke-width="'+SW+'"/>'
+    +slices
+    +'<text x="'+CX+'" y="'+(CY-5)+'" text-anchor="middle" style="font-size:17px;font-weight:700;fill:var(--ink)">'+fmt(total)+'</text>'
+    +'<text x="'+CX+'" y="'+(CY+15)+'" text-anchor="middle" style="font-size:11px;fill:var(--sub)">全区合计</text>'
+    +'</svg></div>';
+  let leg='<div class="iPieLegend"><div class="hd"><span>品项（按占比降序）</span><b>'+fmt(total)+'</b></div>';
+  leg+=rows.map(x=>'<div class="iPieRow" onclick="selectItem(\''+x.it+'\')">'
+      +'<span class="nm"><i class="dot" style="background:'+pieColorOf(x.it)+'"></i>'+x.it+(BREAKOUT.includes(x.it)?' 🔥':'')+'</span>'
+      +'<span class="amt">'+fmt(x.a)+'</span><span class="pc" style="color:'+pieColorOf(x.it)+'">'+pct(x.a/total)+'</span></div>').join('');
+  if(zeros.length) leg+='<div class="iPieZero">本月无收入，未绘制：'+zeros.join('、')+'</div>';
+  leg+='</div>';
+  box.innerHTML=svg+leg;
+}
 function renderItemAnalysis(){
   const rows=ITEMS.map(it=>({it,a:itemActual(it)})).sort((x,y)=>y.a-x.a);
   const total=rows.reduce((s,r)=>s+r.a,0);
   const maxv=Math.max(...rows.map(r=>r.a),1);
   document.getElementById('itemBars').innerHTML=rows.map(x=>`<div class="obar" onclick="selectItem('${x.it}')">
     <div class="name" style="width:140px">${x.it}${BREAKOUT.includes(x.it)?' 🔥':''}</div>
-    <div class="track"><div class="fill" style="width:${x.a/maxv*100}%;background:var(--blue)"></div></div>
-    <div class="nums"><div class="r" style="color:var(--blue)">${fmt(x.a)}</div><div class="r2">占全区 ${total>0?pct(x.a/total):'—'}</div></div>
+    <div class="track"><div class="fill" style="width:${x.a/maxv*100}%;background:${pieColorOf(x.it)}"></div></div>
+    <div class="nums"><div class="r" style="color:${pieColorOf(x.it)}">${fmt(x.a)}</div><div class="r2">占全区 ${total>0?pct(x.a/total):'—'}</div></div>
   </div>`).join('');
+  renderItemPie();
   if(selectedItem) selectItem(selectedItem);
 }
 function selectItem(it){
