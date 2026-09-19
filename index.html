@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260919-0922";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260919-0929";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -100,6 +100,9 @@ var BUILD = "20260919-0922";   // 全局：页面右上角会显示，便于肉�
   .obar .tline.bo{top:0;bottom:0;width:2px;background:var(--bo);opacity:.5}
   .obar .nums{width:250px;text-align:right;flex-shrink:0;font-size:13px}
   /* 各品项占比环形图 */
+  .iPieScope{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 14px}
+  .iPieScope .lbl{font-size:12px;color:var(--sub);font-weight:600;flex:0 0 auto}
+  .iPieScope .seg{flex-wrap:wrap}
   .iPieWrap{display:flex;gap:26px;flex-wrap:wrap;align-items:center;margin:4px 0 20px}
   .iPieSvgBox{flex:0 0 auto}
   .iPieSlice{transition:opacity .15s;cursor:pointer}
@@ -114,6 +117,7 @@ var BUILD = "20260919-0922";   // 全局：页面右上角会显示，便于肉�
   .iPieRow .amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--sub)}
   .iPieRow .pc{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;width:58px}
   .iPieZero{font-size:12px;color:var(--sub);padding:9px 8px 0;border-top:1px dashed var(--line);margin-top:6px}
+  tr.hlRow{background:var(--blue-soft)}
   .obar .nums .r{font-weight:700;font-size:15px}
   .obar .nums .r2{font-size:12px;color:var(--sub)}
   .obar .nums .bo-r2{font-size:12px;color:var(--bo);font-weight:700}
@@ -345,7 +349,8 @@ var BUILD = "20260919-0922";   // 全局：页面右上角会显示，便于肉�
   <div class="panel" id="mod2">
     <div class="sec">
       <h2>📦 全区各品项分析</h2>
-      <div class="desc">上方<b>环形图</b>看各品项占全区实际收入的比重（中心为合计金额），下方<b>条形图</b>按实际收入排序。<b>点击环形扇区、右侧图例行或条形图</b>均可下钻查看该品项的各办事处分布。</div>
+      <div class="desc">上方<b>环形图</b>看各品项实际收入的占比结构（中心为合计金额），下方<b>条形图</b>按实际收入排序。上方可切换<b>查看范围</b>：选「全区」看整体，选某个办事处即可看该办的品项占比与排序。<b>点击环形扇区、右侧图例行或条形图</b>均可下钻查看该品项的各办事处分布。</div>
+      <div class="iPieScope"><span class="lbl">查看范围</span><span class="seg" id="itemScopeSeg"></span></div>
       <div id="itemPie" class="iPieWrap"></div>
       <div id="itemBars"></div>
       <div id="itemDetail" style="margin-top:16px"></div>
@@ -2092,13 +2097,22 @@ function pieColorOf(it){
   const i=(typeof ITEMS!=='undefined'&&ITEMS)?ITEMS.indexOf(it):-1;
   return PIE_COLORS[(i<0?0:i)%PIE_COLORS.length];
 }
+let pieOffice='';   // '' = 全区；否则为某办事处名（环形图/条形图的查看范围）
+function itemScopeActual(it){ return pieOffice ? (itemActualOffice(it,pieOffice)||0) : (itemActual(it)||0); }
+function renderItemScopeSeg(){
+  const box=document.getElementById('itemScopeSeg'); if(!box) return;
+  const opts=[{v:'',t:'全区'}].concat(OFFICE_ORDER.map(o=>({v:o,t:o})));
+  box.innerHTML=opts.map(o=>'<button type="button" data-o="'+o.v+'"'+(o.v===pieOffice?' class="on"':'')+'>'+o.t+'</button>').join('');
+  box.querySelectorAll('button').forEach(b=>{ b.onclick=()=>{ pieOffice=b.dataset.o||''; renderItemAnalysis(); }; });
+}
 function renderItemPie(){
   const box=document.getElementById('itemPie'); if(!box) return;
-  const all=ITEMS.map(it=>({it,a:itemActual(it)||0}));
+  const scopeLbl=pieOffice||'全区';
+  const all=ITEMS.map(it=>({it,a:itemScopeActual(it)}));
   const rows=all.filter(x=>x.a>0).sort((x,y)=>y.a-x.a);
   const zeros=all.filter(x=>!(x.a>0)).map(x=>x.it);
   const total=rows.reduce((s,r)=>s+r.a,0);
-  if(!total){ box.innerHTML='<div style="color:var(--sub);font-size:13px">本月暂无品项收入数据</div>'; return; }
+  if(!total){ box.innerHTML='<div style="color:var(--sub);font-size:13px">'+(pieOffice?pieOffice:'本月')+'暂无品项收入数据</div>'; return; }
   const R=92, CX=130, CY=130, SW=38, C=2*Math.PI*R;
   let acc=0, slices='';
   rows.forEach(x=>{
@@ -2108,32 +2122,34 @@ function renderItemPie(){
     slices+='<circle class="iPieSlice" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+col
       +'" stroke-width="'+SW+'" stroke-dasharray="'+dash.toFixed(2)+' '+(C-dash).toFixed(2)
       +'" stroke-dashoffset="'+(-acc).toFixed(2)+'" transform="rotate(-90 '+CX+' '+CY+')"'
-      +' onclick="selectItem(\''+x.it+'\')"><title>'+x.it+' '+fmt(x.a)+'（占全区 '+pct(x.a/total)+'）</title></circle>';
+      +' onclick="selectItem(\''+x.it+'\')"><title>'+x.it+' '+fmt(x.a)+'（占'+scopeLbl+' '+pct(x.a/total)+'）</title></circle>';
     acc+=len;
   });
-  const svg='<div class="iPieSvgBox"><svg viewBox="0 0 260 260" width="260" height="260" role="img" aria-label="各品项实际收入占比环形图">'
-    +'<title>各品项实际收入占比</title>'
+  const svg='<div class="iPieSvgBox"><svg viewBox="0 0 260 260" width="260" height="260" role="img" aria-label="'+scopeLbl+'各品项实际收入占比环形图">'
+    +'<title>'+scopeLbl+'各品项实际收入占比</title>'
     +'<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="var(--line)" stroke-width="'+SW+'"/>'
     +slices
     +'<text x="'+CX+'" y="'+(CY-5)+'" text-anchor="middle" style="font-size:17px;font-weight:700;fill:var(--ink)">'+fmt(total)+'</text>'
-    +'<text x="'+CX+'" y="'+(CY+15)+'" text-anchor="middle" style="font-size:11px;fill:var(--sub)">全区合计</text>'
+    +'<text x="'+CX+'" y="'+(CY+15)+'" text-anchor="middle" style="font-size:11px;fill:var(--sub)">'+scopeLbl+'合计</text>'
     +'</svg></div>';
-  let leg='<div class="iPieLegend"><div class="hd"><span>品项（按占比降序）</span><b>'+fmt(total)+'</b></div>';
+  let leg='<div class="iPieLegend"><div class="hd"><span>'+scopeLbl+' · 品项（按占比降序）</span><b>'+fmt(total)+'</b></div>';
   leg+=rows.map(x=>'<div class="iPieRow" onclick="selectItem(\''+x.it+'\')">'
       +'<span class="nm"><i class="dot" style="background:'+pieColorOf(x.it)+'"></i>'+x.it+(BREAKOUT.includes(x.it)?' 🔥':'')+'</span>'
       +'<span class="amt">'+fmt(x.a)+'</span><span class="pc" style="color:'+pieColorOf(x.it)+'">'+pct(x.a/total)+'</span></div>').join('');
-  if(zeros.length) leg+='<div class="iPieZero">本月无收入，未绘制：'+zeros.join('、')+'</div>';
+  if(zeros.length) leg+='<div class="iPieZero">'+(pieOffice?pieOffice:'本月')+'无收入，未绘制：'+zeros.join('、')+'</div>';
   leg+='</div>';
   box.innerHTML=svg+leg;
 }
 function renderItemAnalysis(){
-  const rows=ITEMS.map(it=>({it,a:itemActual(it)})).sort((x,y)=>y.a-x.a);
+  renderItemScopeSeg();
+  const scopeLbl=pieOffice||'全区';
+  const rows=ITEMS.map(it=>({it,a:itemScopeActual(it)})).sort((x,y)=>y.a-x.a);
   const total=rows.reduce((s,r)=>s+r.a,0);
   const maxv=Math.max(...rows.map(r=>r.a),1);
   document.getElementById('itemBars').innerHTML=rows.map(x=>`<div class="obar" onclick="selectItem('${x.it}')">
     <div class="name" style="width:140px">${x.it}${BREAKOUT.includes(x.it)?' 🔥':''}</div>
     <div class="track"><div class="fill" style="width:${x.a/maxv*100}%;background:${pieColorOf(x.it)}"></div></div>
-    <div class="nums"><div class="r" style="color:${pieColorOf(x.it)}">${fmt(x.a)}</div><div class="r2">占全区 ${total>0?pct(x.a/total):'—'}</div></div>
+    <div class="nums"><div class="r" style="color:${pieColorOf(x.it)}">${fmt(x.a)}</div><div class="r2">占${scopeLbl} ${total>0?pct(x.a/total):'—'}</div></div>
   </div>`).join('');
   renderItemPie();
   if(selectedItem) selectItem(selectedItem);
@@ -2147,7 +2163,8 @@ function selectItem(it){
   const maxv=Math.max(...rows.map(x=>x.a),1);
   rows.forEach(x=>{
     const w=x.a/maxv*100;
-    html+=`<tr><td><b>${x.o}</b></td><td>${fmt(x.a)}</td><td>${total>0?pct(x.a/total):'—'}</td><td><span class="mini"><i style="width:${w}%;background:var(--blue)"></i></span></td></tr>`;
+    const hl=(pieOffice && x.o===pieOffice) ? ' class="hlRow"' : '';
+    html+=`<tr${hl}><td><b>${x.o}</b></td><td>${fmt(x.a)}</td><td>${total>0?pct(x.a/total):'—'}</td><td><span class="mini"><i style="width:${w}%;background:var(--blue)"></i></span></td></tr>`;
   });
   html+=`</tbody></table>`;
   document.getElementById('itemDetail').innerHTML=html;
