@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20260921-0930";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20260921-0937";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -847,7 +847,8 @@ let YEAR_RANGE = '1–8月汇总';   // 年度累计视图覆盖范围（由 MON
 /* 年度累计覆盖范围（1–N月）：由 MONTH_DATA 月份键推导，早设以便 computeExtendYear 等聚合函数使用 */
 (function(){ let _m=0; for(const _k in MONTH_DATA){ const _n=parseInt(_k.split('-')[1],10); if(_n>_m)_m=_n; } if(_m) YEAR_RANGE='1–'+_m+'月汇总'; })();
 const fmt = n => '¥' + (Math.round(n*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:0});
-const pct = x => (x*100).toFixed(1) + '%';
+/* ⚠️ 全局百分比格式（锁定规则 2026-09-21）：所有百分比一律精确到小数点后两位，勿改成 toFixed(1) */
+const pct = x => (x*100).toFixed(2) + '%';
 /* 全局金额格式化（原仅定义在第二个 <script> 的 IIFE 内，script1 的 updateColSummaries 无法访问，提升为全局以便复用） */
 const money = n => '¥' + Math.round(n).toLocaleString('zh-CN');
 let OFFICE_ORDER = [];
@@ -1757,11 +1758,11 @@ function renderLastYear(){
       const diff=cur-last; sd+=diff; sl+=last;
       const yoy= last>0? diff/last : null;
       const col= diff>=0?'var(--green)':'var(--red)';
-      html+=`<td style="color:${col}"><b>${fmtDiff(diff)}</b><br><span class="sub">${yoy===null?'—':(yoy>=0?'+':'')+(yoy*100).toFixed(1)+'%'}</span></td>`;
+      html+=`<td style="color:${col}"><b>${fmtDiff(diff)}</b><br><span class="sub">${yoy===null?'—':(yoy>=0?'+':'')+(yoy*100).toFixed(2)+'%'}</span></td>`;
     });
     const yoySum= sl>0? sd/sl:null;
     const colSum= sd>=0?'var(--green)':'var(--red)';
-    html+=`<td style="color:${colSum}"><b>${fmtDiff(sd)}</b><br><span class="sub">${yoySum===null?'—':(yoySum>=0?'+':'')+(yoySum*100).toFixed(1)+'%'}</span></td></tr>`;
+    html+=`<td style="color:${colSum}"><b>${fmtDiff(sd)}</b><br><span class="sub">${yoySum===null?'—':(yoySum>=0?'+':'')+(yoySum*100).toFixed(2)+'%'}</span></td></tr>`;
   });
   html+=`</tbody></table></div>`;
   document.getElementById('lyBars').innerHTML=html;
@@ -1791,7 +1792,7 @@ function lySelect(it){
     const w=Math.abs(x.diff)/maxv*100;
     html+=`<tr><td><b>${x.o}</b></td><td>${fmt(x.cur)}</td><td>${fmt(x.last)}</td>`+
       `<td style="color:${col};font-weight:700">${fmtDiff(x.diff)}</td>`+
-      `<td style="color:${col}">${x.r===null?'—':(x.r>=0?'+':'')+(x.r*100).toFixed(1)+'%'}</td>`+
+      `<td style="color:${col}">${x.r===null?'—':(x.r>=0?'+':'')+(x.r*100).toFixed(2)+'%'}</td>`+
       `<td><span class="mini"><i style="width:${w}%;background:${col}"></i></span></td></tr>`;
   });
   html+=`</tbody></table>`;
@@ -1976,7 +1977,7 @@ function renderBigCare(){
     } else {
       cells='<td class="name">'+(tot?'⭐ ':'')+r.name+'</td><td>'+r.id+'</td><td>'+r.office+'</td><td>'+r.net+'</td><td>'+r.big+'</td><td>'+r.den+'</td>';
     }
-    cells+='<td><div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:130px"><i style="width:'+w+'%;background:var(--orange)"></i></span><b style="margin-left:auto">'+r.pct.toFixed(1)+'%</b></div></td>';
+    cells+='<td><div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:130px"><i style="width:'+w+'%;background:var(--orange)"></i></span><b style="margin-left:auto">'+r.pct.toFixed(2)+'%</b></div></td>';
     h+='<tr'+(tot?' style="font-weight:700;background:var(--card-2)"':'')+'>'+cells+'</tr>';
   });
   h+='</tbody></table>';
@@ -2477,7 +2478,7 @@ function renderVpView(){
       else if(lv==='info') vchk='<span class="vp-flag info">部分编码未匹配</span>';
       h+=`<tr${p.special?' class="vp-special"':''}><td class="rowh">${esc(p.name)}${p.special?' 🔧特殊':''}</td>`
         +`<td class="num">${fmtInt(p.total)}</td>`
-        +`<td>${(p.total/grand*100).toFixed(1)}%</td>`
+        +`<td>${(p.total/grand*100).toFixed(2)}%</td>`
         +`<td>${vchk}</td></tr>`;
     });
     h+='</tbody></table>';
@@ -2948,7 +2949,7 @@ function renderYearTargets(){
     const yProg = yearTimeProg();
     const cls = r===null?'mute':(r>=yProg?'good':(r>=yProg*0.8?'warn':'bad'));
     const col = r===null?'#b9c1cc':(r>=yProg?'var(--green)':(r>=yProg*0.8?'var(--orange)':'var(--red)'));
-    const pctTxt = r===null?'—':(r*100).toFixed(1)+'%';
+    const pctTxt = r===null?'—':(r*100).toFixed(2)+'%';
     const bg = (cls==='good')?'rgba(46,191,145,.14)':(cls==='warn')?'rgba(255,159,64,.16)':(cls==='bad')?'rgba(239,83,80,.14)':'#eef1f6';
     return `<td class="${x.total?'tot':''}" style="vertical-align:top;min-width:150px"><div style="font-size:13px;font-weight:600">${money(x.act)}</div><div style="font-size:11px;color:var(--sub);margin:2px 0">目标 ${money(x.tgt)}</div><span class="pill" style="background:${bg};color:${col};font-size:11px">达成率 ${pctTxt}</span></td>`;
   };
@@ -3036,7 +3037,7 @@ setAdminMode(false); // 默认锁定：隐藏 设置目标/固化/导出/导入/
       var top = rows.slice(0,20);
       var max = top.length ? top[0].eff : 1;
       chart.innerHTML = top.map(function(t,i){
-        var pct = (t.eff/max*100).toFixed(1);
+        var pct = (t.eff/max*100).toFixed(2);
         var col = i<3 ? 'var(--orange)' : 'var(--blue)';
         return '<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12px">'
           + '<div style="width:96px;text-align:right;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+t.name+'">'+(i+1)+'. '+t.name+'</div>'
@@ -3054,7 +3055,7 @@ setAdminMode(false); // 默认锁定：隐藏 设置目标/固化/导出/导入/
       + '<th style="padding:8px 6px;cursor:pointer;text-align:right" data-k="amount">金额'+(iv?'('+iv+')':'')+'</th>'
       + '<th style="padding:8px 6px;text-align:right">占筛选合计</th></tr>';
     var body = rows.map(function(t,i){
-      var pct = sum>0 ? (t.eff/sum*100).toFixed(1) : '0.0';
+      var pct = sum>0 ? (t.eff/sum*100).toFixed(2) : '0.00';
       return '<tr style="border-bottom:1px solid var(--line)">'
         + '<td style="padding:7px 6px;color:var(--sub)">'+(i+1)+'</td>'
         + '<td style="padding:7px 6px"><b>'+(t.name||'—')+'</b><br><span style="font-size:11px;color:var(--sub)">'+(t.id||'')+'</span></td>'
