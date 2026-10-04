@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20261004-1010";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20261004-1125";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -225,6 +225,8 @@ var BUILD = "20261004-1010";   // 全局：页面右上角会显示，便于肉�
   .colCard .ico{font-size:28px;line-height:1}
   .colCard .t{font-weight:700;margin-top:8px;font-size:15px}
   .colCard .s{font-size:12px;color:var(--sub);margin-top:6px}
+  .colCard .srcNote{margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:11px;color:var(--sub);line-height:1.5}
+  .colCard .srcNote b{color:var(--blue);font-weight:700}
   .panel{display:none;margin-bottom:8px}
   .panel.open{display:block}
   /* 数据明细表 */
@@ -314,10 +316,12 @@ var BUILD = "20261004-1010";   // 全局：页面右上角会显示，便于肉�
     <div class="colCard" data-mod="vpSec" onclick="toggleModule('vpSec')">
       <div class="ico">🛒</div><div class="t">增值产品</div>
       <div class="s" id="colVpS"></div>
+      <div class="srcNote">数据口径<br><b>工单消耗</b></div>
     </div>
     <div class="colCard" data-mod="vpPartsSec" onclick="toggleModule('vpPartsSec')">
       <div class="ico">🔧</div><div class="t">增值配件明细</div>
       <div class="s" id="colVppS"></div>
+      <div class="srcNote">数据口径<br><b>工单消耗 + 网点买断消耗</b></div>
     </div>
     <div class="colCard" data-mod="cleanSec" onclick="toggleModule('cleanSec')">
       <div class="ico">🧽</div><div class="t">清洗保养</div>
