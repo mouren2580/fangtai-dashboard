@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20261004-1134";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20261004-1137";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -315,13 +315,13 @@ var BUILD = "20261004-1134";   // 全局：页面右上角会显示，便于肉�
     </div>
     <div class="colCard" data-mod="vpSec" onclick="toggleModule('vpSec')">
       <div class="ico">🛒</div><div class="t">增值产品</div>
-      <div class="s" id="colVpS"></div>
-      <div class="srcNote">数据口径<br><b>工单消耗</b></div>
+      <div class="s" id="colVpS" style="display:none"></div>
+      <div class="srcNote"><b>工单消耗</b></div>
     </div>
     <div class="colCard" data-mod="vpPartsSec" onclick="toggleModule('vpPartsSec')">
       <div class="ico">🔧</div><div class="t">增值配件明细</div>
-      <div class="s" id="colVppS"></div>
-      <div class="srcNote">数据口径<br><b>工单消耗 + 网点买断消耗</b></div>
+      <div class="s" id="colVppS" style="display:none"></div>
+      <div class="srcNote"><b>工单消耗 + 网点买断消耗</b></div>
     </div>
     <div class="colCard" data-mod="cleanSec" onclick="toggleModule('cleanSec')">
       <div class="ico">🧽</div><div class="t">清洗保养</div>
