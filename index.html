@@ -12,27 +12,44 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20261016-0846";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20261016-0905";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
-    var n=parseInt(sessionStorage.getItem('_cbN')||'0',10);
-    if(n>=2) return;                                   // 兜底防死循环
+    /* ⚠️ 旧版用 sessionStorage 计数（累计 2 次后永久 return），而微信/QQ 内置浏览器的
+       sessionStorage 常长期不清除 → 次数耗光后缓存穿透彻底失效，手机一直停在几个月前的旧页面。
+       现改为「按版本号去重」：每个新版本只自动重载一次，既不死循环，又不会因历史次数而卡死。 */
+    var LS='_cbTried';
+    var tried='';
+    try{ tried=localStorage.getItem(LS)||''; }catch(e){}
     function go(v){
-      try{sessionStorage.setItem('_cbN',String(n+1));}catch(e){}
+      try{ localStorage.setItem(LS,String(v)); }catch(e){}
       var u=new URL(location.href);
       u.searchParams.set('v',v);
       u.searchParams.set('_',Date.now());              // 随机串 → 必然回源
       location.replace(u.toString());
+    }
+    function tip(v){                                   // 已尝试过仍不一致 → 给人工兜底入口
+      try{
+        var b=document.createElement('div');
+        b.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#e03131;color:#fff;'
+          +'padding:10px 14px;font-size:13px;font-weight:700;text-align:center;cursor:pointer';
+        b.textContent='发现新版 '+v+'（当前显示 '+BUILD+'）→ 点此刷新到最新数据';
+        b.onclick=function(){ location.reload(true); };
+        (document.body||document.documentElement).appendChild(b);
+      }catch(e){}
     }
     var cur=new URL(location.href).searchParams.get('v');
     fetch('version.json?_='+Date.now(),{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; })
       .then(function(j){
         if(!j||!j.v) return;
-        if(j.v!==BUILD) go(j.v);                       // 服务端有新版 → 拉最新
+        if(j.v!==BUILD){
+          if(tried!==j.v) go(j.v);                     // 该版本未尝试过 → 自动重载一次
+          else tip(j.v);                               // 已尝试过 → 提示手动刷新，防死循环
+        }
         else if(cur!==BUILD) go(BUILD);                // 已是最新，仅校正地址栏版本
-        else { try{sessionStorage.removeItem('_cbN');}catch(e){} }
+        else { try{ localStorage.removeItem(LS); }catch(e){} }
       })
       .catch(function(){});
   }catch(e){}
