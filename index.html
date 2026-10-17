@@ -12,7 +12,7 @@
    每次打开先拉极小的 version.json（带随机参数，绕过缓存）比对版本，
    只有确认服务端已有更新时才带随机时间戳重载一次 → 必然回源取到最新内容；
    版本一致则原地不动，不重复下载 4MB 主文件。本地 file:// 打开不触发。 */
-var BUILD = "20261017-0940";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
+var BUILD = "20261017-0951";   // 全局：页面右上角会显示，便于肉眼确认是否是最新版
 (function(){
   try{
     if(location.protocol!=='http:' && location.protocol!=='https:') return;
@@ -78,6 +78,9 @@ var BUILD = "20261017-0940";   // 全局：页面右上角会显示，便于肉�
   .kpi .val{font-size:24px;font-weight:700;letter-spacing:.3px}
   .kpi .sub{font-size:12px;color:var(--sub);margin-top:4px}
   .kpi .ring{position:absolute;right:14px;top:14px;width:56px;height:56px}
+  .kpi.sel::before{content:'';position:absolute;inset:0;border:2px solid var(--blue);border-radius:14px;pointer-events:none}
+  .kpi.sel .lbl{color:var(--blue)}
+  .kpi.sel .val{color:var(--blue)}
   .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
   .pill.good{background:var(--green-soft);color:var(--green)}
   .pill.warn{background:var(--orange-soft);color:var(--orange)}
@@ -426,12 +429,16 @@ var BUILD = "20261017-0940";   // 全局：页面右上角会显示，便于肉�
   <div class="panel" id="unitSec">
     <div class="sec">
       <h2>💰 单均收入 <span class="pill mute" id="unitPeriodLbl"></span></h2>
-      <div class="desc">两个口径并排看：<b>单均服务产值</b> ＝ 工单表「实收费用」÷ 上门工单数（客户为一次服务支付的全部费用，含安装/维修/材料）；<b>单均服务产品收入</b> ＝ 服务产品收入 ÷ 上门工单数（与看板 3+1 同源）。<b>上门工单</b> ＝ 全部工单剔除「远程指导」（取工单表 <b>服务项目</b> 列）。</div>
+      <div class="desc">两个口径<b>分开看</b>，切换后<b>排行榜与排序各自独立计算</b>：<b>单均服务产值（①）</b> ＝ 工单表「实收费用」÷ 上门工单数（客户为一次服务支付的全部费用，含安装/维修/材料）；<b>单均服务产品收入（⑤）</b> ＝ 服务产品收入 ÷ 上门工单数（与看板 3+1 同源）。<b>上门工单</b> ＝ 全部工单剔除「远程指导」（取工单表 <b>服务项目</b> 列）。</div>
+      <div class="seg" id="unitMetricSeg" style="margin:0 0 14px">
+        <button data-m="a" class="on" onclick="setUnitMetric('a')">只看单均服务产值 ①</button>
+        <button data-m="b" onclick="setUnitMetric('b')">只看单均服务产品收入 ⑤</button>
+      </div>
       <div class="kpis" id="unitKpis"></div>
     </div>
     <div class="sec">
-      <h2>🔎 分维度单均 <span class="pill mute" id="unitDimLbl">办事处</span></h2>
-      <div class="desc">三个维度同口径：<b>上门工单</b> ＝ 该维度工单数（已剔远程指导）；<b>①</b> ＝ 实收费用单均；<b>⑤</b> ＝ 服务产品收入单均。均按 <b>①</b> 降序。网点维度 ⑤ 含网点买断；<b>工程师维度 ⑤ 不含买断</b>（买断属网点行为、无工程师归属），所以其合计小于全区。</div>
+      <h2>🔎 分维度单均 <span class="pill mute" id="unitDimLbl">办事处</span> <span class="pill" id="unitMetricLbl" style="background:var(--blue-soft);color:var(--blue)">单均服务产值 ①</span></h2>
+      <div class="desc"><b>排序 = 当前所选指标降序</b>（切换上方指标，排名会重排）；另一指标作为参考列并列展示。<b>上门工单</b> ＝ 该维度工单数（已剔远程指导）；<b>①</b> ＝ 实收费用单均；<b>⑤</b> ＝ 服务产品收入单均。网点维度 ⑤ 含网点买断；<b>工程师维度 ⑤ 不含买断</b>（买断属网点行为、无工程师归属），所以其合计小于全区。</div>
       <div class="seg" id="unitSeg" style="margin:12px 0 8px">
         <button data-d="office" class="on" onclick="setUnitDim('office')">按办事处</button>
         <button data-d="net" onclick="setUnitDim('net')">按服务网点</button>
@@ -1978,10 +1985,13 @@ function renderUnit(){
   }
   const t=U.total, M=U.meta;
   if(lbl) lbl.textContent=M['周期']+' · 截止 '+M['截止'];
-  const card=(l,v,s)=>'<div class="kpi"><div class="lbl">'+l+'</div><div class="val">'+v+'</div><div class="sub">'+s+'</div></div>';
+  const isA = unitMetric!=='b';
+  const card=(l,v,s,on)=>'<div class="kpi'+(on?' sel':'')+'"><div class="lbl">'+l+'</div><div class="val">'+v+'</div><div class="sub">'+s+'</div></div>';
+  const cA=card('单均服务产值（①）','¥'+t.a.toFixed(2),'实收 '+money(t.recv)+' ÷ '+fmtInt(M['上门工单'])+' 单',isA);
+  const cB=card('单均服务产品收入（⑤）','¥'+t.b.toFixed(2),'服务产品 '+money(t.rev)+' ÷ '+fmtInt(M['上门工单'])+' 单',!isA);
   box.innerHTML=[
-    card('单均服务产值（①）','¥'+t.a.toFixed(2),'实收 '+money(t.recv)+' ÷ '+fmtInt(M['上门工单'])+' 单'),
-    card('单均服务产品收入（⑤）','¥'+t.b.toFixed(2),'服务产品 '+money(t.rev)+' ÷ '+fmtInt(M['上门工单'])+' 单'),
+    isA?cA:cB,
+    isA?cB:cA,
     card('上门工单数',fmtInt(M['上门工单']),'全部 '+fmtInt(M['工单全量'])+' − 远程指导 '+fmtInt(M['远程指导剔除'])),
     card('有收费工单占比',t.bkRate.toFixed(2)+'%',fmtInt(M['有收费工单'])+' 单产生收费'),
     card('①÷⑤ 比值',(t.b?(t.a/t.b).toFixed(2):'—'),'产值中增值占 '+(t.recv?(t.rev/t.recv*100).toFixed(2):'0.00')+'%')
@@ -2000,48 +2010,76 @@ function renderUnit(){
     ib.innerHTML=h;
   }
 }
-var unitDim='office';
+var unitDim='office', unitMetric='a';
 function setUnitDim(d){
   unitDim=d;
   var s=document.getElementById('unitSeg');
   if(s) Array.prototype.forEach.call(s.querySelectorAll('button'),function(b){ b.classList.toggle('on', b.getAttribute('data-d')===d); });
   renderUnitTable();
 }
+function setUnitMetric(m){
+  unitMetric=(m==='b')?'b':'a';
+  var s=document.getElementById('unitMetricSeg');
+  if(s) Array.prototype.forEach.call(s.querySelectorAll('button'),function(b){ b.classList.toggle('on', b.getAttribute('data-m')===unitMetric); });
+  var l=document.getElementById('unitMetricLbl');
+  if(l) l.textContent = unitMetric==='b'?'单均服务产品收入 ⑤':'单均服务产值 ①';
+  renderUnit();
+}
 function renderUnitTable(){
   const box=document.getElementById('unitOffice'); if(!box) return;
   const U=unitCur();
   if(!U){ box.innerHTML=''; return; }
   const M=U.meta||{};
+  const isB = unitMetric==='b';
+  const K = isB?'b':'a';
+  const colSel = isB?'单均服务产品 ⑤':'单均服务产值 ①';
+  const colRef = isB?'单均服务产值 ①':'单均服务产品 ⑤';
+  const barColor = isB?'#4a7cf7':'var(--orange)';
   const lbl=document.getElementById('unitDimLbl');
   if(lbl) lbl.textContent = unitDim==='net'?'服务网点':(unitDim==='eng'?'服务工程师':'办事处');
-  const arr = unitDim==='net'?(U.net||[]):(unitDim==='eng'?(U.eng||[]):(U.office||[]));
-  if(!arr.length){ box.innerHTML='<div class="desc">该维度暂无数据</div>'; return; }
-  const mx = Math.max.apply(null, arr.map(r=>r.a).concat([1]));
-  const bar = v=>'<div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:90px"><i style="width:'+(v/mx*100)+'%;background:var(--orange)"></i></span><b>¥'+v.toFixed(2)+'</b></div>';
+  const mlbl=document.getElementById('unitMetricLbl');
+  if(mlbl) mlbl.textContent = isB?'单均服务产品收入 ⑤':'单均服务产值 ①';
+  const src = unitDim==='net'?(U.net||[]):(unitDim==='eng'?(U.eng||[]):(U.office||[]));
+  if(!src.length){ box.innerHTML='<div class="desc">该维度暂无数据</div>'; return; }
+  const arr = src.slice().sort(function(x,y){
+    const d=(y[K]||0)-(x[K]||0);
+    if(d) return d;
+    const o=((y.a||0)-(x.a||0));
+    if(o) return o;
+    return (y.cnt||0)-(x.cnt||0);
+  });
+  const mx = Math.max.apply(null, arr.map(r=>r[K]||0).concat([1]));
+  const bar = v=>'<div style="display:flex;gap:8px;align-items:center"><span class="mini" style="width:90px"><i style="width:'+((v||0)/mx*100)+'%;background:'+barColor+'"></i></span><b>¥'+(v||0).toFixed(2)+'</b></div>';
+  const plain = v=>'<span style="color:var(--sub)">¥'+(v||0).toFixed(2)+'</span>';
+  const selCell = r=>bar(r[K]);
+  const refCell = r=>plain(isB?r.a:r.b);
   let h='<table class="dt"><thead><tr>';
-  if(unitDim==='office') h+='<th>办事处</th><th>上门工单</th><th>单均服务产值 ①</th><th>单均服务产品 ⑤</th><th>有收费占比</th><th>①÷⑤</th>';
-  else if(unitDim==='net') h+='<th>服务网点</th><th>所属办事处</th><th>上门工单</th><th>单均服务产值 ①</th><th>单均服务产品 ⑤</th><th>有收费占比</th>';
-  else h+='<th>服务工程师</th><th>编号</th><th>办事处</th><th>服务网点</th><th>上门工单</th><th>单均服务产值 ①</th><th>单均服务产品 ⑤</th>';
+  const thSel='<th style="color:var(--blue)">'+colSel+' ▼</th>';
+  if(unitDim==='office') h+='<th>办事处</th><th>上门工单</th>'+thSel+'<th>'+colRef+'</th><th>有收费占比</th><th>①÷⑤</th>';
+  else if(unitDim==='net') h+='<th>服务网点</th><th>所属办事处</th><th>上门工单</th>'+thSel+'<th>'+colRef+'</th><th>有收费占比</th>';
+  else h+='<th>服务工程师</th><th>编号</th><th>办事处</th><th>服务网点</th><th>上门工单</th>'+thSel+'<th>'+colRef+'</th>';
   h+='</tr></thead><tbody>';
   arr.forEach(r=>{
     const pk = r.cnt?(r.paidCnt/r.cnt*100).toFixed(2):'0.00';
     if(unitDim==='office'){
-      h+='<tr><td class="name">'+r.name+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+bar(r.a)+'</td><td>¥'+r.b.toFixed(2)+'</td><td>'+pk+'%</td><td>'+(r.b?(r.a/r.b).toFixed(2):'—')+'</td></tr>';
+      h+='<tr><td class="name">'+r.name+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+selCell(r)+'</td><td>'+refCell(r)+'</td><td>'+pk+'%</td><td>'+(r.b?(r.a/r.b).toFixed(2):'—')+'</td></tr>';
     } else if(unitDim==='net'){
-      h+='<tr><td class="name">'+r.name+'</td><td>'+(r.office||'')+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+bar(r.a)+'</td><td>¥'+r.b.toFixed(2)+'</td><td>'+pk+'%</td></tr>';
+      h+='<tr><td class="name">'+r.name+'</td><td>'+(r.office||'')+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+selCell(r)+'</td><td>'+refCell(r)+'</td><td>'+pk+'%</td></tr>';
     } else {
-      h+='<tr><td class="name">'+r.name+'</td><td>'+(r.id||'')+'</td><td>'+(r.office||'')+'</td><td>'+(r.net||'')+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+bar(r.a)+'</td><td>¥'+r.b.toFixed(2)+'</td></tr>';
+      h+='<tr><td class="name">'+r.name+'</td><td>'+(r.id||'')+'</td><td>'+(r.office||'')+'</td><td>'+(r.net||'')+'</td><td>'+fmtInt(r.cnt)+'</td><td>'+selCell(r)+'</td><td>'+refCell(r)+'</td></tr>';
     }
   });
   let tc=0, trw=0, tv=0;
   arr.forEach(r=>{ tc+=r.cnt; trw+=r.recv; tv+=r.rev; });
   const label = unitDim==='eng'?'⭐ 合计（⑤不含买断）':'⭐ 合计';
+  const sumSel = isB?'¥'+(tc?tv/tc:0).toFixed(2):'¥'+(tc?trw/tc:0).toFixed(2);
+  const sumRef = isB?'¥'+(tc?trw/tc:0).toFixed(2):'¥'+(tc?tv/tc:0).toFixed(2);
   if(unitDim==='office'){
-    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">⭐ 全区</td><td>'+fmtInt(tc)+'</td><td>¥'+(tc?trw/tc:0).toFixed(2)+'</td><td>¥'+(tc?tv/tc:0).toFixed(2)+'</td><td>'+((M['有收费工单']&&tc)?(M['有收费工单']/tc*100).toFixed(2):'0.00')+'%</td><td>'+(tv?(trw/tv).toFixed(2):'—')+'</td></tr>';
+    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">⭐ 全区</td><td>'+fmtInt(tc)+'</td><td>'+sumSel+'</td><td style="color:var(--sub)">'+sumRef+'</td><td>'+((M['有收费工单']&&tc)?(M['有收费工单']/tc*100).toFixed(2):'0.00')+'%</td><td>'+(tv?(trw/tv).toFixed(2):'—')+'</td></tr>';
   } else if(unitDim==='net'){
-    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">'+label+'</td><td></td><td>'+fmtInt(tc)+'</td><td>¥'+(tc?trw/tc:0).toFixed(2)+'</td><td>¥'+(tc?tv/tc:0).toFixed(2)+'</td><td></td></tr>';
+    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">'+label+'</td><td></td><td>'+fmtInt(tc)+'</td><td>'+sumSel+'</td><td style="color:var(--sub)">'+sumRef+'</td><td></td></tr>';
   } else {
-    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">'+label+'</td><td></td><td></td><td></td><td>'+fmtInt(tc)+'</td><td>¥'+(tc?trw/tc:0).toFixed(2)+'</td><td>¥'+(tc?tv/tc:0).toFixed(2)+'</td></tr>';
+    h+='<tr style="font-weight:700;background:#fafbfd"><td class="name">'+label+'</td><td></td><td></td><td></td><td>'+fmtInt(tc)+'</td><td>'+sumSel+'</td><td style="color:var(--sub)">'+sumRef+'</td></tr>';
   }
   h+='</tbody></table>';
   box.innerHTML=h;
