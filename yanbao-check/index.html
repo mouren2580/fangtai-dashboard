@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>不可售延保型号 · 快速检索手册</title>
+<style>
+  :root{
+    --brand:#D6001C; --brand-d:#A80016; --brand-soft:#FFF1EE;
+    --ink:#1B1D21; --ink-2:#4A5058; --ink-3:#8A9099;
+    --line:#E8EBEF; --bg:#F5F6F8; --card:#fff;
+    --ok:#0F7B4F; --ok-bg:#E9F6F0; --warn:#C1121F; --warn-bg:#FDECEE;
+    --radius:16px; --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+       background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;padding-bottom:50px}
+  /* hero */
+  .hero{background:linear-gradient(135deg,#B30015 0%,#D6001C 45%,#EF5B2B 100%);color:#fff;
+        padding:26px 20px 76px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-70px;top:-80px;width:280px;height:280px;border-radius:50%;
+        background:rgba(255,255,255,.09)}
+  .hero::before{content:"";position:absolute;right:90px;bottom:-100px;width:190px;height:190px;border-radius:50%;
+        background:rgba(255,255,255,.07)}
+  .hi{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+  .tagline{display:flex;align-items:center;gap:9px;font-size:12.5px;letter-spacing:.16em;font-weight:600;opacity:.93}
+  .tagline .dot{width:6px;height:6px;border-radius:50%;background:#FFD9A0}
+  h1{margin:11px 0 6px;font-size:27px;letter-spacing:.5px}
+  .sub{font-size:13.5px;opacity:.9;max-width:640px}
+  .stats{display:flex;gap:30px;margin-top:16px;flex-wrap:wrap}
+  .st{display:flex;align-items:baseline;gap:7px}
+  .st b{font-size:22px}.st span{font-size:12.5px;opacity:.86}
+  /* layout */
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+         margin-top:-56px;position:relative;z-index:3;padding:20px}
+  .qbox{position:relative}
+  .qbox svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);opacity:.42}
+  #q{width:100%;height:56px;border:2px solid var(--line);border-radius:13px;padding:0 46px 0 46px;
+     font-size:17px;letter-spacing:.3px;color:var(--ink);background:#FBFCFD;outline:none;font-family:inherit;
+     transition:.18s}
+  #q:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px rgba(214,0,28,.08)}
+  #clr{position:absolute;right:13px;top:50%;transform:translateY(-50%);border:0;background:#EDEFF2;color:#767C85;
+       width:26px;height:26px;border-radius:50%;cursor:pointer;display:none;font-size:16px;line-height:1;padding:0}
+  .hint{margin:9px 0 0;font-size:12.5px;color:var(--ink-3);padding-left:2px}
+  /* verdict */
+  .verdict{margin-top:16px;border-radius:13px;padding:16px 18px;display:none;border:1.5px solid transparent}
+  .verdict.show{display:block;animation:fade .22s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .v-warn{background:var(--warn-bg);border-color:#F6C4C9}
+  .v-ok{background:var(--ok-bg);border-color:#BFE6D4}
+  .v-multi{background:#FFF8E6;border-color:#FBE3A6}
+  .v-head{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;letter-spacing:.3px}
+  .v-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+          font-size:15px;color:#fff;flex:0 0 auto}
+  .v-warn .v-icon{background:var(--warn)} .v-ok .v-icon{background:var(--ok)} .v-multi .v-icon{background:#D99900}
+  .v-warn .v-head{color:var(--warn)} .v-ok .v-head{color:var(--ok)} .v-multi .v-head{color:#A87200}
+  .v-desc{margin-top:7px;font-size:13.5px;color:#5A5F66;line-height:1.75}
+  .v-hit{margin-top:12px;background:#fff;border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,.06)}
+  .v-row{display:flex;gap:10px;font-size:13px;padding:4px 0;flex-wrap:wrap;align-items:center}
+  .v-row .k{color:var(--ink-3);min-width:74px;flex:0 0 auto;font-size:12.5px}
+  .v-row .v{font-weight:700;color:var(--ink);word-break:break-all}
+  .mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;letter-spacing:.3px}
+  .copyb{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+         cursor:pointer;background:#F7F8FA;margin-left:4px}
+  .copyb:hover{color:var(--brand);border-color:var(--brand)}
+  /* groups */
+  .gbar{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+  .gchip{font-size:12.5px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#fff;
+         color:var(--ink-2);cursor:pointer;transition:.15s;font-weight:600}
+  .gchip:hover{border-color:var(--brand);color:var(--brand)}
+  .gchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .gchip i{font-style:normal;opacity:.55;margin-left:5px;font-weight:500}
+  .gchip.on i{opacity:.8}
+  /* table */
+  .metabar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:22px 0 10px;flex-wrap:wrap}
+  .count{font-size:13.5px;color:var(--ink-2)}
+  .count b{color:var(--brand);font-size:17px;margin:0 2px}
+  .tablecard{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}
+  thead th{position:sticky;top:0;background:#FAFBFC;text-align:left;font-size:12.5px;color:var(--ink-3);
+           font-weight:700;letter-spacing:.05em;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody td{padding:11px 14px;border-bottom:1px solid #F1F3F5;font-size:13.5px}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover td{background:#FDF6F4}
+  tbody tr.hit td{background:#FFF7F5;box-shadow:inset 3px 0 0 var(--brand)}
+  .idx{color:var(--ink-3);font-size:12px;width:42px}
+  .code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;background:#F3F5F8;
+        border:1px solid #E6E9EE;border-radius:6px;padding:3px 8px;color:#2A2F36}
+  .gname{white-space:nowrap;color:var(--ink-2);font-weight:600}
+  mark{background:#FFE9A8;color:#8A4B00;border-radius:3px;padding:0 1px;font-weight:700}
+  .empty{padding:60px 20px;text-align:center;color:var(--ink-3)}
+  .foot{max-width:1080px;margin:20px auto 0;padding:0 20px;font-size:12px;color:var(--ink-3);line-height:2}
+  .foot b{color:var(--ink-2)}
+  .toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,14px);opacity:0;background:#20242A;color:#fff;
+         font-size:13px;padding:9px 18px;border-radius:99px;pointer-events:none;transition:.24s;z-index:99;white-space:nowrap}
+  .toast.show{opacity:.95;transform:translate(-50%,0)}
+  @media (max-width:760px){
+    .hero{padding:22px 16px 70px} h1{font-size:21px}
+    .wrap{padding:0 12px} .panel{padding:15px;margin-top:-52px}
+    #q{height:50px;font-size:16px}
+    .stats{gap:18px}
+    .v-row .k{min-width:64px}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero"><div class="hi">
+  <div class="tagline"><span class="dot"></span>方太西北大区 · 服务产品</div>
+  <h1>不可售延保型号 · 快速检索</h1>
+  <div class="sub">输入产品型号、简化型号或产品编码，立即判断该型号是否属于不可售延保范围。</div>
+  <div class="stats">
+    <div class="st"><b id="s1">0</b><span>个不可售型号</span></div>
+    <div class="st"><b id="s2">0</b><span>个产品组</span></div>
+    <div class="st"><b>10.20</b><span>数据版本</span></div>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <div class="panel">
+    <div class="qbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6169" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      <input id="q" type="text" placeholder="输入型号，如 JBSD2T-Q3S、K1、1008000100010" autocomplete="off" spellcheck="false" enterkeyhint="search">
+      <button id="clr" title="清空">×</button>
+    </div>
+    <div class="hint">支持模糊匹配：只输主型号（如 K1）也能查；点下方清单任意一行可反查。</div>
+    <div id="verdict" class="verdict"></div>
+    <div class="gbar" id="gbar"></div>
+  </div>
+
+  <div class="metabar">
+    <div class="count">清单共 <b id="cnt">0</b> 个型号<span id="filterTip"></span></div>
+  </div>
+
+  <div class="tablecard">
+    <div class="scroll">
+      <table>
+        <thead><tr><th class="idx">#</th><th>产品组</th><th>简化型号</th><th>产品型号</th><th>产品编码</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" style="display:none">没有匹配的型号</div>
+  </div>
+</div>
+
+<div class="foot">
+  <b>判定说明：</b>清单内列出的型号<b>不可售延保</b>；未在清单中的型号，若型号确认无误，可正常销售延保。<br>
+  <b>数据来源：</b>《不可售延保型号 1020》（2026-10-20 导出）· 共 110 个型号 · 本手册离线可用，可直接分发。
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = [["水槽洗碗机","JBSD2T-Q1","JBSD2T-Q1","1008000100010"],["水槽洗碗机","JBSD2T-Q3S","JBSD2T-Q3S","1008000200065"],["水槽洗碗机","JBSD2T-Q3SL","JBSD2T-Q3SL","1008000200066"],["大厨管家","K6230B","K6230B","1015000100005"],["大厨管家","K6230B.i","K6230B.i","1015000100006"],["吸油烟机","JQG9009T-IDFT","JQG9009T-IDFT（不带罩）","1001000500333"],["水槽洗碗机","JBSD2T-Q3-IRPS","JBSD2T-Q3-IRPS","1008000200059"],["商用净水机","CZN800-X1","CZN800-X1","1013000300000"],["蒸烤烹饪机","MK01","MK01","1009001000001"],["吸油烟机","iMES-100-A1","iMES-100-A1","1001002200000"],["家用净水机","BF1A","FQZ-BF1A","1013000200000"],["蒸烤烹饪机","MK02B","MK02B","1009001000012"],["吸油烟机","CXW-258-LC15-A1.i","CXW-258-LC15-A1.i","1001002700001"],["蒸烤烹饪机","MK02A","MK02A","1009001000011"],["集成式洗碗机","JBID15E-X1A","JBID15E-X1A（带门板）","1024000200001"],["家用冰箱","BCD-510WYHPAF","BCD-510WYHPAF","1019000200002"],["家用冰箱","BCD-510WJLPAF","BCD-510WJLPAF","1019000200003"],["家用冰箱","BCD-510WZBPAF","BCD-510WZBPAF","1019000200001"],["家用净水机","FQZ-02-BF1A","FQZ-02-BF1A","1013000200002"],["家用冰箱","BCD-510WYYPAF","BCD-510WYYPAF","1019000200004"],["大厨管家","K7232G.i","K7232G.i","1015000200000"],["水槽洗碗机","JBSD2T-Q3SL","JBSD2T-Q3SL（升级版）","1008000500032"],["水槽洗碗机","JBSD2T-Q3S","JBSD2T-Q3S（升级版）","1008000500033"],["吸油烟机","01-Y1S","CXW-358-01-Y1S","1001002900008"],["家用冰箱","BCD-502WYHPAT","BCD-502WYHPAT","1019000100001"],["家用冰箱","BCD-508W-Y1Pro","BCD-508W-Y1Pro","1019000300007"],["吸油烟机","358-LC15-A1.i","CXW-358-LC15-A1.i","1001002700002"],["吸油烟机","01-Y3S.i","CXW-358-01-Y3S.i","1001002900007"],["吸油烟机","01-Y1Pro","CXW-358-01-Y1Pro","1001002900004"],["水槽洗碗机","JBSD2T-Q3","JBSD2T-Q3","1008000200022"],["集成式洗碗机","JPID6E-03-H-X1","JPID6E-03-H-X1","1024000200004"],["集成式洗碗机","JPID6E-03-M-X1","JPID6E-03-M-X1","1024000200003"],["集成式洗碗机","JPID6E-03-M-X2","JPID6E-03-M-X2","1024000200002"],["家用冰箱","BCD-508W-S3-YH","BCD-508W-S3-YH","1019000300000"],["家用冰箱","BCD-508W-X20.i","BCD-508W-X20.i","1019000300001"],["家用冰箱","BCD-508W-Y1.i","BCD-508W-Y1.i","1019000300006"],["家用冰箱","BCD-508W-S3-NB","BCD-508W-S3-NB","1019000300005"],["家用冰箱","BCD-508W-S3-JH","BCD-508W-S3-JH","1019000300003"],["家用冰箱","BCD-508W-S7-CM","BCD-508W-S7-CM","1019000300004"],["料理机","FC1","FC1","1016000100000"],["家用冰箱","BCD-510WXLPAF","BCD-510WXLPAF","1019000200000"],["吸油烟机","01-X20Q.i","CXW-358-01-X20Q.i","1001002800003"],["吸油烟机","iMES-60-D1","iMES-60-D1","1001002200005"],["集成式洗碗机","JBID15E-X1A","JBID15E-X1A（不带门板）","1024000200000"],["集成式洗碗机","JPID6E-03-H-Y1","JPID6E-03-H-Y1","1024000200006"],["集成式洗碗机","JPID6E-03-M-Y1","JPID6E-03-M-Y1","1024000200007"],["集成式洗碗机","JPID6E-03-M-Y","JPID6E-03-M-Y","1024000200005"],["吸油烟机","K1","CXW-358-K1(不带罩)","1001003300000"],["吸油烟机","K1S","CXW-358-K1S(不带罩)","1001003300007"],["吸油烟机","K1S","CXW-358-K1S(双罩)","1001003300004"],["吸油烟机","Y1(iMES)","CXW-358-Y1(iMES)","1001002900009"],["吸油烟机","K1","CXW-358-K1(双罩)","1001003300003"],["集成式洗碗机","JPID6E-03-M-X1L","JPID6E-03-M-X1L","1024000200011"],["水槽洗碗机","JBSD2T-02-M2L","JBSD2T-02-M2L","1008000800005"],["集成式洗碗机","JPID6E-03-H-X1L","JPID6E-03-H-X1L","1024000200009"],["集成式洗碗机","JPID6E-03-H-Y1L","JPID6E-03-H-Y1L","1024000200010"],["吸油烟机","Z7(iMES)","CXW-358-Z7(iMES)","1001001500142"],["吸油烟机","358-LC15-A1.i-W","CXW-358-LC15-A1.i-W","1001002700003"],["家用冰箱","BCD-508W-W","BCD-508W-W","1019000300002"],["集成式洗碗机","JPID6E-03-G3","JPID6E-03-G3","1024000200012"],["集成式洗碗机","JPID6E-03-G3L","JPID6E-03-G3L","1024000200013"],["集成式洗碗机","JPID6E-03-M-Y3","JPID6E-03-M-Y3","1024000200024"],["集成式洗碗机","JPID6E-03-M-Y3L","JPID6E-03-M-Y3L","1024000200025"],["集成式洗碗机","JBID6E-04-X20MaxL","JBID6E-04-X20MaxL","1024000200022"],["集成式洗碗机","JBID6E-04-M-X20MaxL","JBID6E-04-M-X20MaxL","1024000200023"],["水槽洗碗机","JBSD3F-03-X20MaxL","JBSD3F-03-X20MaxL","1008000800029"],["水槽洗碗机","JBSD3F-03-X20Max","JBSD3F-03-X20Max","1008000800030"],["嵌入式洗碗机","JBCD7E-02-B-V16Max","JBCD7E-02-B-V16Max","1018000500044"],["嵌入式洗碗机","JBCD7E-02-V16","JBCD7E-02-V16","1018000500046"],["嵌入式洗碗机","JBCD7E-02-V16Max","JBCD7E-02-V16Max","1018000500045"],["嵌入式洗碗机","JBCD7E-02-B-V16","JBCD7E-02-B-V16","1018000500047"],["吸油烟机","K2P","CXW-358-K2P(不带罩)","1001003300011"],["水槽洗碗机","JBSD2F-02-M5","JBSD2F-02-M5","1008000600008"],["水槽洗碗机","JBSD2F-02-M5L","JBSD2F-02-M5L","1008000600007"],["水槽洗碗机","JBSD2T-Q3L","JBSD2T-Q3L","1008000200024"],["料理机","FC1乐享版","FC1乐享版","1016000100001"],["吸油烟机","iMES-100-F1","iMES-100-F1","1001002200008"],["吸油烟机","02-X20Max S","CXW-358-02-X20Max S","1001002800010"],["家用冰箱","BCD-508W-S3 Ultra-YH","BCD-508W-S3 Ultra-YH","1019000300011"],["家用冰箱","BCD-508W-S3 Ultra-YB","BCD-508W-S3 Ultra-YB","1019000300010"],["灶消烹饪机","JZT-ZTD200M-02-X20(SH/FZ)","JZT-ZTD200M-02-X20(SH/FZ)","1009000700018"],["灶消烹饪机","JZY-ZTD200M-02-X20","JZY-ZTD200M-02-X20","1009000700020"],["灶消烹饪机","JZT-ZTD200M-02-X20-R","JZT-ZTD200M-02-X20-R","1009000700021"],["灶消烹饪机","JZT-ZTD200M-02-X20","JZT-ZTD200M-02-X20","1009000700019"],["水槽洗碗机","JBSD2T-02-M2","JBSD2T-02-M2","1008000800006"],["家用净水机","YCZ-JRY33-02-X20","YCZ-JRY33-02-X20","1013001000001"],["家用净水机","YCZ-KF-02-X20Pro AI(G)","YCZ-KF-02-X20Pro AI(G)","1013000800012"],["家用净水机","YCZ-KF-02-X20Pro AI","YCZ-KF-02-X20Pro AI","1013000800004"],["家用净水机","YCZ-JRY33-02-M-X20Max","YCZ-JRY33-02-M-X20Max","1013001000002"],["家用净水机","YCZ-JRY33-02-X20Max","YCZ-JRY33-02-X20Max","1013001000000"],["集成式洗碗机","JPID6E-03-M-Y1L","JPID6E-03-M-Y1L","1024000200008"],["家用净水机","YCZ-JRY33-02-X20(G)","YCZ-JRY33-02-X20(G)","1013001000005"],["家用冰箱","BCD-550W-S1E-YH","BCD-550W-S1E-YH","1019000400000"],["家用冰箱","BCD-550W-S1E-YB","BCD-550W-S1E-YB","1019000400002"],["集成式洗碗机","JBID6E-04-X20Max","JBID6E-04-X20Max","1024000200021"],["集成式洗碗机","JBID6E-04-M-X20Max","JBID6E-04-M-X20Max","1024000200020"],["吸油烟机","02-X20Pro AI","CXW-358-02-X20Pro AI","1001002800011"],["商用净水机","FG-01-L1","FG-01-L1","1013000600008"],["吸油烟机","iMES-45-C1","iMES-45-C1","1001002200009"],["家用冰箱","BCD-550W-S7E-CM","BCD-550W-S7E-CM","1019000400004"],["家用冰箱","BCD-502WJLPAT","BCD-502WJLPAT","1019000100000"],["家用净水机","YCZ-JRY33-02-X20Max(G)","YCZ-JRY33-02-X20Max(G)","1013001000004"],["吸油烟机","02-Y3S","CXW-358-02-Y3S","1001002900031"],["吸油烟机","02-Y1S","CXW-358-02-Y1S","1001002900032"],["家用冰箱","BCD-550W-S3E-YH","BCD-550W-S3E-YH","1019000400001"],["家用冰箱","BCD-550W-S5E-YH","BCD-550W-S5E-YH","1019000400005"],["家用净水机","YCZ-JRY33-02-M-X20Max(G)","YCZ-JRY33-02-M-X20Max(G)","1013001000003"],["家用冰箱","BCD-550W-S5E-YB","BCD-550W-S5E-YB","1019000400006"],["家用冰箱","BCD-550W-S3E-YB","BCD-550W-S3E-YB","1019000400003"],["家用冰箱","H508W-F20-MYFT","H508W-F20-MYFT","1019000300009"]];      // [产品组, 简化型号, 产品型号, 产品编码]
+const GROUPS = ["吸油烟机","商用净水机","大厨管家","家用冰箱","家用净水机","嵌入式洗碗机","料理机","水槽洗碗机","灶消烹饪机","蒸烤烹饪机","集成式洗碗机"];
+
+const $ = id => document.getElementById(id);
+const qEl = $('q');
+let curGroup = '';
+
+/* ---------- 归一化 ---------- */
+function norm(s){
+  return String(s||'')
+    .replace(/\u3000/g,' ')
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0)-65248))
+    .replace(/（/g,'(').replace(/）/g,')').replace(/－|—|–/g,'-')
+    .replace(/\s+/g,'')
+    .toUpperCase();
+}
+// 去掉括号后缀：JQG9009T-IDFT（不带罩） -> JQG9009T-IDFT
+function core(s){ return norm(s).replace(/\(.*?\)/g,''); }
+
+/* ---------- 索引 ---------- */
+const IDX = DATA.map((r,i)=>({
+  i, g:r[0], simp:r[1], model:r[2], code:r[3],
+  ns:norm(r[1]), nm:norm(r[2]), nc:norm(r[3]),
+  cs:core(r[1]), cm:core(r[2])
+}));
+
+/* ---------- 判定 ---------- */
+function judge(kwRaw){
+  const kw = norm(kwRaw);
+  if (!kw) return {type:'idle'};
+  const out = {exact:[], core:[], part:[]};
+  IDX.forEach(o=>{
+    if (o.nm===kw || o.ns===kw || o.nc===kw) out.exact.push(o);
+    else if (o.cm===kw || o.cs===kw) out.core.push(o);
+    else if (kw.length>=3 && (o.nm.includes(kw)||o.ns.includes(kw)||o.nc.includes(kw)||o.nm.includes(kw))) out.part.push(o);
+  });
+  if (out.exact.length) return {type:'warn', level:'exact', list:out.exact};
+  if (out.core.length)  return {type:'warn', level:'core',  list:out.core};
+  if (out.part.length)  return {type:'multi', level:'part', list:out.part};
+  return {type:'ok', list:[]};
+}
+
+function rowHtml(o){
+  return `<div class="v-row"><span class="k">产品组</span><span class="v">${esc(o.g)||'-'}</span></div>
+  <div class="v-row"><span class="k">简化型号</span><span class="v mono">${esc(o.simp)||'-'}</span></div>
+  <div class="v-row"><span class="k">产品型号</span><span class="v mono">${esc(o.model)}<button class="copyb" data-c="${esc(o.model)}">复制</button></span></div>
+  <div class="v-row"><span class="k">产品编码</span><span class="v mono">${esc(o.code)}<button class="copyb" data-c="${esc(o.code)}">复制</button></span></div>`;
+}
+
+function esc(s){ return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderVerdict(res){
+  const box = $('verdict');
+  if (res.type === 'idle'){ box.className='verdict'; box.innerHTML=''; return; }
+  box.className = 'verdict show ' + ({warn:'v-warn', ok:'v-ok', multi:'v-multi'})[res.type];
+
+  if (res.type === 'warn'){
+    const o = res.list[0];
+    const more = res.list.length > 1 ? `<div class="v-desc" style="margin-top:10px;color:#8A5A00">该型号对应 ${res.list.length} 条记录，已展示第一条，完整信息见下方清单。</div>` : '';
+    box.innerHTML = `<div class="v-head"><span class="v-icon">!</span>该型号不可售延保</div>
+      <div class="v-desc">${res.level==='core'?'按主型号匹配命中（忽略括号后缀）':'精确匹配命中'}。此型号在不可售延保清单内，请勿推荐延保套餐。</div>
+      <div class="v-hit">${rowHtml(o)}</div>${more}`;
+  } else if (res.type === 'multi'){
+    box.innerHTML = `<div class="v-head"><span class="v-icon">?</span>找到 ${res.list.length} 个相似型号</div>
+      <div class="v-desc">未精确命中，以下是包含该关键词的型号，请确认具体是哪一台：</div>
+      <div class="v-hit">${res.list.slice(0,6).map(o=>`<div class="v-row" style="cursor:pointer" data-pick="${esc(o.model)}">
+        <span class="v mono" style="min-width:auto">${esc(o.model)}</span>
+        <span style="color:#8A9099;font-size:12px">${esc(o.g)}</span></div>`).join('')}</div>`;
+  } else {
+    box.innerHTML = `<div class="v-head"><span class="v-icon">✓</span>未在不可售清单中</div>
+      <div class="v-desc">清单（110 个型号）中未收录该型号。若型号输入无误，可正常销售延保；若是系列机型，建议再核对一次完整型号。</div>`;
+  }
+  box.querySelectorAll('[data-pick]').forEach(el=>{
+    el.onclick = () => { qEl.value = el.dataset.pick; run(); };
+  });
+  box.querySelectorAll('.copyb').forEach(el=>{
+    el.onclick = e => { e.stopPropagation(); copyText(el.dataset.c); };
+  });
+}
+
+/* ---------- 清单 ---------- */
+function renderTable(res){
+  const kw = norm(qEl.value);
+  let list = IDX;
+  if (curGroup) list = list.filter(o=>o.g===curGroup);
+  if (kw) list = list.filter(o=>o.nm.includes(kw)||o.ns.includes(kw)||o.nc.includes(kw)||o.cm.includes(kw));
+  $('cnt').textContent = list.length;
+  $('filterTip').textContent = (curGroup||kw) ? `（已筛选）` : '';
+
+  const hitSet = new Set();
+  if (res && (res.type==='warn')) res.list.forEach(o=>hitSet.add(o.i));
+
+  $('tb').innerHTML = list.map(o=>`<tr data-i="${o.i}" class="${hitSet.has(o.i)?'hit':''}">
+    <td class="idx">${DATA.indexOf(DATA[o.i])+1}</td>
+    <td class="gname">${hl(o.g,kw)}</td>
+    <td class="mono">${hl(o.simp,kw)}</td>
+    <td class="mono">${hl(o.model,kw)}</td>
+    <td><span class="code">${hl(o.code,kw)}</span></td>
+  </tr>`).join('');
+  $('empty').style.display = list.length ? 'none' : 'block';
+
+  $('tb').querySelectorAll('tr').forEach(tr=>{
+    tr.onclick = () => { qEl.value = DATA[+tr.dataset.i][2]; run(); };
+  });
+}
+
+function hl(t,kw){
+  const s = esc(t);
+  if (!kw) return s;
+  const raw = qEl.value.trim();
+  if (!raw) return s;
+  const parts = raw.split(/\s+/).filter(Boolean).map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if (!parts.length) return s;
+  return String(t).split(new RegExp('('+parts.join('|')+')','gi'))
+    .map((seg,i)=> i%2===1 ? '<mark>'+esc(seg)+'</mark>' : esc(seg)).join('');
+}
+
+function run(){
+  const res = judge(qEl.value);
+  renderVerdict(res);
+  renderTable(res);
+}
+
+/* ---------- 产品组 chips ---------- */
+function renderGroups(){
+  const cnt = {};
+  DATA.forEach(r=>{ cnt[r[0]] = (cnt[r[0]]||0)+1; });
+  const all = `<span class="gchip on" data-g="">全部<i>${DATA.length}</i></span>`;
+  $('gbar').innerHTML = all + GROUPS.map(g=>
+    `<span class="gchip" data-g="${esc(g)}">${esc(g)}<i>${cnt[g]||0}</i></span>`).join('');
+  $('gbar').querySelectorAll('.gchip').forEach(el=>{
+    el.onclick = () => {
+      curGroup = el.dataset.g;
+      $('gbar').querySelectorAll('.gchip').forEach(x=>x.classList.toggle('on', x===el));
+      run();
+    };
+  });
+}
+
+/* ---------- 事件 ---------- */
+let t=null;
+qEl.addEventListener('input', ()=>{
+  $('clr').style.display = qEl.value ? 'block' : 'none';
+  clearTimeout(t); t = setTimeout(run, 120);
+});
+qEl.addEventListener('keydown', e=>{ if(e.key==='Enter'){ clearTimeout(t); run(); } });
+$('clr').onclick = ()=>{ qEl.value=''; $('clr').style.display='none'; qEl.focus(); run(); };
+document.addEventListener('click', e=>{
+  const b = e.target.closest('.copyb');
+  if (b){ e.stopPropagation(); copyText(b.dataset.c); }
+});
+function copyText(txt){
+  const done = ()=>toast('已复制：'+txt);
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(done).catch(()=>fb(txt,done));
+  else fb(txt,done);
+}
+function fb(txt,cb){
+  const ta=document.createElement('textarea'); ta.value=txt; ta.style.cssText='position:fixed;left:-9999px';
+  document.body.appendChild(ta); ta.select(); try{document.execCommand('copy')}catch(e){} ta.remove(); cb();
+}
+let tt=null;
+function toast(m){ const el=$('toast'); el.textContent=m; el.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),1600); }
+
+$('s1').textContent = DATA.length;
+$('s2').textContent = GROUPS.length;
+renderGroups();
+run();
+</script>
+</body>
+</html>
