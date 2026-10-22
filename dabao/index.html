@@ -1,0 +1,4032 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>虚拟大保养包 · 型号查询 | 方太西北大区</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+background:#F5F4F2;color:#1F2328;-webkit-font-smoothing:antialiased;font-size:15px}
+.wrap{max-width:880px;margin:0 auto}
+
+/* ============ header ============ */
+header{background:linear-gradient(135deg,#A81C2A 0%,#C8102E 45%,#E0512F 100%);color:#fff;padding:20px 16px 18px}
+.brand{font-size:11px;letter-spacing:2.5px;font-weight:700;opacity:.82}
+h1{font-size:21px;margin:7px 0 6px;font-weight:800;letter-spacing:.3px}
+.sub{margin:0;font-size:12.5px;line-height:1.6;opacity:.92}
+.chips{margin-top:13px;display:flex;gap:7px;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:4px 10px;
+border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.chip b{font-weight:800}
+
+/* ============ 搜索区 ============ */
+.sticky{position:sticky;top:0;z-index:30;background:rgba(245,244,242,.95);
+-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:12px 16px 10px;
+border-bottom:1px solid rgba(0,0,0,.05)}
+.sbox{position:relative}
+#q{width:100%;height:52px;border-radius:14px;border:1.5px solid #E4E1DC;background:#fff;
+padding:0 46px 0 46px;font-size:16px;color:#1F2328;outline:none;
+box-shadow:0 2px 10px rgba(24,20,16,.05);transition:.16s;font-family:inherit}
+#q::placeholder{color:#A7ADB4;font-size:15px}
+#q:focus{border-color:#C8102E;box-shadow:0 0 0 4px rgba(200,16,46,.09),0 2px 10px rgba(24,20,16,.06)}
+.sicon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:#A7ADB4;pointer-events:none}
+#clr{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;
+border:0;background:#EFEDE9;color:#6B7178;font-size:18px;line-height:1;cursor:pointer;display:none;padding:0}
+#clr:active{background:#E3E0DB}
+.tabs{display:flex;gap:8px;margin-top:10px}
+.tab{flex:1;padding:9px 12px;border-radius:11px;border:1px solid #E4E1DC;background:#fff;
+font-size:13.5px;font-weight:800;color:#5E646B;cursor:pointer;font-family:inherit;transition:.14s}
+.tab .num{font-size:11px;font-weight:700;opacity:.6;margin-left:3px}
+.tab.on{background:#B7202E;border-color:#B7202E;color:#fff;box-shadow:0 3px 10px rgba(183,32,46,.24)}
+.tab.on .num{opacity:.8}
+
+/* ============ 结果栏 ============ */
+.meta{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+padding:14px 16px 9px;font-size:12.5px;color:#8A9099}
+.meta b{color:#B7202E;font-weight:800;font-size:14px}
+.meta .hint{font-size:11.5px;color:#A7ADB4}
+
+/* ============ 卡片 ============ */
+#list{padding:0 16px 40px;min-height:52vh}
+.card{background:#fff;border-radius:14px;padding:14px 15px 13px;margin-bottom:11px;
+border:1px solid #EDEAE5;box-shadow:0 1px 3px rgba(24,20,16,.045)}
+.mrow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.model{font-size:17px;font-weight:800;line-height:1.3;word-break:break-word;letter-spacing:.2px}
+.badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 6px;border-radius:5px;
+margin-left:7px;vertical-align:3px;letter-spacing:.5px}
+.badge.new{background:#C8102E;color:#fff}
+.badge.warn{background:#FFF1E0;color:#C4720C;border:1px solid #FFD9A8}
+.cnt{font-size:11.5px;font-weight:800;color:#B7202E;background:#FDECEE;border-radius:8px;
+padding:4px 8px;white-space:nowrap;flex:0 0 auto}
+.sub2{margin-top:6px;display:flex;gap:9px;flex-wrap:wrap;align-items:center;font-size:12px;color:#8A9099}
+.codeln{display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:700;color:#6B7178;
+border-bottom:1px dashed #D9D5CF;padding-bottom:1px}
+.codeln:active{color:#B7202E;border-color:#B7202E}
+.codeln svg{width:11px;height:11px;opacity:.65}
+.gtag{background:#F3F1EE;border-radius:5px;padding:2px 6px;font-weight:700;color:#8A9099;font-size:11px}
+
+.parts{margin-top:10px;border-top:1px solid #F2EFEA}
+.part{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F7F5F2}
+.part:last-child{border-bottom:0;padding-bottom:2px}
+.no{width:19px;height:19px;border-radius:50%;background:#F4F2EF;color:#9AA0A6;font-size:10.5px;
+font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px}
+.pbody{flex:1;min-width:0}
+.pname{font-size:13.5px;font-weight:600;line-height:1.4;word-break:break-word;color:#2C3138}
+.pcode{display:inline-flex;align-items:center;gap:4px;margin-top:4px;cursor:pointer;
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:700;
+color:#B7202E;background:#FDF5F5;border:1px solid #F5DFE1;border-radius:6px;padding:2px 7px}
+.pcode:active{background:#FAE7E9}
+.pcode svg{width:10px;height:10px;opacity:.7}
+.qty{flex:0 0 auto;font-size:13.5px;font-weight:800;color:#1F2328;font-variant-numeric:tabular-nums}
+.qty small{font-size:11px;font-weight:700;color:#9AA0A6}
+.qty.zero{color:#C4720C;font-size:11.5px;font-weight:800}
+
+.copyall{width:100%;margin-top:11px;height:36px;border-radius:9px;border:1px solid #EFDADC;
+background:#FFFCFC;color:#B7202E;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit}
+.copyall:active{background:#FDF2F3;border-color:#E4B9BD}
+
+/* 配件模式卡片 */
+.pcard{background:#fff;border-radius:14px;padding:14px 15px;margin-bottom:11px;
+border:1px solid #EDEAE5;box-shadow:0 1px 3px rgba(24,20,16,.045)}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pn{font-size:15px;font-weight:800;line-height:1.35;word-break:break-word}
+.pc{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;font-weight:700;
+color:#B7202E;background:#FDF5F5;border:1px solid #F5DFE1;border-radius:6px;padding:2px 7px;
+margin-top:6px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.mlist{margin-top:11px;padding-top:10px;border-top:1px solid #F2EFEA;display:flex;flex-wrap:wrap;gap:6px}
+.mtag{font-size:12px;font-weight:700;color:#41474E;background:#F4F2EF;border-radius:7px;
+padding:5px 9px;cursor:pointer;border:1px solid transparent}
+.mtag:active{background:#FDECEE;color:#B7202E;border-color:#F5DFE1}
+.mlab{width:100%;font-size:11.5px;color:#A7ADB4;font-weight:700;margin-bottom:2px}
+
+/* 空态 */
+.empty{text-align:center;padding:52px 24px;color:#8A9099}
+.empty .big{display:flex;justify-content:center;margin-bottom:12px}
+.empty .big svg{width:44px;height:44px;color:#D9D4CD}
+.empty h3{font-size:15px;color:#41474E;margin:0 0 8px;font-weight:800}
+.empty p{font-size:12.5px;line-height:1.7;margin:0}
+.empty code{background:#fff;border:1px solid #EDEAE5;border-radius:5px;padding:1px 6px;
+font-family:ui-monospace,monospace;color:#B7202E;font-weight:700}
+
+mark{background:#FFE9A8;color:inherit;border-radius:3px;padding:0 1px}
+.more{text-align:center;padding:14px 0 4px}
+.more button{border:1px solid #E4E1DC;background:#fff;color:#5E646B;font-weight:800;font-size:13px;
+padding:10px 26px;border-radius:10px;cursor:pointer;font-family:inherit}
+
+footer{padding:0 16px 34px;text-align:center;font-size:11.5px;color:#A7ADB4;line-height:1.8}
+footer b{color:#8A9099}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:rgba(31,35,40,.93);
+color:#fff;font-size:13px;font-weight:700;padding:10px 18px;border-radius:99px;opacity:0;
+transition:.22s;pointer-events:none;z-index:99;white-space:nowrap;max-width:88vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* 桌面端双列，信息密度更高 */
+@media (min-width:860px){
+  #list{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  .card,.pcard{margin-bottom:0}
+  .more,.empty{grid-column:1/-1}
+}
+@media (min-width:1120px){
+  .wrap{max-width:1080px}
+}
+@media (max-width:520px){
+  header{padding:16px 14px 14px}
+  h1{font-size:19px;margin:6px 0 5px}
+  .sub{font-size:12px;line-height:1.55}
+  .chips{margin-top:10px;gap:6px}
+  .chip{padding:3px 9px;font-size:11px}
+  .sticky{padding:10px 14px 8px}
+  #q{height:48px;font-size:16px;padding:0 42px 0 42px}
+  .sicon{left:13px;width:17px;height:17px}
+  .tab{padding:8px 10px;font-size:13px}
+  #list{padding:0 14px 34px}
+}
+@media (max-width:400px){
+  h1{font-size:18px}
+  .model{font-size:16px}
+  .pname{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">FOTILE 方太 · 西北大区服务</div>
+    <h1>虚拟大保养包 · 型号查询</h1>
+    <p class="sub">输入客户家的产品型号，秒查该机型大保养包要换哪些配件</p>
+    <div class="chips">
+      <span class="chip"><b>159</b> 个型号</span>
+      <span class="chip"><b>52</b> 种配件</span>
+      <span class="chip">数据版本 <b>10.22 核对版</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="sticky">
+  <div class="wrap">
+    <div class="sbox">
+      <svg class="sicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2" stroke-linecap="round"/></svg>
+      <input id="q" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             placeholder="型号 / 产品编码 / 配件名，如 EM05G、JQ01TS、叶轮">
+      <button id="clr" aria-label="清空">×</button>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-mode="m">按型号查<span class="num">159</span></button>
+      <button class="tab" data-mode="p">按配件查<span class="num">52</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="meta">
+    <div id="stat">共 <b>159</b> 个型号</div>
+    <div class="hint" id="hint">可只输后半段</div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<footer>
+  数据来源：《虚拟大保养包1018》· 10.22 核对后型号 · 共 333 条配件明细<br>
+  配件编码点击即可复制 · 仅供服务工程师 / 配件管理员内部查询使用
+</footer>
+
+<div id="toast"></div>
+
+<script>
+const MODELS = [
+ {
+  "m": "CXW-175-SY09",
+  "c": "1001000600035",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100010059",
+    "n": "叶轮组件(CXW-128-Q2)",
+    "q": 1
+   },
+   {
+    "c": "110100060053",
+    "n": "网罩组件(CXW-189-SY02)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-175-SY09G",
+  "c": "1001000600030",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100010059",
+    "n": "叶轮组件(CXW-128-Q2)",
+    "q": 1
+   },
+   {
+    "c": "110100060053",
+    "n": "网罩组件(CXW-189-SY02)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-189-JX05(不带罩)",
+  "c": "1001000300049",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100030190",
+    "n": "叶轮组件（右）(CXW-189-JX02)",
+    "q": 1
+   },
+   {
+    "c": "110100030262",
+    "n": "进风口组件(CXW-189-JX05(不带罩))",
+    "q": 2
+   },
+   {
+    "c": "110100030187",
+    "n": "叶轮组件（左）(CXW-189-JX02)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-189-JX05(带罩)",
+  "c": "1001000300054",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100030187",
+    "n": "叶轮组件（左）(CXW-189-JX02)",
+    "q": 1
+   },
+   {
+    "c": "110100030262",
+    "n": "进风口组件(CXW-189-JX05(不带罩))",
+    "q": 2
+   },
+   {
+    "c": "110100030190",
+    "n": "叶轮组件（右）(CXW-189-JX02)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-189-JX17(不带罩)",
+  "c": "1001000300046",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100030187",
+    "n": "叶轮组件（左）(CXW-189-JX02)",
+    "q": 1
+   },
+   {
+    "c": "110100030190",
+    "n": "叶轮组件（右）(CXW-189-JX02)",
+    "q": 1
+   },
+   {
+    "c": "110100030262",
+    "n": "进风口组件(CXW-189-JX05(不带罩))",
+    "q": 2
+   }
+  ]
+ },
+ {
+  "m": "CXW-189-JX78(不带罩)",
+  "c": "1001000300069",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100030187",
+    "n": "叶轮组件（左）(CXW-189-JX02)",
+    "q": 1
+   },
+   {
+    "c": "110100030262",
+    "n": "进风口组件(CXW-189-JX05(不带罩))",
+    "q": 2
+   },
+   {
+    "c": "110100030190",
+    "n": "叶轮组件（右）(CXW-189-JX02)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EG09（带罩）",
+  "c": "1001001100039",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EH20Q",
+  "c": "1001000800048",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EH22Q",
+  "c": "1001000800045",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EH25T",
+  "c": "1001000800115",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EH29T",
+  "c": "1001000800046",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EH40QE",
+  "c": "1001000800050",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 0
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 0
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430(CXW-189-EH11D)",
+    "q": 0
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM01T",
+  "c": "1001000900040",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090169",
+    "n": "叶轮组件(CXW-200-EM01T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM02T",
+  "c": "1001000900042",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM03T",
+  "c": "1001000900041",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM05",
+  "c": "1001000900043",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM05G",
+  "c": "1001000900050",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM05H",
+  "c": "1001000900165",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM06T",
+  "c": "1001000900061",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM10T",
+  "c": "1001000900059",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM11T",
+  "c": "1001000900057",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM12T",
+  "c": "1001000900058",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM12T.S",
+  "c": "1001000900137",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM12TA",
+  "c": "1001000900182",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM16T",
+  "c": "1001000900138",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM17T",
+  "c": "1001000900139",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM18TA",
+  "c": "1001000900199",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM23TS.D（京东专供机）",
+  "c": "1001000900068",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM23TS.M",
+  "c": "1001000900077",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM25E",
+  "c": "1001000900049",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM25E（电商包装增强）",
+  "c": "1001000900045",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM71T",
+  "c": "1001000900056",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM71T.S（电商苏宁易购专供机）",
+  "c": "1001000900080",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EM72T.S",
+  "c": "1001000900154",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMD2T",
+  "c": "1001000900108",
+  "g": "吸油烟机",
+  "n": "新增",
+  "p": [
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   },
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMD3",
+  "c": "1001000900107",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMD6T",
+  "c": "1001000900115",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090662",
+    "n": "叶轮组件(CXW-200-EM06T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMD9T",
+  "c": "1001000900161",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMD22T",
+  "c": "1001000900206",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EMQ2T",
+  "c": "1001000900054",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100090103",
+    "n": "进风口罩(CXW-200-EM01T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EN05E",
+  "c": "1001001200031",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100081024",
+    "n": "叶轮部件(CXW-200-EH12Q)",
+    "q": 1
+   },
+   {
+    "c": "110100080593",
+    "n": "进风口内罩(CXW-200-EH12)",
+    "q": 1
+   },
+   {
+    "c": "110100080513",
+    "n": "进风口外罩430",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EQ01T",
+  "c": "1001001300035",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100130059",
+    "n": "进风口内罩冲制件(CXW-200-EQ01)",
+    "q": 1
+   },
+   {
+    "c": "110100130061",
+    "n": "进风口外罩冲制件(CXW-200-EQ01)",
+    "q": 1
+   },
+   {
+    "c": "110100130103",
+    "n": "叶轮部件(CXW-200-EQ01)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-EQ02T",
+  "c": "1001001300037",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100130061",
+    "n": "进风口外罩(CXW-200-EQ01)",
+    "q": 1
+   },
+   {
+    "c": "110100130103",
+    "n": "叶轮部件(CXW-200-EQ01)",
+    "q": 1
+   },
+   {
+    "c": "110100130059",
+    "n": "进风口内罩(CXW-200-EQ01)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01T(不带罩)",
+  "c": "1001000500042",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01T(带罩)",
+  "c": "1001000500041",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TI(不带罩）",
+  "c": "1001000500080",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TI(带罩）",
+  "c": "1001000500121",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TS-L(不带罩)",
+  "c": "1001000500007",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TS.H（不带罩）",
+  "c": "1001000500227",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TS.H（带罩）",
+  "c": "1001000500226",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TS（不带罩）",
+  "c": "1001000500073",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ01TS（带罩）",
+  "c": "1001000500072",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ02T(不带罩)",
+  "c": "1001000500055",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ03T(不带罩)",
+  "c": "1001000500049",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ03TS（不带罩）",
+  "c": "1001000500075",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ03TS（带罩）",
+  "c": "1001000500076",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ06T(不带罩)",
+  "c": "1001000500044",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050460",
+    "n": "进风口圈组件喷涂件(JQ06T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS(不带罩)",
+  "c": "1001000500087",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS-H(带罩）",
+  "c": "1001000500128",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS-H（不带罩）",
+  "c": "1001000500095",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS-L（不带罩）",
+  "c": "1001000500104",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS-Y（不带罩）",
+  "c": "1001000500101",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ08TS-Y（带罩）",
+  "c": "1001000500103",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ09TS（不带罩）",
+  "c": "1001000500270",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   },
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ22TS(不带罩)",
+  "c": "1001000500093",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ22TS(带罩)",
+  "c": "1001000500123",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ25TE(不带罩)",
+  "c": "1001000500052",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ25TS（不带罩）",
+  "c": "1001000500094",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ25TS（带罩）",
+  "c": "1001000500125",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ26TS(不带罩)",
+  "c": "1001000500085",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   },
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-200-JQ29TS（不带罩）",
+  "c": "1001000500092",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-208-JQ01T(不带罩)",
+  "c": "1001001600100",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100050157",
+    "n": "进风口圈组件(CXW-200-JQ03T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ01TA(不带罩)",
+  "c": "1001000500224",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ01TA(带罩)",
+  "c": "1001000500223",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ08TA(不带罩)",
+  "c": "1001000500283",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ08TA(带罩)",
+  "c": "1001000500301",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ08TB(不带罩)",
+  "c": "1001000500285",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ12T（不带罩）",
+  "c": "1001000500218",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100051306",
+    "n": "进风口圈组件(JQ01TA)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ12T（带罩）",
+  "c": "1001000500219",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100050176",
+    "n": "叶轮组件(CXW-200-JQ03T)",
+    "q": 1
+   },
+   {
+    "c": "110100051306",
+    "n": "进风口圈组件(JQ01TA)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ15T(不带罩)",
+  "c": "1001000500251",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ15T(带罩)",
+  "c": "1001000500250",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ16T（不带罩）",
+  "c": "1001000500269",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ22TA(不带罩）",
+  "c": "1001000500312",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQ26TA(不带罩)",
+  "c": "1001000500259",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQD2T(不带罩)",
+  "c": "1001000500263",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQD3T(不带罩)",
+  "c": "1001000500253",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQD6T(不带罩)",
+  "c": "1001000500278",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-228-JQD11T(不带罩)",
+  "c": "1001000500307",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052210",
+    "n": "叶轮组件(JQ15T)",
+    "q": 1
+   },
+   {
+    "c": "110100050747",
+    "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM6T",
+  "c": "1001000900013",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM7T",
+  "c": "1001000900014",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM7T.S",
+  "c": "1001000900128",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM10T.S",
+  "c": "1001000900125",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091122",
+    "n": "内网(EM7T)",
+    "q": 1
+   },
+   {
+    "c": "110100091625",
+    "n": "外网组件(EM7T)FW",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM15TA",
+  "c": "1001000900233",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100220132",
+    "n": "叶轮组件(EM36.L)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM15TA(单罩)",
+  "c": "1001000900275",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100220132",
+    "n": "叶轮组件(EM36.L)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM16TA",
+  "c": "1001000900225",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100220132",
+    "n": "叶轮组件(EM36.L)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM18A",
+  "c": "1001000900226",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM18A(单罩)",
+  "c": "1001000900287",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM19T（单罩）",
+  "c": "1001000900319",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260030",
+    "n": "叶轮组件(AC)(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100093027",
+    "n": "进风口罩(EMQ5)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM31",
+  "c": "1001000900191",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM31(单罩)",
+  "c": "1001000900303",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM32",
+  "c": "1001000900198",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM32(单罩)",
+  "c": "1001000900301",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM33",
+  "c": "1001000900194",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM35",
+  "c": "1001000900193",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM35(单罩)",
+  "c": "1001000900278",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM35Y",
+  "c": "1001000900209",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EM35Y(单罩)",
+  "c": "1001000900289",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC2",
+  "c": "1001000900197",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC2(单罩)",
+  "c": "1001000900304",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC3",
+  "c": "1001000900195",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC3(单罩)",
+  "c": "1001000900300",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC5",
+  "c": "1001000900192",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC5(单罩)",
+  "c": "1001000900302",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC7",
+  "c": "1001000900196",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMC7(单罩)",
+  "c": "1001000900282",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMD20T",
+  "c": "1001000900237",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100090586",
+    "n": "叶轮组件(CXW-200-EM10T)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMD22A",
+  "c": "1001000900230",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-EMD22A(单罩)",
+  "c": "1001000900284",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-J1(不带罩)",
+  "c": "1001002400000",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260015",
+    "n": "叶轮组件(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100240003",
+    "n": "格栅(J1)",
+    "q": 2
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD1(不带罩)",
+  "c": "1001002100000",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD6(不带罩)",
+  "c": "1001002100004",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD7(不带罩)",
+  "c": "1001002100005",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD9A（不带罩）",
+  "c": "1001002100015",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD9B（不带罩）",
+  "c": "1001002100013",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JCD11T(不带罩)",
+  "c": "1001002100045",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260037",
+    "n": "叶轮组件_沧海V1R1_JCD15T",
+    "q": 1
+   },
+   {
+    "c": "110100210309",
+    "n": "导油板组件_JCD15T",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ01TB(不带罩)",
+  "c": "1001000500244",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100051520",
+    "n": "叶轮组件(JQ01T.i)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ01TB(带罩)",
+  "c": "1001000500243",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100051520",
+    "n": "叶轮组件(JQ01T.i)",
+    "q": 1
+   },
+   {
+    "c": "110100050570",
+    "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ01TX(不带罩)",
+  "c": "1001000500363",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052897",
+    "n": "叶轮组件(JQ01TY)",
+    "q": 1
+   },
+   {
+    "c": "110100052918",
+    "n": "进风口圈组件(JQ01TY)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ16TA（不带罩）",
+  "c": "1001000500359",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260037",
+    "n": "叶轮组件_沧海V1R1_JCD15T",
+    "q": 1
+   },
+   {
+    "c": "110100260044",
+    "n": "前进风口圈组件_沧海V1R1",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ31(不带罩)",
+  "c": "1001000500304",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ32(不带罩)",
+  "c": "1001000500318",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQ33(不带罩)",
+  "c": "1001000500320",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQC1（不带罩）",
+  "c": "1001002100008",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQC2(不带罩）",
+  "c": "1001000500309",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQC3A（不带罩）",
+  "c": "1001000500356",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-JQC5(不带罩)",
+  "c": "1001000500311",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100052434",
+    "n": "叶轮组件(JQ31)",
+    "q": 1
+   },
+   {
+    "c": "110100052258",
+    "n": "导油板(JQ31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-P1(不带罩)",
+  "c": "1001002500001",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100200375",
+    "n": "叶轮组件(X3)",
+    "q": 1
+   },
+   {
+    "c": "110100250066",
+    "n": "油网(P1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-X1",
+  "c": "1001002000000",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-X1A",
+  "c": "1001002000004",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-X1S",
+  "c": "1001002000006",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-X2",
+  "c": "1001002000001",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-X2A",
+  "c": "1001002000005",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100091362",
+    "n": "叶轮组件(EM7T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-Z3TA",
+  "c": "1001001500084",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150539",
+    "n": "叶轮组件(Z3TA)",
+    "q": 1
+   },
+   {
+    "c": "110100150798",
+    "n": "格栅电泳件(Z3TA)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-Z3TB（不带罩）",
+  "c": "1001001500086",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150539",
+    "n": "叶轮组件(Z3TA)",
+    "q": 1
+   },
+   {
+    "c": "1101001507980",
+    "n": "格栅电泳件(Z3TA)",
+    "q": 2
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-Z5T(不带罩)",
+  "c": "1001001500088",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150539",
+    "n": "叶轮组件(Z3TA)",
+    "q": 1
+   },
+   {
+    "c": "110100150825",
+    "n": "格栅(Z6T)电泳件(Z6T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-Z5T(带罩)",
+  "c": "1001001500092",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150539",
+    "n": "叶轮组件(Z3TA)",
+    "q": 1
+   },
+   {
+    "c": "110100150825",
+    "n": "格栅(Z6T)电泳件(Z6T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-258-Z6T(不带罩)",
+  "c": "1001001500087",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150539",
+    "n": "叶轮组件(Z3TA)",
+    "q": 1
+   },
+   {
+    "c": "110100150825",
+    "n": "格栅(Z6T)电泳件(Z6T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-298-JCD10A（不带罩）",
+  "c": "1001002100026",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-298-JCD10C（不带罩）",
+  "c": "1001002100031",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100210032",
+    "n": "叶轮组件(JCD1)",
+    "q": 1
+   },
+   {
+    "c": "110100210033",
+    "n": "导油板组件(JCD1)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-01-F2.i",
+  "c": "1001001500121",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260030",
+    "n": "叶轮组件(AC)(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-01-F2.i(带罩)",
+  "c": "1001001500125",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260030",
+    "n": "叶轮组件(AC)(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-01-JCD10TA(不带罩)",
+  "c": "1001002100047",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260037",
+    "n": "叶轮组件_沧海V1R1_JCD15T",
+    "q": 1
+   },
+   {
+    "c": "110100053320",
+    "n": "导油板组件_01-JQ17T",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-EMC2A（单罩）",
+  "c": "1001000900315",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-EMC5A（单罩）",
+  "c": "1001000900317",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100092089",
+    "n": "叶轮组件(EM31)",
+    "q": 1
+   },
+   {
+    "c": "110100092044",
+    "n": "进风口罩(EM31)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-Z1T-M",
+  "c": "1001001500032",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100150190",
+    "n": "叶轮组件(CXW-358-Z3T)",
+    "q": 1
+   },
+   {
+    "c": "110100150236",
+    "n": "格栅(CXW-358-Z1T)",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-Z5TA（不带罩）",
+  "c": "1001001500106",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260030",
+    "n": "叶轮组件(AC)(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 2
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-Z6TA（不带罩）",
+  "c": "1001001500103",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260015",
+    "n": "叶轮组件(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 1
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-Z7T（不带罩）",
+  "c": "1001001500097",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260015",
+    "n": "叶轮组件(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 2
+   }
+  ]
+ },
+ {
+  "m": "CXW-358-Z8T(不带罩)",
+  "c": "1001001500116",
+  "g": "吸油烟机",
+  "n": "",
+  "p": [
+   {
+    "c": "110100260030",
+    "n": "叶轮组件(AC)(V1R1)",
+    "q": 1
+   },
+   {
+    "c": "110100150911",
+    "n": "格栅_Z7T",
+    "q": 2
+   }
+  ]
+ }
+];
+const PARTS  = [
+ {
+  "c": "110100050176",
+  "n": "叶轮组件(CXW-200-JQ03T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-JQ01T(不带罩)",
+   "CXW-200-JQ01T(带罩)",
+   "CXW-200-JQ01TI(不带罩）",
+   "CXW-200-JQ01TI(带罩）",
+   "CXW-200-JQ01TS-L(不带罩)",
+   "CXW-200-JQ01TS.H（不带罩）",
+   "CXW-200-JQ01TS.H（带罩）",
+   "CXW-200-JQ01TS（不带罩）",
+   "CXW-200-JQ01TS（带罩）",
+   "CXW-200-JQ02T(不带罩)",
+   "CXW-200-JQ03T(不带罩)",
+   "CXW-200-JQ03TS（不带罩）",
+   "CXW-200-JQ03TS（带罩）",
+   "CXW-200-JQ06T(不带罩)",
+   "CXW-200-JQ08TS(不带罩)",
+   "CXW-200-JQ08TS-H(带罩）",
+   "CXW-200-JQ08TS-H（不带罩）",
+   "CXW-200-JQ08TS-L（不带罩）",
+   "CXW-200-JQ08TS-Y（不带罩）",
+   "CXW-200-JQ08TS-Y（带罩）",
+   "CXW-200-JQ09TS（不带罩）",
+   "CXW-200-JQ22TS(不带罩)",
+   "CXW-200-JQ22TS(带罩)",
+   "CXW-200-JQ25TE(不带罩)",
+   "CXW-200-JQ25TS（不带罩）",
+   "CXW-200-JQ25TS（带罩）",
+   "CXW-200-JQ26TS(不带罩)",
+   "CXW-200-JQ29TS（不带罩）",
+   "CXW-208-JQ01T(不带罩)",
+   "CXW-228-JQ12T（不带罩）",
+   "CXW-228-JQ12T（带罩）"
+  ]
+ },
+ {
+  "c": "110100092044",
+  "n": "进风口罩(EM31)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM18TA",
+   "CXW-200-EM25E（电商包装增强）",
+   "CXW-200-EMD22T",
+   "CXW-258-EM15TA",
+   "CXW-258-EM15TA(单罩)",
+   "CXW-258-EM16TA",
+   "CXW-258-EM18A",
+   "CXW-258-EM18A(单罩)",
+   "CXW-258-EM31",
+   "CXW-258-EM31(单罩)",
+   "CXW-258-EM32",
+   "CXW-258-EM32(单罩)",
+   "CXW-258-EM33",
+   "CXW-258-EM35",
+   "CXW-258-EM35(单罩)",
+   "CXW-258-EM35Y",
+   "CXW-258-EM35Y(单罩)",
+   "CXW-258-EMC2",
+   "CXW-258-EMC2(单罩)",
+   "CXW-258-EMC3",
+   "CXW-258-EMC3(单罩)",
+   "CXW-258-EMC5",
+   "CXW-258-EMC5(单罩)",
+   "CXW-258-EMC7",
+   "CXW-258-EMC7(单罩)",
+   "CXW-258-EMD20T",
+   "CXW-258-EMD22A",
+   "CXW-258-EMD22A(单罩)",
+   "CXW-358-EMC2A（单罩）",
+   "CXW-358-EMC5A（单罩）"
+  ]
+ },
+ {
+  "c": "110100092089",
+  "n": "叶轮组件(EM31)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EG09（带罩）",
+   "CXW-200-EM05G",
+   "CXW-200-EMD9T",
+   "CXW-258-EM18A",
+   "CXW-258-EM18A(单罩)",
+   "CXW-258-EM31",
+   "CXW-258-EM31(单罩)",
+   "CXW-258-EM32",
+   "CXW-258-EM32(单罩)",
+   "CXW-258-EM33",
+   "CXW-258-EM35",
+   "CXW-258-EM35(单罩)",
+   "CXW-258-EM35Y",
+   "CXW-258-EM35Y(单罩)",
+   "CXW-258-EMC2",
+   "CXW-258-EMC2(单罩)",
+   "CXW-258-EMC3",
+   "CXW-258-EMC3(单罩)",
+   "CXW-258-EMC5",
+   "CXW-258-EMC5(单罩)",
+   "CXW-258-EMC7",
+   "CXW-258-EMC7(单罩)",
+   "CXW-258-EMD22A",
+   "CXW-258-EMD22A(单罩)",
+   "CXW-358-EMC2A（单罩）",
+   "CXW-358-EMC5A（单罩）"
+  ]
+ },
+ {
+  "c": "110100090103",
+  "n": "进风口罩(CXW-200-EM01T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM01T",
+   "CXW-200-EM02T",
+   "CXW-200-EM03T",
+   "CXW-200-EM05",
+   "CXW-200-EM05G",
+   "CXW-200-EM05H",
+   "CXW-200-EM06T",
+   "CXW-200-EM10T",
+   "CXW-200-EM11T",
+   "CXW-200-EM12T",
+   "CXW-200-EM16T",
+   "CXW-200-EM17T",
+   "CXW-200-EM23TS.D（京东专供机）",
+   "CXW-200-EM23TS.M",
+   "CXW-200-EM25E",
+   "CXW-200-EM71T",
+   "CXW-200-EM71T.S（电商苏宁易购专供机）",
+   "CXW-200-EMD2T",
+   "CXW-200-EMD3",
+   "CXW-200-EMD6T",
+   "CXW-200-EMD9T",
+   "CXW-200-EMQ2T"
+  ]
+ },
+ {
+  "c": "110100050570",
+  "n": "进风口圈组件(CXW-200-JQ01TS（不带罩）)",
+  "q": 1,
+  "ms": [
+   "CXW-200-JQ01TI(不带罩）",
+   "CXW-200-JQ01TI(带罩）",
+   "CXW-200-JQ01TS-L(不带罩)",
+   "CXW-200-JQ01TS.H（不带罩）",
+   "CXW-200-JQ01TS.H（带罩）",
+   "CXW-200-JQ01TS（不带罩）",
+   "CXW-200-JQ01TS（带罩）",
+   "CXW-200-JQ03TS（不带罩）",
+   "CXW-200-JQ03TS（带罩）",
+   "CXW-200-JQ22TS(不带罩)",
+   "CXW-200-JQ22TS(带罩)",
+   "CXW-200-JQ25TS（不带罩）",
+   "CXW-200-JQ25TS（带罩）",
+   "CXW-200-JQ29TS（不带罩）",
+   "CXW-228-JQ01TA(不带罩)",
+   "CXW-228-JQ01TA(带罩)",
+   "CXW-228-JQ22TA(不带罩）",
+   "CXW-258-JQ01TB(不带罩)",
+   "CXW-258-JQ01TB(带罩)"
+  ]
+ },
+ {
+  "c": "110100050747",
+  "n": "进风口圈组件(CXW-200-JQ08TS(带罩))",
+  "q": 1,
+  "ms": [
+   "CXW-200-JQ08TS(不带罩)",
+   "CXW-200-JQ08TS-H(带罩）",
+   "CXW-200-JQ08TS-H（不带罩）",
+   "CXW-200-JQ08TS-L（不带罩）",
+   "CXW-200-JQ08TS-Y（不带罩）",
+   "CXW-200-JQ08TS-Y（带罩）",
+   "CXW-200-JQ09TS（不带罩）",
+   "CXW-200-JQ26TS(不带罩)",
+   "CXW-228-JQ08TA(不带罩)",
+   "CXW-228-JQ08TA(带罩)",
+   "CXW-228-JQ08TB(不带罩)",
+   "CXW-228-JQ15T(不带罩)",
+   "CXW-228-JQ15T(带罩)",
+   "CXW-228-JQ16T（不带罩）",
+   "CXW-228-JQ26TA(不带罩)",
+   "CXW-228-JQD2T(不带罩)",
+   "CXW-228-JQD3T(不带罩)",
+   "CXW-228-JQD6T(不带罩)",
+   "CXW-228-JQD11T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100090586",
+  "n": "叶轮组件(CXW-200-EM10T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM02T",
+   "CXW-200-EM10T",
+   "CXW-200-EM11T",
+   "CXW-200-EM12T",
+   "CXW-200-EM12T.S",
+   "CXW-200-EM12TA",
+   "CXW-200-EM16T",
+   "CXW-200-EM17T",
+   "CXW-200-EM18TA",
+   "CXW-200-EM71T",
+   "CXW-200-EM71T.S（电商苏宁易购专供机）",
+   "CXW-200-EM72T.S",
+   "CXW-200-EMD22T",
+   "CXW-200-EMQ2T",
+   "CXW-258-EMD20T"
+  ]
+ },
+ {
+  "c": "110100052210",
+  "n": "叶轮组件(JQ15T)",
+  "q": 1,
+  "ms": [
+   "CXW-228-JQ01TA(不带罩)",
+   "CXW-228-JQ01TA(带罩)",
+   "CXW-228-JQ08TA(不带罩)",
+   "CXW-228-JQ08TA(带罩)",
+   "CXW-228-JQ08TB(不带罩)",
+   "CXW-228-JQ15T(不带罩)",
+   "CXW-228-JQ15T(带罩)",
+   "CXW-228-JQ16T（不带罩）",
+   "CXW-228-JQ22TA(不带罩）",
+   "CXW-228-JQ26TA(不带罩)",
+   "CXW-228-JQD2T(不带罩)",
+   "CXW-228-JQD3T(不带罩)",
+   "CXW-228-JQD6T(不带罩)",
+   "CXW-228-JQD11T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100090662",
+  "n": "叶轮组件(CXW-200-EM06T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM03T",
+   "CXW-200-EM05",
+   "CXW-200-EM05H",
+   "CXW-200-EM06T",
+   "CXW-200-EM23TS.D（京东专供机）",
+   "CXW-200-EM23TS.M",
+   "CXW-200-EM25E",
+   "CXW-200-EM25E（电商包装增强）",
+   "CXW-200-EMD2T",
+   "CXW-200-EMD3",
+   "CXW-200-EMD6T"
+  ]
+ },
+ {
+  "c": "110100091362",
+  "n": "叶轮组件(EM7T)",
+  "q": 1,
+  "ms": [
+   "CXW-258-EM6T",
+   "CXW-258-EM7T",
+   "CXW-258-EM7T.S",
+   "CXW-258-EM10T.S",
+   "CXW-258-X1",
+   "CXW-258-X1A",
+   "CXW-258-X1S",
+   "CXW-258-X2",
+   "CXW-258-X2A"
+  ]
+ },
+ {
+  "c": "110100210032",
+  "n": "叶轮组件(JCD1)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JCD1(不带罩)",
+   "CXW-258-JCD6(不带罩)",
+   "CXW-258-JCD7(不带罩)",
+   "CXW-258-JCD9A（不带罩）",
+   "CXW-258-JCD9B（不带罩）",
+   "CXW-258-JQC1（不带罩）",
+   "CXW-298-JCD10A（不带罩）",
+   "CXW-298-JCD10C（不带罩）"
+  ]
+ },
+ {
+  "c": "110100210033",
+  "n": "导油板组件(JCD1)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JCD1(不带罩)",
+   "CXW-258-JCD6(不带罩)",
+   "CXW-258-JCD7(不带罩)",
+   "CXW-258-JCD9A（不带罩）",
+   "CXW-258-JCD9B（不带罩）",
+   "CXW-258-JQC1（不带罩）",
+   "CXW-298-JCD10A（不带罩）",
+   "CXW-298-JCD10C（不带罩）"
+  ]
+ },
+ {
+  "c": "110100080513",
+  "n": "进风口外罩430(CXW-189-EH11D)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EG09（带罩）",
+   "CXW-200-EH20Q",
+   "CXW-200-EH22Q",
+   "CXW-200-EH25T",
+   "CXW-200-EH29T",
+   "CXW-200-EH40QE",
+   "CXW-200-EN05E"
+  ]
+ },
+ {
+  "c": "110100080593",
+  "n": "进风口内罩(CXW-200-EH12)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EG09（带罩）",
+   "CXW-200-EH20Q",
+   "CXW-200-EH22Q",
+   "CXW-200-EH25T",
+   "CXW-200-EH29T",
+   "CXW-200-EH40QE",
+   "CXW-200-EN05E"
+  ]
+ },
+ {
+  "c": "110100091122",
+  "n": "内网(EM7T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM12T.S",
+   "CXW-200-EM12TA",
+   "CXW-200-EM72T.S",
+   "CXW-258-EM6T",
+   "CXW-258-EM7T",
+   "CXW-258-EM7T.S",
+   "CXW-258-EM10T.S"
+  ]
+ },
+ {
+  "c": "110100091625",
+  "n": "外网组件(EM7T)FW",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM12T.S",
+   "CXW-200-EM12TA",
+   "CXW-200-EM72T.S",
+   "CXW-258-EM6T",
+   "CXW-258-EM7T",
+   "CXW-258-EM7T.S",
+   "CXW-258-EM10T.S"
+  ]
+ },
+ {
+  "c": "110100050157",
+  "n": "进风口圈组件(CXW-200-JQ03T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-JQ01T(不带罩)",
+   "CXW-200-JQ01T(带罩)",
+   "CXW-200-JQ02T(不带罩)",
+   "CXW-200-JQ03T(不带罩)",
+   "CXW-200-JQ25TE(不带罩)",
+   "CXW-208-JQ01T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100052258",
+  "n": "导油板(JQ31)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ31(不带罩)",
+   "CXW-258-JQ32(不带罩)",
+   "CXW-258-JQ33(不带罩)",
+   "CXW-258-JQC2(不带罩）",
+   "CXW-258-JQC3A（不带罩）",
+   "CXW-258-JQC5(不带罩)"
+  ]
+ },
+ {
+  "c": "110100052434",
+  "n": "叶轮组件(JQ31)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ31(不带罩)",
+   "CXW-258-JQ32(不带罩)",
+   "CXW-258-JQ33(不带罩)",
+   "CXW-258-JQC2(不带罩）",
+   "CXW-258-JQC3A（不带罩）",
+   "CXW-258-JQC5(不带罩)"
+  ]
+ },
+ {
+  "c": "110100081024",
+  "n": "叶轮部件(CXW-200-EH12Q)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EH20Q",
+   "CXW-200-EH22Q",
+   "CXW-200-EH25T",
+   "CXW-200-EH29T",
+   "CXW-200-EH40QE",
+   "CXW-200-EN05E"
+  ]
+ },
+ {
+  "c": "110100150911",
+  "n": "格栅_Z7T",
+  "q": 1,
+  "ms": [
+   "CXW-358-01-F2.i",
+   "CXW-358-01-F2.i(带罩)",
+   "CXW-358-Z5TA（不带罩）",
+   "CXW-358-Z6TA（不带罩）",
+   "CXW-358-Z7T（不带罩）",
+   "CXW-358-Z8T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100150539",
+  "n": "叶轮组件(Z3TA)",
+  "q": 1,
+  "ms": [
+   "CXW-258-Z3TA",
+   "CXW-258-Z3TB（不带罩）",
+   "CXW-258-Z5T(不带罩)",
+   "CXW-258-Z5T(带罩)",
+   "CXW-258-Z6T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100260030",
+  "n": "叶轮组件(AC)(V1R1)",
+  "q": 1,
+  "ms": [
+   "CXW-258-EM19T（单罩）",
+   "CXW-358-01-F2.i",
+   "CXW-358-01-F2.i(带罩)",
+   "CXW-358-Z5TA（不带罩）",
+   "CXW-358-Z8T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100030187",
+  "n": "叶轮组件（左）(CXW-189-JX02)",
+  "q": 1,
+  "ms": [
+   "CXW-189-JX05(不带罩)",
+   "CXW-189-JX05(带罩)",
+   "CXW-189-JX17(不带罩)",
+   "CXW-189-JX78(不带罩)"
+  ]
+ },
+ {
+  "c": "110100030190",
+  "n": "叶轮组件（右）(CXW-189-JX02)",
+  "q": 1,
+  "ms": [
+   "CXW-189-JX05(不带罩)",
+   "CXW-189-JX05(带罩)",
+   "CXW-189-JX17(不带罩)",
+   "CXW-189-JX78(不带罩)"
+  ]
+ },
+ {
+  "c": "110100030262",
+  "n": "进风口组件(CXW-189-JX05(不带罩))",
+  "q": 2,
+  "ms": [
+   "CXW-189-JX05(不带罩)",
+   "CXW-189-JX05(带罩)",
+   "CXW-189-JX17(不带罩)",
+   "CXW-189-JX78(不带罩)"
+  ]
+ },
+ {
+  "c": "110100150825",
+  "n": "格栅(Z6T)电泳件(Z6T)",
+  "q": 1,
+  "ms": [
+   "CXW-258-Z5T(不带罩)",
+   "CXW-258-Z5T(带罩)",
+   "CXW-258-Z6T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100220132",
+  "n": "叶轮组件(EM36.L)",
+  "q": 1,
+  "ms": [
+   "CXW-258-EM15TA",
+   "CXW-258-EM15TA(单罩)",
+   "CXW-258-EM16TA"
+  ]
+ },
+ {
+  "c": "110100260015",
+  "n": "叶轮组件(V1R1)",
+  "q": 1,
+  "ms": [
+   "CXW-258-J1(不带罩)",
+   "CXW-358-Z6TA（不带罩）",
+   "CXW-358-Z7T（不带罩）"
+  ]
+ },
+ {
+  "c": "110100260037",
+  "n": "叶轮组件_沧海V1R1_JCD15T",
+  "q": 1,
+  "ms": [
+   "CXW-258-JCD11T(不带罩)",
+   "CXW-258-JQ16TA（不带罩）",
+   "CXW-358-01-JCD10TA(不带罩)"
+  ]
+ },
+ {
+  "c": "110100010059",
+  "n": "叶轮组件(CXW-128-Q2)",
+  "q": 1,
+  "ms": [
+   "CXW-175-SY09",
+   "CXW-175-SY09G"
+  ]
+ },
+ {
+  "c": "110100051306",
+  "n": "进风口圈组件(JQ01TA)",
+  "q": 1,
+  "ms": [
+   "CXW-228-JQ12T（不带罩）",
+   "CXW-228-JQ12T（带罩）"
+  ]
+ },
+ {
+  "c": "110100051520",
+  "n": "叶轮组件(JQ01T.i)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ01TB(不带罩)",
+   "CXW-258-JQ01TB(带罩)"
+  ]
+ },
+ {
+  "c": "110100060053",
+  "n": "网罩组件(CXW-189-SY02)",
+  "q": 1,
+  "ms": [
+   "CXW-175-SY09",
+   "CXW-175-SY09G"
+  ]
+ },
+ {
+  "c": "110100130059",
+  "n": "进风口内罩冲制件(CXW-200-EQ01)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EQ01T",
+   "CXW-200-EQ02T"
+  ]
+ },
+ {
+  "c": "110100130061",
+  "n": "进风口外罩冲制件(CXW-200-EQ01)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EQ01T",
+   "CXW-200-EQ02T"
+  ]
+ },
+ {
+  "c": "110100130103",
+  "n": "叶轮部件(CXW-200-EQ01)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EQ01T",
+   "CXW-200-EQ02T"
+  ]
+ },
+ {
+  "c": "110100050460",
+  "n": "进风口圈组件喷涂件(JQ06T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-JQ06T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100052897",
+  "n": "叶轮组件(JQ01TY)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ01TX(不带罩)"
+  ]
+ },
+ {
+  "c": "110100052918",
+  "n": "进风口圈组件(JQ01TY)",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ01TX(不带罩)"
+  ]
+ },
+ {
+  "c": "110100053320",
+  "n": "导油板组件_01-JQ17T",
+  "q": 1,
+  "ms": [
+   "CXW-358-01-JCD10TA(不带罩)"
+  ]
+ },
+ {
+  "c": "110100090169",
+  "n": "叶轮组件(CXW-200-EM01T)",
+  "q": 1,
+  "ms": [
+   "CXW-200-EM01T"
+  ]
+ },
+ {
+  "c": "110100093027",
+  "n": "进风口罩(EMQ5)",
+  "q": 1,
+  "ms": [
+   "CXW-258-EM19T（单罩）"
+  ]
+ },
+ {
+  "c": "110100150190",
+  "n": "叶轮组件(CXW-358-Z3T)",
+  "q": 1,
+  "ms": [
+   "CXW-358-Z1T-M"
+  ]
+ },
+ {
+  "c": "110100150236",
+  "n": "格栅(CXW-358-Z1T)",
+  "q": 1,
+  "ms": [
+   "CXW-358-Z1T-M"
+  ]
+ },
+ {
+  "c": "110100150798",
+  "n": "格栅电泳件(Z3TA)",
+  "q": 1,
+  "ms": [
+   "CXW-258-Z3TA"
+  ]
+ },
+ {
+  "c": "110100200375",
+  "n": "叶轮组件(X3)",
+  "q": 1,
+  "ms": [
+   "CXW-258-P1(不带罩)"
+  ]
+ },
+ {
+  "c": "110100210309",
+  "n": "导油板组件_JCD15T",
+  "q": 1,
+  "ms": [
+   "CXW-258-JCD11T(不带罩)"
+  ]
+ },
+ {
+  "c": "110100240003",
+  "n": "格栅(J1)",
+  "q": 2,
+  "ms": [
+   "CXW-258-J1(不带罩)"
+  ]
+ },
+ {
+  "c": "110100250066",
+  "n": "油网(P1)",
+  "q": 1,
+  "ms": [
+   "CXW-258-P1(不带罩)"
+  ]
+ },
+ {
+  "c": "110100260044",
+  "n": "前进风口圈组件_沧海V1R1",
+  "q": 1,
+  "ms": [
+   "CXW-258-JQ16TA（不带罩）"
+  ]
+ },
+ {
+  "c": "1101001507980",
+  "n": "格栅电泳件(Z3TA)",
+  "q": 2,
+  "ms": [
+   "CXW-258-Z3TB（不带罩）"
+  ]
+ }
+];
+
+/* ---------- 工具 ---------- */
+const $ = id => document.getElementById(id);
+const PAGE = 60;
+
+function norm(s){
+  return String(s == null ? '' : s).toLowerCase()
+    .replace(/（/g,'(').replace(/）/g,')')
+    .replace(/[，、]/g,',').replace(/\s+/g,'');
+}
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+const PAREN = {'(':'[（(]',')':'[）)]','（':'[（(]','）':'[）)]'};
+function tokenSrc(t){
+  return t.split('').map(c => PAREN[c] || c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('');
+}
+function hl(text, tokens){
+  if(!tokens.length) return esc(text);
+  const src = tokens.map(tokenSrc).filter(Boolean).join('|');
+  if(!src) return esc(text);
+  let re;
+  try{ re = new RegExp('(' + src + ')','gi'); }catch(e){ return esc(text); }
+  return String(text).split(re).map((seg,i) => (i % 2 ? '<mark>' + esc(seg) + '</mark>' : esc(seg))).join('');
+}
+
+const CPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke-linecap="round"/></svg>';
+
+/* ---------- 预建索引 ---------- */
+MODELS.forEach(m => {
+  m._hay = norm([m.m, m.c, m.g, m.n].concat(m.p.map(p => p.n + ' ' + p.c)).join(' '));
+  m._zero = m.p.some(p => p.q === 0);
+});
+PARTS.forEach(p => {
+  p._hay = norm([p.c, p.n].concat(p.ms).join(' '));
+});
+
+/* ---------- 状态 ---------- */
+const state = { mode:'m', tokens:[], shown:0, list:[] };
+
+/* ---------- 复制 ---------- */
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 1600);
+}
+function copy(text, msg){
+  const done = () => toast(msg || '已复制');
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done, () => fallback(text, done));
+  } else fallback(text, done);
+}
+function fallback(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){ toast('复制失败，请长按选择'); }
+  document.body.removeChild(ta);
+}
+
+/* ---------- 渲染 ---------- */
+function partHTML(p, i, tokens){
+  const zero = p.q === 0;
+  return '<div class="part">'
+    + '<div class="no">' + (i + 1) + '</div>'
+    + '<div class="pbody"><div class="pname">' + hl(p.n, tokens) + '</div>'
+    +   '<span class="pcode" data-copy="' + esc(p.c) + '">' + hl(p.c, tokens) + CPY + '</span></div>'
+    + (zero ? '<div class="qty zero">待核对</div>'
+            : '<div class="qty">×' + p.q + '</div>')
+    + '</div>';
+}
+
+function modelCard(m, tokens){
+  const badge = (m.n ? '<span class="badge new">新增</span>' : '')
+              + (m._zero ? '<span class="badge warn">数量待核对</span>' : '');
+  const txt = '【' + m.m + '】虚拟大保养包 · 共' + m.p.length + '项\n'
+    + m.p.map((p, i) => (i + 1) + '. ' + p.c + '  ' + p.n + ' ×' + (p.q || 1)).join('\n');
+  return '<div class="card" data-model="' + esc(m.m) + '">'
+    + '<div class="mrow"><div class="model">' + hl(m.m, tokens) + badge + '</div>'
+    +   '<div class="cnt">' + m.p.length + ' 个配件</div></div>'
+    + '<div class="sub2"><span class="codeln" data-copy="' + esc(m.c) + '">产品编码 ' + hl(m.c, tokens) + CPY + '</span>'
+    +   '<span class="gtag">' + esc(m.g) + '</span></div>'
+    + '<div class="parts">' + m.p.map((p, i) => partHTML(p, i, tokens)).join('') + '</div>'
+    + '<button class="copyall" data-copyall="' + esc(m.m) + '">复制整套清单</button>'
+    + '</div>';
+}
+
+function partCard(p, tokens){
+  return '<div class="pcard">'
+    + '<div class="phead"><div class="pn">' + hl(p.n, tokens) + '</div>'
+    +   '<div class="cnt">' + p.ms.length + ' 个型号</div></div>'
+    + '<span class="pc" data-copy="' + esc(p.c) + '">' + hl(p.c, tokens) + CPY + '</span>'
+    + '<div class="mlist"><div class="mlab">适用型号（点击复制）</div>'
+    +   p.ms.map(mm => '<span class="mtag" data-copy="' + esc(mm) + '">' + hl(mm, tokens) + '</span>').join('')
+    + '</div></div>';
+}
+
+const ALLTXT = {};
+MODELS.forEach(m => { ALLTXT[m.m] = '【' + m.m + '】虚拟大保养包 · 共' + m.p.length + '项\n'
+  + m.p.map((p, i) => (i + 1) + '. ' + p.c + '  ' + p.n + ' ×' + (p.q || 1)).join('\n'); });
+
+function render(){
+  const list = $('list');
+  const tokens = state.tokens;
+  const src = state.mode === 'm' ? MODELS : PARTS;
+  const hit = tokens.length
+    ? src.filter(x => tokens.every(t => x._hay.indexOf(t) >= 0))
+    : src;
+  state.list = hit;
+
+  if(!hit.length){
+    list.innerHTML = '<div class="empty"><div class="big">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10.5" cy="10.5" r="7"/><path d="M20 20l-4.6-4.6" stroke-linecap="round"/><path d="M8 10.5h5" stroke-linecap="round"/></svg>'
+      + '</div>'
+      + '<h3>没有查到「' + esc($('q').value.trim()) + '」</h3>'
+      + '<p>建议只输型号后半段，例如 <code>EM05G</code>、<code>JQ01TS</code><br>'
+      + '或直接输产品编码后 7 位 <code>0900050</code><br>'
+      + '若仍无结果，该机型可能不在本次虚拟大保养包范围</p></div>';
+    $('stat').innerHTML = '未匹配到结果';
+    return;
+  }
+
+  const partCount = state.mode === 'm'
+    ? hit.reduce((a, m) => a + m.p.length, 0)
+    : 0;
+  $('stat').innerHTML = state.mode === 'm'
+    ? '命中 <b>' + hit.length + '</b> 个型号 · 共 <b>' + partCount + '</b> 个配件'
+    : '命中 <b>' + hit.length + '</b> 种配件';
+
+  const n = Math.min(hit.length, PAGE);
+  state.shown = n;
+  const body = hit.slice(0, n).map(x => state.mode === 'm' ? modelCard(x, tokens) : partCard(x, tokens)).join('');
+  const more = hit.length > n
+    ? '<div class="more"><button id="moreBtn">加载更多（还有 ' + (hit.length - n) + ' 条）</button></div>'
+    : '';
+  list.innerHTML = body + more;
+  if(hit.length > n){
+    $('moreBtn').onclick = () => {
+      const from = state.shown, to = Math.min(hit.length, from + PAGE);
+      const extra = hit.slice(from, to).map(x => state.mode === 'm' ? modelCard(x, tokens) : partCard(x, tokens)).join('');
+      const btnWrap = $('list').querySelector('.more');
+      btnWrap.insertAdjacentHTML('beforebegin', extra);
+      state.shown = to;
+      if(to >= hit.length) btnWrap.remove();
+      else $('moreBtn').textContent = '加载更多（还有 ' + (hit.length - to) + ' 条）';
+    };
+  }
+}
+
+/* ---------- 交互 ---------- */
+function update(){
+  const raw = $('q').value.trim();
+  $('clr').style.display = raw ? 'block' : 'none';
+  state.tokens = raw ? raw.split(/\s+/).map(norm).filter(Boolean) : [];
+  $('hint').textContent = state.mode === 'm' ? '可只输后半段' : '点击型号可复制';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$('q').addEventListener('input', update);
+$('clr').addEventListener('click', () => { $('q').value = ''; update(); $('q').focus(); });
+
+document.querySelectorAll('.tab').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    state.mode = b.dataset.mode;
+    update();
+  });
+});
+
+$('list').addEventListener('click', e => {
+  const c = e.target.closest('[data-copy]');
+  if(c){ copy(c.dataset.copy, '已复制：' + c.dataset.copy); return; }
+  const a = e.target.closest('[data-copyall]');
+  if(a){ copy(ALLTXT[a.dataset.copyall], '整套清单已复制，可直接粘贴'); return; }
+});
+
+/* 回车收起键盘 */
+$('q').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('q').blur(); } });
+
+/* 按屏宽切换输入提示 */
+function fitPlaceholder(){
+  $('q').placeholder = window.innerWidth < 560
+    ? '型号 / 编码 / 配件名，如 EM05G'
+    : '型号 / 产品编码 / 配件名，如 EM05G、JQ01TS、叶轮';
+}
+fitPlaceholder();
+window.addEventListener('resize', fitPlaceholder);
+
+render();
+</script>
+</body>
+</html>
